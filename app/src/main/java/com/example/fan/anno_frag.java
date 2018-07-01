@@ -33,25 +33,29 @@ public class anno_frag extends Fragment {
     }
     protected String uri;
     void fill(final boolean rest, ArrayList<String> l, final ArrayList<String> vidUri,String descript){
-        text.setText(descript);
-        uu=new ArrayAdapter(getActivity(), R.layout.support_simple_spinner_dropdown_item,l);
-        sp.setAdapter(uu);
-        //pr.setVisibility(View.INVISIBLE);
+        try {
+            text.setText(descript);
+            uu = new ArrayAdapter(getActivity(), R.layout.support_simple_spinner_dropdown_item, l);
+            sp.setAdapter(uu);
+            //pr.setVisibility(View.INVISIBLE);
 
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent,
-                                       View itemSelected, int selectedItemPosition, long selectedId) {
-                uri = vidUri.get(selectedItemPosition);
-                if(!rest) {
-                    Video.curUri=uri;
-                    video_fragment.starting=false;
-                    video_fragment.seturi(uri,0);
+            sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(AdapterView<?> parent,
+                                           View itemSelected, int selectedItemPosition, long selectedId) {
+                    uri = vidUri.get(selectedItemPosition);
+                    if (!rest) {
+                        Video.curUri = uri;
+                        video_fragment.starting = false;
+                        video_fragment.seturi(uri, 0);
+                    }
                 }
-            }
-            public void onNothingSelected(AdapterView<?> parent) {
-                text.setText("nothing");
-            }
-        });
+
+                public void onNothingSelected(AdapterView<?> parent) {
+                    text.setText("nothing");
+                }
+            });
+        }catch (Exception e){
+        }
     }
    /* public void prVisible(boolean visible){
         if(visible)pr.setVisibility(View.VISIBLE);

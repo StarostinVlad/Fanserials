@@ -77,7 +77,7 @@ public class Video extends AppCompatActivity
         s2=in.getStringExtra("uri").toString();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(in.getStringExtra("name").toString());
-        toolbar.setSubtitle(in.getStringExtra("anno").toString());
+        toolbar.setSubtitle(in.getStringExtra("annos").toString());
         setSupportActionBar(toolbar);
 
         mSettings = getSharedPreferences(SaveTime, Context.MODE_PRIVATE);
@@ -153,6 +153,12 @@ public class Video extends AppCompatActivity
     }
     int currentPos;
     static String curUri;
+
+    @Override
+    protected void onDestroy() {
+        finish();
+        super.onDestroy();
+    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -375,14 +381,16 @@ public class Video extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             startActivity(new Intent(this,All_serials_activity.class).putExtra("param",0));
+            finish();
         } else if (id == R.id.nav_gallery) {
             startActivity(new Intent(this,All_serials_activity.class).putExtra("param",1));
-
+            finish();
         } else if (id == R.id.nav_slideshow) {
             startActivity(new Intent(this,All_serials_activity.class).putExtra("param",2));
-
+            finish();
         } else if (id == R.id.nav_manage) {
-
+            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",3));
+            finish();
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
@@ -405,7 +413,7 @@ public class Video extends AppCompatActivity
     public void fillFrag(final boolean rest, ArrayList<String> l, final ArrayList<String> vidUri,String descript) {
         annoFrag.fill(rest,l,vidUri,descript);
     }
-String toolbarTit;
+String toolbarTit="";
     class getHref extends AsyncTask<Void, Void, Void> {
 
 
@@ -517,7 +525,8 @@ String toolbarTit;
                 Prevbut.setVisibility(View.VISIBLE);
                 Log.d("tmp","prev !null");
             }
-            if(toolbarTit!=null)toolbar.setTitle(toolbarTit);
+            if(toolbarTit!="")toolbar.setTitle(toolbarTit);
+            setSupportActionBar(toolbar);
             fillFrag(false,l,vidUri,description);
         }
 

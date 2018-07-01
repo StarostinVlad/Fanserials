@@ -108,14 +108,16 @@ public class All_serials_activity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             startActivity(new Intent(this,All_serials_activity.class).putExtra("param",0));
+            finish();
         } else if (id == R.id.nav_gallery) {
             startActivity(new Intent(this,All_serials_activity.class).putExtra("param",1));
-
+            finish();
         } else if (id == R.id.nav_slideshow) {
-            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",0));
-
+            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",2));
+            finish();
         } else if (id == R.id.nav_manage) {
-
+            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",3));
+            finish();
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
@@ -132,6 +134,15 @@ public class All_serials_activity extends AppCompatActivity
         MyExpandableAdapter adapter = new MyExpandableAdapter(this,list);
         elvMain = (ExpandableListView) findViewById(R.id.ExpandableListOfAllSerials);
         elvMain.setAdapter(adapter);
+        elvMain.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                Log.d("not_main", list.get(groupPosition).getItems().get(childPosition).getName());
+                Log.d("not_main", list.get(groupPosition).getItems().get(childPosition).getUri());
+                startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("Uri",list.get(groupPosition).getItems().get(childPosition).getUri()).putExtra("Name",list.get(groupPosition).getItems().get(childPosition).getName()));
+                return false;
+            }
+        });
     }
     class getHref extends AsyncTask<Void, Void, Void> {
 

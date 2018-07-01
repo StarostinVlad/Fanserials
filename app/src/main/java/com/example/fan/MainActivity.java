@@ -4,10 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -16,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -25,43 +22,33 @@ import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    ArrayList<String> anno, imgs, names, uris;
+    ArrayList<String> annos, imgs, names, uris;
     int[] to = {R.id.textV, R.id.imgV, R.id.textView2};
     String[] from = {"Name", "Icon", "Anno"};
 
@@ -75,12 +62,13 @@ public class MainActivity extends AppCompatActivity
 
     protected ArrayList<HashMap<String, Object>> data;
     protected HashMap<String, Object> map;
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         lv = (ListView) findViewById(R.id.ser);
         lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         pr = (ProgressBar) findViewById(R.id.progressBar);
@@ -106,7 +94,7 @@ public class MainActivity extends AppCompatActivity
             getHref gt = new getHref();
             gt.execute();
         }else  if(savedInstanceState!=null){
-            anno=savedInstanceState.getStringArrayList("anno");
+            annos =savedInstanceState.getStringArrayList("annos");
             imgs=savedInstanceState.getStringArrayList("imgs");
             names=savedInstanceState.getStringArrayList("names");
             uris=savedInstanceState.getStringArrayList("uris");
@@ -117,10 +105,10 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(position<lv.getCount()-1) {
                     Intent intent = new Intent(MainActivity.this, Video.class);
-                    Log.d("tnp", "size= " + uris.size() + "/" + (lv.getCount()-1) + " pos= " + position+" "+names.get(position).toString()+" "+anno.get(position).toString());
-                    intent.putExtra("uri", uris.get(position).toString());
-                    intent.putExtra("name",names.get(position).toString());
-                    intent.putExtra("anno",anno.get(position).toString());
+                    Log.d("tnp", "size= " + uris.size() + "/" + (lv.getCount()-1) + " pos= " + position+" "+names.get(position)+" "+ annos.get(position));
+                    intent.putExtra("uri", uris.get(position));
+                    intent.putExtra("name",names.get(position));
+                    intent.putExtra("annos", annos.get(position));
                     startActivity(intent);
                 }
             }
@@ -137,11 +125,11 @@ public class MainActivity extends AppCompatActivity
                 if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
                         && (lv.getLastVisiblePosition() - lv.getHeaderViewsCount() -
                         lv.getFooterViewsCount()) >= (adap.getCount() - 1)) {
-                    if (add == false && page < 9 && internet()) {
+                    if (!add && !EndList && internet()) {
                             add = true;
                             getHref gt = new getHref();
                             gt.execute();
-                }if(page>=9)viewpr.setVisibility(View.INVISIBLE);
+                }if(EndList)viewpr.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -171,7 +159,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putStringArrayList("anno",anno);
+        savedInstanceState.putStringArrayList("annos", annos);
         savedInstanceState.putStringArrayList("imgs", imgs);
         savedInstanceState.putStringArrayList("names", names);
         savedInstanceState.putStringArrayList("uris", uris);
@@ -182,7 +170,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         if(savedInstanceState!=null){
-            anno=savedInstanceState.getStringArrayList("anno");
+            annos =savedInstanceState.getStringArrayList("annos");
             imgs=savedInstanceState.getStringArrayList("imgs");
             names=savedInstanceState.getStringArrayList("names");
             uris=savedInstanceState.getStringArrayList("uris");
@@ -250,7 +238,7 @@ public class MainActivity extends AppCompatActivity
             map = new HashMap<>();
             map.put("Name", "" + names.get(i));
             map.put("Icon", "" + imgs.get(i));
-            map.put("Anno", "" + anno.get(i));
+            map.put("Anno", "" + annos.get(i));
             data.add(map);
         }
         if(iter==0) {
@@ -273,7 +261,7 @@ public class MainActivity extends AppCompatActivity
             map = new HashMap<>();
             map.put("Name", "" + names.get(i));
             map.put("Icon", "" + imgs.get(i));
-            map.put("Anno", "" + anno.get(i));
+            map.put("Anno", "" + annos.get(i));
             data.add(map);
         }
         adap.notifyDataSetChanged();
@@ -340,7 +328,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_slideshow) {
             startActivity(new Intent(this,All_serials_activity.class).putExtra("param",2));
         } else if (id == R.id.nav_manage) {
-
+            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",3));
         } else if (id == R.id.nav_share) {
             startService(new Intent(this,top_layout.class));
         } else if (id == R.id.nav_send) {
@@ -352,42 +340,56 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    boolean EndList=false;
 
     class getHref extends AsyncTask<Void, Void, Void> {
+
+
 
         @Override
         protected Void doInBackground(Void... parametr) {
             Document doc;
-            String agent="Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
-            String s, img = "";
+            String s, img,queryUrl,anno = "";
+            if(getIntent().getStringExtra("Uri")!=null) {
+                queryUrl = getIntent().getStringExtra("Uri");
+            }
+            else queryUrl=getString(R.string.url) + "/new/";
             try {
-                if (quick_help.CheckResponceCode(getString(R.string.url) + "/new/")) {
+                if (quick_help.CheckResponceCode(queryUrl)&&!EndList) {
                     Log.d("check", "code = 200");
-                    if (add && page < 9)
-                        doc = Jsoup.parse(quick_help.GiveDocFromUrl(getString(R.string.url) + "/new/page/" + page));//Jsoup.connect("http://fanserials.biz/new/page/"+page).userAgent(agent).timeout(10000).get();
+                    if (add)
+                        doc = Jsoup.parse(quick_help.GiveDocFromUrl(queryUrl+"page/" + page+"/"));//Jsoup.connect("http://fanserials.biz/new/page/"+page).userAgent(agent).timeout(10000).get();
                     else {
-                        doc = Jsoup.parse(quick_help.GiveDocFromUrl(getString(R.string.url) + "/new/"));// Jsoup.connect("http://fanserials.biz/new/").userAgent(agent).timeout(10000).get();
+                        doc = Jsoup.parse(quick_help.GiveDocFromUrl(queryUrl));// Jsoup.connect("http://fanserials.biz/new/").userAgent(agent).timeout(10000).get();
                     }
                     Log.d("check", "give doc");
                     Elements src = doc.select("li div div.item-serial");//li div div div div.field-img
                     Log.d("check", "src=" + doc.toString());
                     int i = 0;
                     if (!add) {
-                        uris = new ArrayList<String>();
-                        anno = new ArrayList<String>();
-                        names = new ArrayList<String>();
-                        imgs = new ArrayList<String>();
+                        uris = new ArrayList<>();
+                        annos = new ArrayList<>();
+                        names = new ArrayList<>();
+                        imgs = new ArrayList<>();
                     }
                     for (Element ss : src) {
                         names.add(ss.select("div.serial-bottom div.field-title a").text());
-                        anno.add(ss.select("div.serial-bottom div.field-description a").text());
+                        anno=ss.select("div.serial-bottom div.field-description a").text();
+                        //Log.d("not_main", "an= "+anno);
+                        annos.add(anno);
+                        /*if(anno.contains("1 сезон 1 серия")||anno.indexOf("1 серия")==0){
+                            EndList=true;
+                            Log.d("not_main", ""+EndList);
+                        }*/
                         Log.d("tnp", ss.select("div.serial-top div.field-img a").attr("href"));
                         uris.add(ss.select("div.serial-top div.field-img a").attr("href"));
-                        s = ss.select("div.serial-top div.field-img").attr("style").toString();
+                        s = ss.select("div.serial-top div.field-img").attr("style");
                         img = (img = s.substring(0, s.indexOf("\');"))).substring(img.indexOf("url(\'") + 5);
                         imgs.add(img);
                         i++;
                     }
+                    Log.d("not_main", "size="+annos.size());
+                    if(annos.size()%20!=0)EndList=true;
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -416,6 +418,10 @@ public class MainActivity extends AppCompatActivity
             if(names!=null)
             if(add)add();
             else fill();
+            if(getIntent().getStringExtra("Uri")!=null) {
+                toolbar.setTitle(getIntent().getStringExtra("Name"));
+                setSupportActionBar(toolbar);
+            }
         }
 
     }

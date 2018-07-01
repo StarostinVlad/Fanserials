@@ -94,7 +94,7 @@ public class video_fragment extends Fragment implements Runnable{
                 Intent intent = new Intent(v.getContext(), Video.class);
                 intent.putExtra("uri",Video.nextSeria);
                 intent.putExtra("name","");
-                intent.putExtra("anno","");
+                intent.putExtra("annos","");
                 getActivity().finish();
                 startActivity(intent);
             }
@@ -105,7 +105,7 @@ public class video_fragment extends Fragment implements Runnable{
                 Intent intent = new Intent(v.getContext(), Video.class);
                 intent.putExtra("uri",Video.previusSeria);
                 intent.putExtra("name","");
-                intent.putExtra("anno","");
+                intent.putExtra("annos","");
                 getActivity().finish();
                 startActivity(intent);
 
@@ -272,7 +272,7 @@ public class video_fragment extends Fragment implements Runnable{
                 video_seek.setProgress(curPos);
                 if(video.getDuration()>0)
                 max=video.getDuration();
-                else max=1;
+                else max=1000;
                 video_seek.setMax(max);
                 //Log.d("mm","thread");
             }
