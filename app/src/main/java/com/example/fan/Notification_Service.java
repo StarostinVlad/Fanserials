@@ -35,12 +35,15 @@ public class Notification_Service extends Service {
     private ArrayList<String> uris,anno,names,last_names,new_series,new_anno,previousNewSeries;
 
     SharedPreferences lastSeries;
+    SharedPreferences sPref;
 
     NotificationManager Notify_Man;
 
     @Override
     public void onCreate() {
         Notify_Man=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        sPref = getSharedPreferences("URL",MODE_PRIVATE);
+
         super.onCreate();
     }
     public boolean internet(){
@@ -50,6 +53,11 @@ public class Notification_Service extends Service {
             return false;
         }
     }
+
+
+
+
+    final String SAVED_TEXT = "saved_text";
 
     public boolean isNetworkOnline(Context context) {
         boolean status = false;
@@ -77,13 +85,15 @@ public class Notification_Service extends Service {
             public void run() {
                 last_names = new ArrayList<String>();
                 previousNewSeries = new ArrayList<String>();
+
+                String queryUrl = sPref.getString(SAVED_TEXT, "");
                 while(true) {
                     if (internet()) {
                         Document doc;
                         String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
                         String s, img = "";
-                        if(quick_help.CheckResponceCode(getString(R.string.url)+"/new/")){
-                            doc = Jsoup.parse(quick_help.GiveDocFromUrl(getString(R.string.url)+"/new/"));
+                        if(quick_help.CheckResponceCode(queryUrl+"/new/")){
+                            doc = Jsoup.parse(quick_help.GiveDocFromUrl(queryUrl+"/new/"));
                             Elements src = doc.select("li div div.item-serial");
                             uris = new ArrayList<String>();
                             anno = new ArrayList<String>();

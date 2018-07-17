@@ -87,6 +87,7 @@ public class quick_help {
                         gru = new MyGroup();
                         decodedString = decodedString.substring(decodedString.indexOf("<div id=\"as-") + 12);
                         decodedString = decodedString.substring(0, decodedString.indexOf("\" class"));
+                        if(decodedString.equals("NUMB"))decodedString="0-9";
                         gru.setName(decodedString);
                         ch_list = new ArrayList<Child>();
                 } else if(decodedString.contains("<a href=\"")){

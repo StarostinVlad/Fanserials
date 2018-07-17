@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -342,6 +343,10 @@ public class MainActivity extends AppCompatActivity
 
     boolean EndList=false;
 
+    SharedPreferences sPref;
+
+    final String SAVED_TEXT = "saved_text";
+
     class getHref extends AsyncTask<Void, Void, Void> {
 
 
@@ -350,12 +355,24 @@ public class MainActivity extends AppCompatActivity
         protected Void doInBackground(Void... parametr) {
             Document doc;
             String s, img,queryUrl,anno = "";
-            if(getIntent().getStringExtra("Uri")!=null) {
-                queryUrl = getIntent().getStringExtra("Uri");
-            }
-            else queryUrl=getString(R.string.url) + "/new/";
+
             try {
-                if (quick_help.CheckResponceCode(queryUrl)&&!EndList) {
+                if (quick_help.CheckResponceCode("http://fanserials-zerkalo.com")&&!EndList) {
+                    doc = Jsoup.parse(quick_help.GiveDocFromUrl("http://fanserials-zerkalo.com"));
+                    queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("href").substring(2);
+
+                    sPref = getSharedPreferences("URL",MODE_PRIVATE);
+                    SharedPreferences.Editor ed = sPref.edit();
+                    ed.putString(SAVED_TEXT,"http://"+queryUrl );
+                    ed.commit();
+
+
+                    if(getIntent().getStringExtra("Uri")!=null) {
+                        queryUrl = getIntent().getStringExtra("Uri");
+                    }
+                    else queryUrl="http://"+queryUrl+"/new/";
+                    Log.d("check", "queryUrl="+queryUrl);
+
                     Log.d("check", "code = 200");
                     if (add)
                         doc = Jsoup.parse(quick_help.GiveDocFromUrl(queryUrl+"page/" + page+"/"));//Jsoup.connect("http://fanserials.biz/new/page/"+page).userAgent(agent).timeout(10000).get();
@@ -377,10 +394,6 @@ public class MainActivity extends AppCompatActivity
                         anno=ss.select("div.serial-bottom div.field-description a").text();
                         //Log.d("not_main", "an= "+anno);
                         annos.add(anno);
-                        /*if(anno.contains("1 сезон 1 серия")||anno.indexOf("1 серия")==0){
-                            EndList=true;
-                            Log.d("not_main", ""+EndList);
-                        }*/
                         Log.d("tnp", ss.select("div.serial-top div.field-img a").attr("href"));
                         uris.add(ss.select("div.serial-top div.field-img a").attr("href"));
                         s = ss.select("div.serial-top div.field-img").attr("style");

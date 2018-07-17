@@ -2,6 +2,7 @@ package com.example.fan;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -144,6 +145,11 @@ public class All_serials_activity extends AppCompatActivity
             }
         });
     }
+
+    SharedPreferences sPref;
+
+    final String SAVED_TEXT = "saved_text";
+
     class getHref extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -152,10 +158,14 @@ public class All_serials_activity extends AppCompatActivity
             list = new ArrayList<MyGroup>();
             ArrayList<Child> ch_list;
 
+            sPref = getSharedPreferences("URL",MODE_PRIVATE);
+            String queryUrl = sPref.getString(SAVED_TEXT, "");
+            Log.d("tnp", "queryUrl " + queryUrl);
+
             String agent="Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
             String s, img = "";
-            if(quick_help.CheckResponceCode(getString(R.string.url))){
-                list=quick_help.sendReq(getString(R.string.url)+"/alfavit/",getIntent().getIntExtra("param",0));
+            if(quick_help.CheckResponceCode(queryUrl)){
+                list=quick_help.sendReq(queryUrl+"/alfavit/",getIntent().getIntExtra("param",0));
                 /*
                 doc = Jsoup.connect("http://fanserials.biz").userAgent(agent).timeout(10000).get();
                 Elements src = doc.select("form div div div#alfavit-content div");
