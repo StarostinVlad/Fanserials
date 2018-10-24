@@ -30,6 +30,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -49,11 +51,13 @@ public class Video extends AppCompatActivity
 
     public String s2;
     ProgressBar pr;
-    ArrayList<String> l,names,vidUri;
+    ArrayList<String> l,names,vidUri,sound_param;
     anno_frag annoFrag;
     video_fragment videoFragment;
     Button play_pause;
     Toolbar toolbar;
+
+    Seria currentSeria;
 
 
     LinearLayout.LayoutParams vidParam,annoParam;
@@ -74,10 +78,12 @@ public class Video extends AppCompatActivity
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.act_video);
         Intent in=getIntent();
-        s2=in.getStringExtra("uri").toString();
+
+        currentSeria=(Seria) in.getSerializableExtra("Seria");
+        s2=currentSeria.getUri();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(in.getStringExtra("name").toString());
-        toolbar.setSubtitle(in.getStringExtra("annos").toString());
+        toolbar.setTitle(currentSeria.getName());
+        toolbar.setSubtitle(currentSeria.getDescription());
         setSupportActionBar(toolbar);
 
         mSettings = getSharedPreferences(SaveTime, Context.MODE_PRIVATE);
@@ -422,31 +428,46 @@ String toolbarTit="";
             Document doc;
             String agent="Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
             try {
-                if(quick_help.CheckResponceCode(s2)){
-                doc = Jsoup.parse(quick_help.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
-                Elements iframe = doc.select("iframe");//doc.select("iframe");
-                Elements ulli = doc.select("ul li a");
-                description=doc.select(".well p").text();
-                names= new ArrayList<String>();
-                vidUri= new ArrayList<String>();
-                l= new ArrayList<String>();
-                previusSeria=(doc.select("a.arrow.prev").attr("href"));
-                nextSeria=(doc.select("a.arrow.next").attr("href"));
-                Log.d("tmp","prev="+previusSeria );
-                Log.d("tmp","next="+nextSeria );
-                if(getIntent().getStringExtra("name").toString()=="")toolbarTit=doc.select("h1.page-title").text();
-                for (Element ss : iframe) {
-                    names.add(ss.attr("src"));
-                }
-                for (Element ss : ulli) {
-                    if (ss.attr("data-sound") != "")
-                        l.add(ss.attr("data-sound").replace('#', ' '));
-                }
-                for(String name:names){
-                    if(name.contains("fanserials")||name.contains("umovies")) {
+                if (quick_help.CheckResponceCode(s2)) {
+                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
+                    //Elements iframe = doc.select("iframe");//doc.select("iframe");
+                    Elements ulli = doc.select("ul.nav.nav-tabs.tabs-voice.mobile-tabs-scroll.show-for-small-only li a");
+                    description = doc.select(".well div").text();
+                    names = new ArrayList<String>();
+                    vidUri = new ArrayList<String>();
+                    l = new ArrayList<String>();
+                    previusSeria = (doc.select("a.arrow.prev").attr("href"));
+                    nextSeria = (doc.select("a.arrow.next").attr("href"));
+                    Log.d("tmp", "prev=" + previusSeria);
+                    Log.d("tmp", "next=" + nextSeria);
+                    if (getIntent().getStringExtra("name").toString() == "")
+                        toolbarTit = doc.select("h1.page-title").text();
+
+                    for (Element ss : ulli) {
+                        if (ss.text() != "") {
+                            l.add(ss.text());
+                            Log.d("tmp", "sound" + ss.text());
+                        }
+                    }
+                        Elements iframe = doc.select("div.tabs-wrapper script");//doc.select("iframe");
+                        for (Element ss : iframe) {
+                            String str = ss.toString();
+                            str="{\"uris\":["+str.substring(0,str.indexOf("]';</script>")).substring(str.indexOf(" = '[")+5).replace("\\/","/")+"]}";
+                            JSONObject jsonDATA=new JSONObject(str);
+                            JSONArray jsonUris=jsonDATA.getJSONArray("uris");
+                            for(int i=0;i<jsonUris.length();i++) {
+                                JSONObject soundURI = jsonUris.getJSONObject(i);
+                                str=soundURI.getString("player");
+                                Log.d("tmp", "frame=" + str);
+                                names.add(str);
+                            }
+                        }
+
+                    for (String name : names) {
+                        if (name.contains("fanserials") || name.contains("umovies") || name.contains("seplay")) {
                             try {
-                                if(quick_help.CheckResponceCode(name)){
-                                    Log.d("con","href= "+name);
+                                if (quick_help.CheckResponceCode(name)) {
+                                    Log.d("con", "href= " + name);
                                     doc = Jsoup.parse(quick_help.GiveDocFromUrl(name));
                                     /*
                                     Elements vsrc = doc.getElementsByAttributeValue("type", "text/javascript");
@@ -471,27 +492,26 @@ String toolbarTit="";
                                     tmp = s.substring(0, s.indexOf("index.m3u8") + 10);
                                     tmp = tmp.substring(tmp.lastIndexOf("src:  \"") + 7);
                                     */
-                                    String tmp=doc.getElementsByAttribute("data-hls").attr("data-hls");
+                                    String tmp = doc.getElementsByAttribute("data-hls").attr("data-hls");
                                     Log.d("tmp", tmp);
                                     vidUri.add(tmp);
                                 }
-                            }catch (Exception e){
-                                Log.d("tmp","just not work  "+e);
+                            } catch (Exception e) {
+                                Log.d("tmp", "just not work  " + e);
                                 e.printStackTrace();
                                 vidUri.add("some.mp4");
                             }
+                        } else {
+                            Log.d("tmp", "alt palyer");
+                            vidUri.add("some.mp4");
                         }
-                    else {
-                        Log.d("tmp","alt palyer");
-                        vidUri.add("some.mp4");
                     }
-                }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            for(int i=0;i<vidUri.size();i++){
-                if(vidUri.get(i).equals("some.mp4")){
+            for(int i=0;i<vidUri.size();i++) {
+                if (vidUri.get(i).equals("some.mp4")) {
                     vidUri.remove(i);
                     l.remove(i);
                     i--;

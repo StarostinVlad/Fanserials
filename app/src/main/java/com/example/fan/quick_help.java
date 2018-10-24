@@ -2,18 +2,17 @@ package com.example.fan;
 
 import android.util.Log;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Scanner;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * Created by Star on 03.02.2018.
@@ -59,43 +58,75 @@ public class quick_help {
         }
         return true;
     }
+    public static String decode(String decodeString) throws UnsupportedEncodingException {
+        String Encode="";
+        Log.d("tnp_cartoon", "dec: "+decodeString);
+        decodeString=StringEscapeUtils.unescapeJava(decodeString);
+        Log.d("tnp_cartoon", "enc: "+decodeString);
+        return decodeString;
+    }
     public static ArrayList<MyGroup> sendReq(String url, int value) {
         String content = "";
         ArrayList<MyGroup> list = null;
         try {
-            URLConnection connection = new URL(url).openConnection();
+            URLConnection connection = new URL(url+value).openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36 OPR/54.0.2952.64");
+            connection.setRequestProperty("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            connection.setRequestProperty("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
+            connection.setUseCaches(false);
             connection.setDoOutput(true);
-            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+            /*OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
             out.write("type=" + value + "");
             // remember to clean up
             out.flush();
-            out.close();
+            out.close();*/
+            /*
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(
-                            connection.getInputStream(),"cp1251"));
-            String decodedString;
+                            connection.getInputStream(),"UTF8"));*/
+
+
+            InputStreamReader r = new InputStreamReader(connection.getInputStream());
+            StringBuilder buf = new StringBuilder();
+            while (true) {
+                int ch = r.read();
+                if (ch < 0)
+                    break;
+                buf.append((char) ch);
+            }
+            String str = new String(buf);
+            //Log.d("tnp_cartoon", "result 1 : "+r.getEncoding());
+            String[] Htmltext=str.split("n ");
+            //Log.d("tnp_cartoon", "result 1 : "+Htmltext.length);
             list = new ArrayList<MyGroup>();
             ArrayList<Child> ch_list = new ArrayList<Child>();
             MyGroup gru = null;
-            while ((decodedString = in.readLine()) != null) {
-                Log.d("tnp_cartoon", decodedString);
-                if (decodedString.contains("id=\"as-")) {
+            boolean exist=false,end=false;
+            for (String decodedString: Htmltext){
+                //Log.d("tnp_cartoon", "result: "+decodedString);
+                if (decodedString.contains("literal__header")) {
                     if (gru != null) {
                         gru.setItems(ch_list);
                         list.add(gru);
                     }
                         gru = new MyGroup();
-                        decodedString = decodedString.substring(decodedString.indexOf("<div id=\"as-") + 12);
-                        decodedString = decodedString.substring(0, decodedString.indexOf("\" class"));
-                        if(decodedString.equals("NUMB"))decodedString="0-9";
+                        decodedString = decodedString.substring(decodedString.indexOf("<div class=\\\"literal__header\\\">") + 31);
+                        //Log.d("tnp_cartoon", decodedString);
+                        decodedString = decodedString.substring(0, decodedString.indexOf("<\\/div>"));
+                        decodedString=decode(decodedString);
+                        if(decodedString.equals("#"))decodedString="0-9";
+                        else if(decodedString.equals("?"))end=true;
                         gru.setName(decodedString);
                         ch_list = new ArrayList<Child>();
-                } else if(decodedString.contains("<a href=\"")){
+                        exist=true;
+
+                } else if(decodedString.contains("<a href=\\\"")&&exist){
                     String name = decodedString;
-                    decodedString = decodedString.substring(decodedString.indexOf("<a href=\"")+9);
-                    decodedString = decodedString.substring(0, decodedString.indexOf("\">"));
+                    decodedString = decodedString.substring(decodedString.indexOf("<a href=\\\"")+10);
+                    decodedString = decodedString.substring(1, decodedString.indexOf("\">")).replace("\\","");
                     name = name.substring(name.indexOf("\">")+2);
-                    name = name.substring(0, name.indexOf("</a>"));
+                    name = name.substring(0, name.indexOf("<\\/a>\\"));
+                    name=decode(name);
                     Log.d("tnp_cartoon", name);
                     Log.d("tnp_cartoon", decodedString);
                     Child ch = new Child();
@@ -109,8 +140,8 @@ public class quick_help {
             }
             gru.setItems(ch_list);
             list.add(gru);
-            Log.d("tnp_cartoon", content);
-            in.close();
+            //Log.d("tnp_cartoon", content);
+            //in.close();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {

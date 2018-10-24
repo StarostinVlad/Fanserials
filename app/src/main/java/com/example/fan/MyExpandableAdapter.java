@@ -45,7 +45,7 @@ public class MyExpandableAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(android.R.layout.simple_list_item_1, null);
         }
         TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
-        ImageView iv = (ImageView) convertView.findViewById(R.id.poster);
+        //ImageView iv = (ImageView) convertView.findViewById(R.id.poster);
 
         tv.setText(child.getName().toString());
         //Picasso.with(getApplicationContext()).load(child.getImage()).error(R.drawable.no_image).placeholder(R.drawable.no_image).into(iv);

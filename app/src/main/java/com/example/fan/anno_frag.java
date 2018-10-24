@@ -1,8 +1,8 @@
 package com.example.fan;
 
-import android.app.Application;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +39,7 @@ public class anno_frag extends Fragment {
             sp.setAdapter(uu);
             //pr.setVisibility(View.INVISIBLE);
 
+            if(!vidUri.isEmpty())
             sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView<?> parent,
                                            View itemSelected, int selectedItemPosition, long selectedId) {
@@ -54,6 +55,9 @@ public class anno_frag extends Fragment {
                     text.setText("nothing");
                 }
             });
+            else for (String vid : vidUri) {
+                Log.d("tmp","vid="+vid );
+            }
         }catch (Exception e){
         }
     }

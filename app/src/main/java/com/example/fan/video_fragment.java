@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
 
-public class video_fragment extends Fragment implements Runnable{
+public class video_fragment extends Fragment{
     static VideoView video;
     Button btn,Next,Prev,btnWindow;
     ProgressBar pr;
@@ -34,7 +34,6 @@ public class video_fragment extends Fragment implements Runnable{
     public static String uri;
     static int currentPos=0;
     public static boolean starting=false;
-    Thread seek_pos;
     static boolean alive=true;
 
 
@@ -48,7 +47,7 @@ public class video_fragment extends Fragment implements Runnable{
     }
     static View v;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState){
         v = inflater.inflate(R.layout.video_fragment, container, false);
         video = (VideoView) v.findViewById(R.id.videoV);
         pr = (ProgressBar) v.findViewById(R.id.progressBar2);
@@ -57,7 +56,7 @@ public class video_fragment extends Fragment implements Runnable{
         Next= (Button) v.findViewById(R.id.button3);
         Prev= (Button) v.findViewById(R.id.button2);
         btnWindow= (Button) v.findViewById(R.id.btnWindow);
-
+        alive=true;
         if(savedInstanceState!=null){
             uri = savedInstanceState.getString("current uri");
             video.seekTo(currentPos =  savedInstanceState.getInt("current position"));
@@ -76,6 +75,31 @@ public class video_fragment extends Fragment implements Runnable{
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Thread Seeker=new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int max = video.getDuration();
+                        video_seek.setMax(max);
+                        while (alive) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            currentPos = video.getCurrentPosition();
+                            video_seek.setProgress(video.getCurrentPosition());
+                            if (video.getDuration() > 0)
+                                max = video.getDuration();
+                            else max = 10000;
+                            video_seek.setMax(max);
+                            Log.d("window", "cur: " + video.getCurrentPosition() + " / " + video.getDuration());
+                        }
+                    }
+                });
+                if(!Seeker.isAlive()){
+                    Seeker.start();
+                }
+                video_seek.setMax(video.getDuration());
                 if(!starting) {
                     video.start();
                     starting=true;
@@ -114,7 +138,10 @@ public class video_fragment extends Fragment implements Runnable{
         video_seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                video_seek.setMax(video.getDuration());
                 if(b) {
+                    alive=true;
+                    Log.d("window","time: "+i+" / "+video.getDuration());
                     video.seekTo(i);
                 }
             }
@@ -129,8 +156,6 @@ public class video_fragment extends Fragment implements Runnable{
 
             }
         });
-        seek_pos=new Thread(this);
-        seek_pos.start();
         return v;
     }
     public static File getTempFile(Context context, String url) {
@@ -150,7 +175,7 @@ public class video_fragment extends Fragment implements Runnable{
     public static void seturi(String uri, final int currentPos){
         video.setVideoURI(Uri.parse(uri));
         video.seekTo(currentPos);
-        getTempFile(v.getContext(),uri);
+        //getTempFile(v.getContext(),uri);
     }
     static InputStream iss;
     static boolean end=false;
@@ -229,6 +254,7 @@ public class video_fragment extends Fragment implements Runnable{
     @Override
     public void onDestroy() {
         alive=false;
+        Log.d("window","destroy");
         super.onDestroy();
     }
 
@@ -253,29 +279,5 @@ public class video_fragment extends Fragment implements Runnable{
     void Play(){
         btn.setBackground(getResources().getDrawable(R.drawable.pause));
         video.start();
-    }
-
-    @Override
-    public void run() {
-        {
-            int curPos=video.getCurrentPosition();
-            int max=video.getDuration();
-            video_seek.setMax(max);
-            while (alive) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                curPos = video.getCurrentPosition();
-                currentPos=curPos;
-                video_seek.setProgress(curPos);
-                if(video.getDuration()>0)
-                max=video.getDuration();
-                else max=1000;
-                video_seek.setMax(max);
-                //Log.d("mm","thread");
-            }
-        }
     }
 }

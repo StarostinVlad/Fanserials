@@ -9,11 +9,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -49,7 +46,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    ArrayList<String> annos, imgs, names, uris;
+    ArrayList<Seria> Series;
     int[] to = {R.id.textV, R.id.imgV, R.id.textView2};
     String[] from = {"Name", "Icon", "Anno"};
 
@@ -87,18 +84,18 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        /*
         if (Build.VERSION.SDK_INT >= 23&&!hasPermissions()) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, 0);
         }
+        */
         if(internet()&&savedInstanceState==null) {
             getHref gt = new getHref();
             gt.execute();
         }else  if(savedInstanceState!=null){
-            annos =savedInstanceState.getStringArrayList("annos");
-            imgs=savedInstanceState.getStringArrayList("imgs");
-            names=savedInstanceState.getStringArrayList("names");
-            uris=savedInstanceState.getStringArrayList("uris");
+            Series=(ArrayList<Seria>) savedInstanceState.getSerializable("Series");
+
             fill();
         }
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -106,10 +103,10 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(position<lv.getCount()-1) {
                     Intent intent = new Intent(MainActivity.this, Video.class);
-                    Log.d("tnp", "size= " + uris.size() + "/" + (lv.getCount()-1) + " pos= " + position+" "+names.get(position)+" "+ annos.get(position));
-                    intent.putExtra("uri", uris.get(position));
-                    intent.putExtra("name",names.get(position));
-                    intent.putExtra("annos", annos.get(position));
+                    Log.d("tnp", "size= " + Series.size() + "/" + (lv.getCount()-1) + " pos= " + position+" "+Series.get(position).getName()+" "+ Series.get(position).getDescription());
+
+
+                    intent.putExtra("Seria",Series.get(position));
                     startActivity(intent);
                 }
             }
@@ -160,10 +157,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putStringArrayList("annos", annos);
-        savedInstanceState.putStringArrayList("imgs", imgs);
-        savedInstanceState.putStringArrayList("names", names);
-        savedInstanceState.putStringArrayList("uris", uris);
+        savedInstanceState.putSerializable("Series",Series);
+
         super.onSaveInstanceState(savedInstanceState);
         Log.d("sa","saved");
     }
@@ -171,10 +166,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         if(savedInstanceState!=null){
-            annos =savedInstanceState.getStringArrayList("annos");
-            imgs=savedInstanceState.getStringArrayList("imgs");
-            names=savedInstanceState.getStringArrayList("names");
-            uris=savedInstanceState.getStringArrayList("uris");
+            Series=(ArrayList<Seria>) savedInstanceState.getSerializable("Series");
             Log.d("sa","restored");
         }
         super.onRestoreInstanceState(savedInstanceState);
@@ -228,18 +220,18 @@ public class MainActivity extends AppCompatActivity
 
     void fill() {
         if(iter==0)
-        data = new ArrayList<>(names.size());
+        data = new ArrayList<>(Series.size());
         else{
             data.clear();
             lv.refreshDrawableState();
             adap.notifyDataSetChanged();
         }
 
-        for (int i = 0; i < names.size(); i++) {
+        for (Seria seria : Series) {
             map = new HashMap<>();
-            map.put("Name", "" + names.get(i));
-            map.put("Icon", "" + imgs.get(i));
-            map.put("Anno", "" + annos.get(i));
+            map.put("Name", "" + seria.getName());
+            map.put("Icon", "" + seria.getImage());
+            map.put("Anno", "" + seria.getDescription());
             data.add(map);
         }
         if(iter==0) {
@@ -258,11 +250,11 @@ public class MainActivity extends AppCompatActivity
         data.clear();
         lv.refreshDrawableState();
         adap.notifyDataSetChanged();
-        for (int i = 0; i < names.size(); i++) {
+        for (Seria seria : Series) {
             map = new HashMap<>();
-            map.put("Name", "" + names.get(i));
-            map.put("Icon", "" + imgs.get(i));
-            map.put("Anno", "" + annos.get(i));
+            map.put("Name", "" + seria.getName());
+            map.put("Icon", "" + seria.getImage());
+            map.put("Anno", "" + seria.getDescription());
             data.add(map);
         }
         adap.notifyDataSetChanged();
@@ -368,7 +360,9 @@ public class MainActivity extends AppCompatActivity
 
 
                     if(getIntent().getStringExtra("Uri")!=null) {
-                        queryUrl = getIntent().getStringExtra("Uri");
+                        sPref = getSharedPreferences("URL",MODE_PRIVATE);
+                        queryUrl = sPref.getString(SAVED_TEXT, "");
+                        queryUrl += getIntent().getStringExtra("Uri");
                     }
                     else queryUrl="http://"+queryUrl+"/new/";
                     Log.d("check", "queryUrl="+queryUrl);
@@ -384,25 +378,22 @@ public class MainActivity extends AppCompatActivity
                     Log.d("check", "src=" + doc.toString());
                     int i = 0;
                     if (!add) {
-                        uris = new ArrayList<>();
-                        annos = new ArrayList<>();
-                        names = new ArrayList<>();
-                        imgs = new ArrayList<>();
+                        Series=new ArrayList<>();
                     }
                     for (Element ss : src) {
-                        names.add(ss.select("div.serial-bottom div.field-title a").text());
+                        String name = ss.select("div.serial-bottom div.field-title a").text();
                         anno=ss.select("div.serial-bottom div.field-description a").text();
                         //Log.d("not_main", "an= "+anno);
-                        annos.add(anno);
                         Log.d("tnp", ss.select("div.serial-top div.field-img a").attr("href"));
-                        uris.add(ss.select("div.serial-top div.field-img a").attr("href"));
+                        String uri=ss.select("div.serial-top div.field-img a").attr("href");
                         s = ss.select("div.serial-top div.field-img").attr("style");
-                        img = (img = s.substring(0, s.indexOf("\');"))).substring(img.indexOf("url(\'") + 5);
-                        imgs.add(img);
+                        img = (img = s.substring(0, s.indexOf(");"))).substring(img.indexOf("url(") + 4);
+                        Seria seria=new Seria(name,uri,img,anno);
+                        Series.add(seria);
                         i++;
                     }
-                    Log.d("not_main", "size="+annos.size());
-                    if(annos.size()%20!=0)EndList=true;
+                    Log.d("not_main", "size="+Series.size());
+                    if(Series.size()%20!=0)EndList=true;
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -428,7 +419,7 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(result);
             // adapter.add("");
             pr.setVisibility(View.INVISIBLE);
-            if(names!=null)
+            if(Series!=null)
             if(add)add();
             else fill();
             if(getIntent().getStringExtra("Uri")!=null) {

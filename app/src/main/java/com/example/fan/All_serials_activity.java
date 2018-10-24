@@ -165,7 +165,7 @@ public class All_serials_activity extends AppCompatActivity
             String agent="Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
             String s, img = "";
             if(quick_help.CheckResponceCode(queryUrl)){
-                list=quick_help.sendReq(queryUrl+"/alfavit/",getIntent().getIntExtra("param",0));
+                list=quick_help.sendReq(queryUrl+"/alphabet/",getIntent().getIntExtra("param",0));
                 /*
                 doc = Jsoup.connect("http://fanserials.biz").userAgent(agent).timeout(10000).get();
                 Elements src = doc.select("form div div div#alfavit-content div");
