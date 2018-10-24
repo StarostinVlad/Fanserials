@@ -440,7 +440,8 @@ String toolbarTit="";
                     nextSeria = (doc.select("a.arrow.next").attr("href"));
                     Log.d("tmp", "prev=" + previusSeria);
                     Log.d("tmp", "next=" + nextSeria);
-                    if (getIntent().getStringExtra("name").toString() == "")
+                    Seria seria=(Seria)getIntent().getSerializableExtra("Seria");
+                    if (seria.getName() == "")
                         toolbarTit = doc.select("h1.page-title").text();
 
                     for (Element ss : ulli) {

@@ -32,12 +32,19 @@ import java.util.Set;
  */
 
 public class Notification_Service extends Service {
-    private ArrayList<String> uris,anno,names,last_names,new_series,new_anno,previousNewSeries;
+    private ArrayList<String> uris;
+    private ArrayList<String> anno;
+    private ArrayList<String> names;
+    private ArrayList<String> last_names;
+    private ArrayList<Seria> new_series;
+    private ArrayList<String> new_anno;
+    private ArrayList<String> previousNewSeries;
 
     SharedPreferences lastSeries;
     SharedPreferences sPref;
 
     NotificationManager Notify_Man;
+    private ArrayList<Seria> series;
 
     @Override
     public void onCreate() {
@@ -55,7 +62,7 @@ public class Notification_Service extends Service {
     }
 
 
-
+    int i =0;
 
     final String SAVED_TEXT = "saved_text";
 
@@ -95,60 +102,35 @@ public class Notification_Service extends Service {
                         if(quick_help.CheckResponceCode(queryUrl+"/new/")){
                             doc = Jsoup.parse(quick_help.GiveDocFromUrl(queryUrl+"/new/"));
                             Elements src = doc.select("li div div.item-serial");
-                            uris = new ArrayList<String>();
-                            anno = new ArrayList<String>();
-                            names = new ArrayList<String>();
-                            new_series = new ArrayList<String>();
-                            new_anno = new ArrayList<String>();
+                            series=new ArrayList<Seria>();
+                            new_series = new ArrayList<Seria>();
                             for (Element ss : src) {
-                                names.add(ss.select("div.serial-bottom div.field-title a").text());
-                                anno.add(ss.select("div.serial-bottom div.field-description a").text());
+                                String name=ss.select("div.serial-bottom div.field-title a").text();
+                                String anno=ss.select("div.serial-bottom div.field-description a").text();
                                 Log.d("tnp", "from service " + ss.select("div.serial-top div.field-img a").attr("href"));
-                                uris.add(ss.select("div.serial-top div.field-img a").attr("href"));
+                                String uri=ss.select("div.serial-top div.field-img a").attr("href");
+                                Seria seria=new Seria(name,uri,"",anno);
+                                new_series.add(seria);
                             }
-                            if (last_names.size() == 0) {
-                                for (int i = 0; i < names.size(); i++) {
-                                    last_names.add(names.get(i));
-                                }
+                            if (series.size() == 0) {
+                                series.addAll(new_series);
                                 Log.d("service", "last name null");
                             } else {
                                 Log.d("service", "last name not null");
                             }
 
-                            boolean serieExist = false;
-                            for (int i = 0; i < names.size(); i++) {
-                                for (int j = 0; j < names.size(); j++) {
-                                    if (names.get(j).equals(last_names.get(i))) {
-                                        serieExist = true;
-                                        break;
-                                    }
+
+                            for (Seria seria : new_series) {
+                                if(!series.contains(seria)) {
+                                    i++;
+                                    NotifySend(i, seria.getName(), seria.getDescription());
                                 }
-                                if (!serieExist) {
-                                    new_series.add(names.get(i));
-                                    new_anno.add(anno.get(i));
-                                }
-                                serieExist = false;
                             }
-                            for (int i = 0; i < new_series.size(); i++) {
-                                if (previousNewSeries.size() != 0) {
-                                    NotifySend(i, new_series.get(i), new_anno.get(i));
-                                    if (!previousNewSeries.get(i).equals(new_series.get(i))) {
-                                        NotifySend(i, new_series.get(i), new_anno.get(i));
-                                        break;
-                                    }
-                                } else NotifySend(i, new_series.get(i), new_anno.get(i));
-                            }
-                            previousNewSeries.clear();
-                            previousNewSeries.addAll(new_series);
-                            new_anno.clear();
+                            series.addAll(new_series);
                             new_series.clear();
-                            last_names.clear();
-                            if (last_names.size() == 0) {
-                                last_names.addAll(names);
-                            }
                         }
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(300000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

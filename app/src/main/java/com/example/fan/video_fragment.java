@@ -55,7 +55,6 @@ public class video_fragment extends Fragment{
         btn = (Button) v.findViewById(R.id.button);
         Next= (Button) v.findViewById(R.id.button3);
         Prev= (Button) v.findViewById(R.id.button2);
-        btnWindow= (Button) v.findViewById(R.id.btnWindow);
         alive=true;
         if(savedInstanceState!=null){
             uri = savedInstanceState.getString("current uri");
@@ -63,14 +62,7 @@ public class video_fragment extends Fragment{
             video.start();
         }
 
-        btnWindow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Pause();
-                Log.d("window","start");
-                getActivity().startService(new Intent(getActivity(),top_layout.class).putExtra("currentPos",currentPos).putExtra("currentUri",uri));
-            }
-        });
+
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,9 +108,7 @@ public class video_fragment extends Fragment{
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), Video.class);
-                intent.putExtra("uri",Video.nextSeria);
-                intent.putExtra("name","");
-                intent.putExtra("annos","");
+                intent.putExtra("Seria",new Seria("",Video.nextSeria,"",""));
                 getActivity().finish();
                 startActivity(intent);
             }
@@ -127,9 +117,7 @@ public class video_fragment extends Fragment{
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), Video.class);
-                intent.putExtra("uri",Video.previusSeria);
-                intent.putExtra("name","");
-                intent.putExtra("annos","");
+                intent.putExtra("Seria",new Seria("",Video.previusSeria,"",""));
                 getActivity().finish();
                 startActivity(intent);
 

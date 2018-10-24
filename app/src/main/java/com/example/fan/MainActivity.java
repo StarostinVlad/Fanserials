@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
         pr3 = (ProgressBar) findViewById(R.id.progressBar3);
         pr.setVisibility(View.INVISIBLE);
         swiperef=(SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout);
-
+        toolbar.setTitle("Новинки");
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
