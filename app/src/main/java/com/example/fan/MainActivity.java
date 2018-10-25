@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_manage) {
             startActivity(new Intent(this,All_serials_activity.class).putExtra("param",3));
         } else if (id == R.id.nav_share) {
-            startService(new Intent(this,top_layout.class));
+
         } else if (id == R.id.nav_send) {
 
         }
@@ -394,6 +394,10 @@ public class MainActivity extends AppCompatActivity
                     }
                     Log.d("not_main", "size="+Series.size());
                     if(Series.size()%20!=0)EndList=true;
+                }
+                else{
+                    Log.d("check"," Something wrong with connection!");
+                    return null;
                 }
             }catch (Exception e){
                 e.printStackTrace();

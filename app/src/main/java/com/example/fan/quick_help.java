@@ -129,12 +129,14 @@ public class quick_help {
                     name=decode(name);
                     Log.d("tnp_cartoon", name);
                     Log.d("tnp_cartoon", decodedString);
-                    Child ch = new Child();
-                    ch.setName(name);
-                    ch.setImage("jgh");
-                    //ch.setImage(serial.select("div div.poster a img").attr("src"));
-                    ch.setUri(decodedString);
-                    ch_list.add(ch);
+                    if(!name.equals("Показать все")) {
+                        Child ch = new Child();
+                        ch.setName(name);
+                        ch.setImage("jgh");
+                        //ch.setImage(serial.select("div div.poster a img").attr("src"));
+                        ch.setUri(decodedString);
+                        ch_list.add(ch);
+                    }
                 }
                 content += decodedString;
             }

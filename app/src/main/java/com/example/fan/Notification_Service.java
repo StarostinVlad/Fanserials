@@ -129,6 +129,15 @@ public class Notification_Service extends Service {
                             series.addAll(new_series);
                             new_series.clear();
                         }
+                        else{
+                            doc = Jsoup.parse(quick_help.GiveDocFromUrl("http://fanserials-zerkalo.com"));
+                            queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("href").substring(2);
+
+                            sPref = getSharedPreferences("URL",MODE_PRIVATE);
+                            SharedPreferences.Editor ed = sPref.edit();
+                            ed.putString(SAVED_TEXT,"http://"+queryUrl );
+                            ed.commit();
+                        }
                         try {
                             Thread.sleep(300000);
                         } catch (InterruptedException e) {

@@ -53,6 +53,22 @@ public class All_serials_activity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_serials_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        String toolbarTittle;
+        switch(getIntent().getIntExtra("param",0)){
+            case 1 :
+                toolbarTittle="Мультсериалы";
+                break;
+            case 2 :
+                toolbarTittle="Аниме";
+                break;
+            case 3 :
+                toolbarTittle="Документальные";
+                break;
+            default:
+                toolbarTittle="Все сериалы";
+                break;
+        }
+        toolbar.setTitle(toolbarTittle);
         setSupportActionBar(toolbar);
         pr=(ProgressBar)findViewById(R.id.progressBar4);
 

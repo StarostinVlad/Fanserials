@@ -42,9 +42,9 @@ public class MyExpandableAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) context
                     .getSystemService(context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(android.R.layout.simple_list_item_1, null);
+            convertView = infalInflater.inflate(R.layout.expandablelist_child_style, null);
         }
-        TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
+        TextView tv = (TextView) convertView.findViewById(R.id.Tittle_text);
         //ImageView iv = (ImageView) convertView.findViewById(R.id.poster);
 
         tv.setText(child.getName().toString());
@@ -80,9 +80,9 @@ public class MyExpandableAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater inf = (LayoutInflater) context
                     .getSystemService(context.LAYOUT_INFLATER_SERVICE);
-            convertView = inf.inflate(android.R.layout.simple_expandable_list_item_1, null);
+            convertView = inf.inflate(R.layout.expandablelist_group_style, null);
         }
-        TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
+        TextView tv = (TextView) convertView.findViewById(R.id.Symbol_text);
         tv.setText(group.getName());
         return convertView;
     }

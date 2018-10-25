@@ -510,6 +510,7 @@ String toolbarTit="";
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                return null;
             }
             for(int i=0;i<vidUri.size();i++) {
                 if (vidUri.get(i).equals("some.mp4")) {

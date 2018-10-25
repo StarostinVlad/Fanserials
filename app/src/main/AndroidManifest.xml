@@ -58,10 +58,6 @@
             android:label="@string/title_activity_all_serials_activity"
             android:theme="@style/AppTheme" />
 
-        <service
-            android:name=".top_layout"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>
