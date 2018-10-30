@@ -130,7 +130,7 @@ public class Notification_Service extends Service {
                             new_series.clear();
                         }
                         else{
-                            doc = Jsoup.parse(quick_help.GiveDocFromUrl("http://fanserials-zerkalo.com"));
+                            doc = Jsoup.parse(quick_help.GiveDocFromUrl("https://mrstarostinvlad.000webhostapp.com/actual_adres.php"));
                             queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("href").substring(2);
 
                             sPref = getSharedPreferences("URL",MODE_PRIVATE);

@@ -349,9 +349,10 @@ public class MainActivity extends AppCompatActivity
             String s, img,queryUrl,anno = "";
 
             try {
-                if (quick_help.CheckResponceCode("http://fanserials-zerkalo.com")&&!EndList) {
-                    doc = Jsoup.parse(quick_help.GiveDocFromUrl("http://fanserials-zerkalo.com"));
-                    queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("href").substring(2);
+                if (quick_help.CheckResponceCode("https://mrstarostinvlad.000webhostapp.com/actual_adres.php")&&!EndList) {
+                    doc = Jsoup.parse(quick_help.GiveDocFromUrl("https://mrstarostinvlad.000webhostapp.com/actual_adres.php"));
+                    //queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("href").substring(2);
+                    queryUrl=doc.select("h1").text();
 
                     sPref = getSharedPreferences("URL",MODE_PRIVATE);
                     SharedPreferences.Editor ed = sPref.edit();
