@@ -94,6 +94,13 @@ public class Notification_Service extends Service {
                 previousNewSeries = new ArrayList<String>();
 
                 String queryUrl = sPref.getString(SAVED_TEXT, "");
+
+                if(intent.getSerializableExtra("Series")!=null) {
+                    series = (ArrayList<Seria>) intent.getSerializableExtra("Series");
+                    //series= (ArrayList<Seria>) series.subList(0,20);
+                }
+                else
+                    series=new ArrayList<Seria>();
                 while(true) {
                     if (internet()) {
                         Document doc;
@@ -102,36 +109,46 @@ public class Notification_Service extends Service {
                         if(quick_help.CheckResponceCode(queryUrl+"/new/")){
                             doc = Jsoup.parse(quick_help.GiveDocFromUrl(queryUrl+"/new/"));
                             Elements src = doc.select("li div div.item-serial");
-                            series=new ArrayList<Seria>();
+
+
+
                             new_series = new ArrayList<Seria>();
                             for (Element ss : src) {
-                                String name=ss.select("div.serial-bottom div.field-title a").text();
+                                String name = ss.select("div.serial-bottom div.field-title a").text();
                                 String anno=ss.select("div.serial-bottom div.field-description a").text();
-                                Log.d("tnp", "from service " + ss.select("div.serial-top div.field-img a").attr("href"));
+                                //Log.d("not_main", "an= "+anno);
+                                Log.d("tnp", ss.select("div.serial-top div.field-img a").attr("href"));
                                 String uri=ss.select("div.serial-top div.field-img a").attr("href");
-                                Seria seria=new Seria(name,uri,"",anno);
+                                s = ss.select("div.serial-top div.field-img").attr("style");
+                                img = (img = s.substring(0, s.indexOf(");"))).substring(img.indexOf("url(") + 4);
+                                Seria seria=new Seria(name,uri,img,anno);
                                 new_series.add(seria);
+
                             }
                             if (series.size() == 0) {
                                 series.addAll(new_series);
                                 Log.d("service", "last name null");
                             } else {
                                 Log.d("service", "last name not null");
-                            }
 
+                                ArrayList<String> series_names = new ArrayList<>();
+                                for (Seria seria : series)
+                                    series_names.add(seria.getName());
 
-                            for (Seria seria : new_series) {
-                                if(!series.contains(seria)) {
-                                    i++;
-                                    NotifySend(i, seria.getName(), seria.getDescription());
+                                for (Seria new_seria : new_series) {
+                                    if (!series_names.contains(new_seria.getName())) {
+                                        i++;
+
+                                        NotifySend(i, new_seria.getName(), new_seria.getDescription());
+                                    }
                                 }
+                                series.addAll(new_series);
+                                new_series.clear();
                             }
-                            series.addAll(new_series);
-                            new_series.clear();
                         }
                         else{
                             doc = Jsoup.parse(quick_help.GiveDocFromUrl("https://mrstarostinvlad.000webhostapp.com/actual_adres.php"));
-                            queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("href").substring(2);
+                            queryUrl=doc.select("h1").text();
 
                             sPref = getSharedPreferences("URL",MODE_PRIVATE);
                             SharedPreferences.Editor ed = sPref.edit();
@@ -140,6 +157,7 @@ public class Notification_Service extends Service {
                         }
                         try {
                             Thread.sleep(300000);
+                            NotifySend(i, "Пока ничего", "но я работаю");
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -169,7 +187,7 @@ public class Notification_Service extends Service {
                 //.setContentText(res.getString(R.string.notifytext))
                 .setContentText(new_anno) // Текст уведомления
                 // необязательные настройки
-                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.play)) // большая
+                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.logo1)) // большая
                 // картинка
                 //.setTicker(res.getString(R.string.warning)) // текст в строке состояния
                 .setWhen(System.currentTimeMillis())

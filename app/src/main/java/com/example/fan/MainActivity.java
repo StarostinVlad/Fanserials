@@ -1,6 +1,7 @@
 package com.example.fan;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -150,9 +152,13 @@ public class MainActivity extends AppCompatActivity
     }
     @Override
     protected void onDestroy() {
-
-        Intent NotifyService=new Intent(this,Notification_Service.class);
-        startService(NotifyService);
+       /*
+        sPref = getSharedPreferences("URL",MODE_PRIVATE);
+        if(sPref.getBoolean("Notify",true)) {
+            Intent NotifyService = new Intent(this, Notification_Service.class);
+            NotifyService.putExtra("Series", Series);
+            startService(NotifyService);
+        }*/
         super.onDestroy();
     }
 
@@ -219,6 +225,23 @@ public class MainActivity extends AppCompatActivity
     protected int iter=0;
 
     void fill() {
+        if(Series.size()==0){
+            lv.setVisibility(View.INVISIBLE);
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Важное сообщение!")
+                    .setMessage("К сожалению данный сериал недоступен из приложения!")
+                    .setCancelable(false)
+                    .setNegativeButton("ОК",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                    finish();
+                                }
+                            });
+            AlertDialog alert = builder.create();
+            alert.show();
+
+        }
         if(iter==0)
         data = new ArrayList<>(Series.size());
         else{
@@ -244,7 +267,6 @@ public class MainActivity extends AppCompatActivity
             adap.notifyDataSetChanged();
             swiperef.setRefreshing(false);
         }
-
     }
     void add(){
         data.clear();
@@ -291,6 +313,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+
+    private boolean isChecked = false;
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem checkable = menu.findItem(R.id.action_notifications);
+        checkable.setChecked(isChecked);
+        return true;
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -299,13 +330,30 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startService(new Intent(this,Notification_Service.class));
+        if (id == R.id.action_search) {
+            //startService(new Intent(this,Notification_Service.class));
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    "Пока нет, но будет!", Toast.LENGTH_SHORT);
+            toast.show();
+            return true;
+        }
+        else if (id == R.id.action_notifications) {
+            Intent NotifyService = new Intent(this, Notification_Service.class);
+            if(isChecked){
+                NotifyService.putExtra("Series", Series);
+                startService(NotifyService);
+            }else{
+                stopService(NotifyService);
+            }
+            isChecked = !item.isChecked();
+            item.setChecked(isChecked);
+            Log.d("check", "queryUrl="+isChecked);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override

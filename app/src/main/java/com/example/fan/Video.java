@@ -24,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -176,6 +177,9 @@ public class Video extends AppCompatActivity
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow()
+                    .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             vidParam.weight=0.0f;
             annoParam.weight=1.0f;
             Log.d(or,"land");
@@ -184,6 +188,7 @@ public class Video extends AppCompatActivity
             Log.d(or,"port");
             vidParam.weight=0.6f;
             annoParam.weight=0.4f;
+            decorView.setVisibility(View.VISIBLE);
         }
         Log.d(or,"change config");
     }
@@ -287,6 +292,9 @@ public class Video extends AppCompatActivity
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
             vidParam.weight=0.0f;
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow()
+                    .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             annoParam.weight=1.0f;
         }else {
 
@@ -427,6 +435,13 @@ String toolbarTit="";
         protected Void doInBackground(Void... parametr) {
             Document doc;
             String agent="Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
+            if(!s2.contains("fanserials")){
+                SharedPreferences sPref;
+                String SAVED_TEXT = "saved_text";
+                sPref = getSharedPreferences("URL",MODE_PRIVATE);
+                String queryUrl = sPref.getString(SAVED_TEXT, "");
+                s2=queryUrl+s2;
+            }
             try {
                 if (quick_help.CheckResponceCode(s2)) {
                     doc = Jsoup.parse(quick_help.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
@@ -443,14 +458,14 @@ String toolbarTit="";
                     Seria seria=(Seria)getIntent().getSerializableExtra("Seria");
                     if (seria.getName() == "")
                         toolbarTit = doc.select("h1.page-title").text();
-
+/*
                     for (Element ss : ulli) {
                         if (ss.text() != "") {
                             l.add(ss.text());
                             Log.d("tmp", "sound" + ss.text());
                         }
-                    }
-                        Elements iframe = doc.select("div.tabs-wrapper script");//doc.select("iframe");
+                    }*/
+                        Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
                         for (Element ss : iframe) {
                             String str = ss.toString();
                             str="{\"uris\":["+str.substring(0,str.indexOf("]';</script>")).substring(str.indexOf(" = '[")+5).replace("\\/","/")+"]}";
@@ -461,6 +476,7 @@ String toolbarTit="";
                                 str=soundURI.getString("player");
                                 Log.d("tmp", "frame=" + str);
                                 names.add(str);
+                                l.add(soundURI.getString("name"));
                             }
                         }
 

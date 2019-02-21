@@ -163,8 +163,8 @@ public class All_serials_activity extends AppCompatActivity
     }
 
     SharedPreferences sPref;
-
     final String SAVED_TEXT = "saved_text";
+
 
     class getHref extends AsyncTask<Void, Void, Void> {
 

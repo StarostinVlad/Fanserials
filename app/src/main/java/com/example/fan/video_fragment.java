@@ -1,5 +1,6 @@
 package com.example.fan;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -256,6 +257,11 @@ public class video_fragment extends Fragment{
 
     @Override
     public void onPause() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if(!getActivity().isInMultiWindowMode())
+                Pause();
+        }else
+
         Pause();
         super.onPause();
     }

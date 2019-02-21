@@ -1,5 +1,6 @@
 package com.example.fan;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 
@@ -13,6 +14,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Star on 03.02.2018.
@@ -28,7 +35,7 @@ public class quick_help {
             connection.connect();
             if(connection.getResponseCode()==200)
             {
-                BufferedReader in=new BufferedReader(new InputStreamReader(connection.getInputStream(),"cp1251"));
+                BufferedReader in=new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
                 String line;
                 Log.d("check","start reading");
                 while((line=in.readLine())!=null){
@@ -95,9 +102,12 @@ public class quick_help {
                 buf.append((char) ch);
             }
             String str = new String(buf);
-            //Log.d("tnp_cartoon", "result 1 : "+r.getEncoding());
-            String[] Htmltext=str.split("n ");
-            //Log.d("tnp_cartoon", "result 1 : "+Htmltext.length);
+            String endList="\",\"countries";
+            str=str.substring(1,str.indexOf(endList)+endList.length());
+            Log.d("tnp_cartoon", "result html : "+str);
+
+            String[] Htmltext=str.split("<div class=\\\\\"literal\\\\\" id=\\\\\"as-.{0,2}\\\\\" data-id=\\\\\"[0-9]{1,5}\\\\\"");
+            Log.d("tnp_cartoon", "alfabet length : "+Htmltext.length);
             list = new ArrayList<MyGroup>();
             ArrayList<Child> ch_list = new ArrayList<Child>();
             MyGroup gru = null;
@@ -105,22 +115,51 @@ public class quick_help {
             for (String decodedString: Htmltext){
                 //Log.d("tnp_cartoon", "result: "+decodedString);
                 if (decodedString.contains("literal__header")) {
+                    /*
                     if (gru != null) {
                         gru.setItems(ch_list);
                         list.add(gru);
-                    }
-                        gru = new MyGroup();
-                        decodedString = decodedString.substring(decodedString.indexOf("<div class=\\\"literal__header\\\">") + 31);
-                        //Log.d("tnp_cartoon", decodedString);
-                        decodedString = decodedString.substring(0, decodedString.indexOf("<\\/div>"));
-                        decodedString=decode(decodedString);
-                        if(decodedString.equals("#"))decodedString="0-9";
-                        else if(decodedString.equals("?"))end=true;
-                        gru.setName(decodedString);
-                        ch_list = new ArrayList<Child>();
-                        exist=true;
+                    }*/
+                    gru = new MyGroup();
+                    decodedString = decodedString.substring(decodedString.indexOf("<div class=\\\"literal__header\\\">") + 31);
+                    Log.d("tnp_cartoon", "literal header:" + decodedString);
+                    String GroupName = decodedString.substring(0, decodedString.indexOf("<\\/div>"));
+                    GroupName = decode(GroupName);
+                    if (GroupName.equals("#")) GroupName = "0-9";
+                    else if (GroupName.equals("?")) end = true;
+                    gru.setName(GroupName);
+                    ch_list = new ArrayList<Child>();
+                    String[] Serials = decodedString.split("<li class=\\\\\"literal__item not-loaded\\\\\".{0,1000}\\\\\" >");
+                    for (String Serial : Serials) {
+                        //Log.d("tnp_cartoon", "serial header:" + Serial);
+                        if (!Serial.contains("href="))
+                            continue;
 
-                } else if(decodedString.contains("<a href=\\\"")&&exist){
+                        String name = Serial;
+                        Serial = Serial.substring(Serial.indexOf("=\\\"") + "=\\\"".length());
+                        Serial = Serial.substring(1, Serial.indexOf("\">"));
+                        Log.d("tnp_cartoon", "serial header:" + Serial);
+                        Log.d("tnp_cartoon", "name header:" + name);
+                        name = name.substring(name.indexOf("\">") + 2);
+                        name = name.substring(0, name.indexOf("<\\/a>"));
+                        name = decode(name);
+                        Log.d("tnp_cartoon", "name: " + name);
+                        Log.d("tnp_cartoon", "url: " + Serial);
+                        if (!name.equals("Показать все")) {
+                            Child ch = new Child();
+                            ch.setName(name);
+                            ch.setImage("jgh");
+                            //ch.setImage(serial.select("div div.poster a img").attr("src"));
+                            ch.setUri(Serial);
+                            ch_list.add(ch);
+                        }
+                    }
+                    gru.setItems(ch_list);
+                    list.add(gru);
+                    exist = true;
+
+                }
+                /*else if(decodedString.contains("<a href=\\\"")&&exist){
                     String name = decodedString;
                     decodedString = decodedString.substring(decodedString.indexOf("<a href=\\\"")+10);
                     decodedString = decodedString.substring(1, decodedString.indexOf("\">")).replace("\\","");
@@ -138,10 +177,10 @@ public class quick_help {
                         ch_list.add(ch);
                     }
                 }
-                content += decodedString;
+                content += decodedString;*/
             }
-            gru.setItems(ch_list);
-            list.add(gru);
+            //gru.setItems(ch_list);
+            //list.add(gru);
             //Log.d("tnp_cartoon", content);
             //in.close();
         } catch (MalformedURLException e) {
