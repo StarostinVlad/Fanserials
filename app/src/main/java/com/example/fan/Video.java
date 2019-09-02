@@ -48,11 +48,11 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Video extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,Fragment_Interface{
+        implements NavigationView.OnNavigationItemSelectedListener, Fragment_Interface {
 
     public String s2;
     ProgressBar pr;
-    ArrayList<String> l,names,vidUri,sound_param;
+    ArrayList<String> l, names, vidUri, sound_param;
     anno_frag annoFrag;
     video_fragment videoFragment;
     Button play_pause;
@@ -61,27 +61,27 @@ public class Video extends AppCompatActivity
     Seria currentSeria;
 
 
-    LinearLayout.LayoutParams vidParam,annoParam;
-    FrameLayout vidLayout,annoLayout;
+    LinearLayout.LayoutParams vidParam, annoParam;
+    FrameLayout vidLayout, annoLayout;
     private View decorView;
 
-    boolean AUTO_HIDE=true;
+    boolean AUTO_HIDE = true;
     private SeekBar seek_video;
 
     public static final String SaveTime = "SaveTime";
     public static final String CurrentTime = "CurrentTime";
     private SharedPreferences mSettings;
-    private Button Nextbut,Prevbut;
+    private Button Nextbut, Prevbut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.act_video);
-        Intent in=getIntent();
+        Intent in = getIntent();
 
-        currentSeria=(Seria) in.getSerializableExtra("Seria");
-        s2=currentSeria.getUri();
+        currentSeria = (Seria) in.getSerializableExtra("Seria");
+        s2 = currentSeria.getUri();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(currentSeria.getName());
         toolbar.setSubtitle(currentSeria.getDescription());
@@ -100,64 +100,64 @@ public class Video extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        videoFragment= (video_fragment) getFragmentManager().findFragmentById(R.id.Fvid);
+        videoFragment = (video_fragment) getFragmentManager().findFragmentById(R.id.Fvid);
 
-        annoFrag= (anno_frag) getFragmentManager().findFragmentById(R.id.Avid);
+        annoFrag = (anno_frag) getFragmentManager().findFragmentById(R.id.Avid);
 
-        seek_video=(SeekBar)videoFragment.getView().findViewById(R.id.seekBar);
+        seek_video = (SeekBar) videoFragment.getView().findViewById(R.id.seekBar);
 
-        play_pause=(Button)videoFragment.getView().findViewById(R.id.button);
+        play_pause = (Button) videoFragment.getView().findViewById(R.id.button);
         play_pause.setVisibility(View.GONE);
 
-        Nextbut=(Button)videoFragment.getView().findViewById(R.id.button3);
-        Prevbut=(Button)videoFragment.getView().findViewById(R.id.button2);
+        Nextbut = (Button) videoFragment.getView().findViewById(R.id.button3);
+        Prevbut = (Button) videoFragment.getView().findViewById(R.id.button2);
         Prevbut.setVisibility(View.GONE);
         Nextbut.setVisibility(View.GONE);
 
         pr = (ProgressBar) videoFragment.getView().findViewById(R.id.progressBar2);
         pr.setVisibility(View.INVISIBLE);
-        vidLayout=(FrameLayout)findViewById(R.id.vidFrame);
+        vidLayout = (FrameLayout) findViewById(R.id.vidFrame);
         vidLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (AUTO_HIDE) {
                     Hide();
-                    AUTO_HIDE=false;
-                }else {
+                    AUTO_HIDE = false;
+                } else {
                     Show();
-                    AUTO_HIDE=true;
+                    AUTO_HIDE = true;
                 }
                 return false;
             }
         });
-        annoLayout=(FrameLayout)findViewById(R.id.annoFrame);
-        vidParam=(LinearLayout.LayoutParams)vidLayout.getLayoutParams();
-        annoParam=(LinearLayout.LayoutParams)annoLayout.getLayoutParams();
+        annoLayout = (FrameLayout) findViewById(R.id.annoFrame);
+        vidParam = (LinearLayout.LayoutParams) vidLayout.getLayoutParams();
+        annoParam = (LinearLayout.LayoutParams) annoLayout.getLayoutParams();
 
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            vidParam.weight=0.0f;
-            annoParam.weight=1.0f;
-            Log.d(or,"land");
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            vidParam.weight = 0.0f;
+            annoParam.weight = 1.0f;
+            Log.d(or, "land");
         }
 
-        if(savedInstanceState!=null){
-            currentPos =  savedInstanceState.getInt("current position");
-            curUri=savedInstanceState.getString("current uri");
-            Log.d("cururi","cururi: "+curUri);
-            vidUri=savedInstanceState.getStringArrayList("uri's");
-            names=savedInstanceState.getStringArrayList("names");
-            l=savedInstanceState.getStringArrayList("l's");
-            video_fragment.uri=curUri;
+        if (savedInstanceState != null) {
+            currentPos = savedInstanceState.getInt("current position");
+            curUri = savedInstanceState.getString("current uri");
+            Log.d("cururi", "cururi: " + curUri);
+            vidUri = savedInstanceState.getStringArrayList("uri's");
+            names = savedInstanceState.getStringArrayList("names");
+            l = savedInstanceState.getStringArrayList("l's");
+            video_fragment.uri = curUri;
 
-            fillFrag(true,l,vidUri,description);
+            fillFrag(true, l, vidUri, description);
 
-        }
-        else if(internet()) {
+        } else if (internet()) {
             getHref gf = new getHref();
             gf.execute();
         }
-        i=0;
+        i = 0;
     }
+
     int currentPos;
     static String curUri;
 
@@ -180,49 +180,49 @@ public class Video extends AppCompatActivity
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow()
                     .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            vidParam.weight=0.0f;
-            annoParam.weight=1.0f;
-            Log.d(or,"land");
+            vidParam.weight = 0.0f;
+            annoParam.weight = 1.0f;
+            Log.d(or, "land");
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if(annoFrag==null)
-            Log.d(or,"port");
-            vidParam.weight=0.6f;
-            annoParam.weight=0.4f;
+            if (annoFrag == null)
+                Log.d(or, "port");
+            vidParam.weight = 0.6f;
+            annoParam.weight = 0.4f;
             decorView.setVisibility(View.VISIBLE);
         }
-        Log.d(or,"change config");
+        Log.d(or, "change config");
     }
 
-    final String or="orient";
+    final String or = "orient";
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         //savedInstanceState.putInt("current position",video.getCurrentPosition() );
-        savedInstanceState.putString("current uri",curUri );
-            savedInstanceState.putStringArrayList("uri's", vidUri);
-            savedInstanceState.putStringArrayList("l's", l);
-            savedInstanceState.putStringArrayList("names", names);
+        savedInstanceState.putString("current uri", curUri);
+        savedInstanceState.putStringArrayList("uri's", vidUri);
+        savedInstanceState.putStringArrayList("l's", l);
+        savedInstanceState.putStringArrayList("names", names);
 
         super.onSaveInstanceState(savedInstanceState);
-        Log.d("sa","saved");
+        Log.d("sa", "saved");
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if(savedInstanceState!=null){
-            curUri=savedInstanceState.getString("current uri");
-            vidUri=savedInstanceState.getStringArrayList("uri's");
-            l=savedInstanceState.getStringArrayList("l's");
-            names=savedInstanceState.getStringArrayList("names");
+        if (savedInstanceState != null) {
+            curUri = savedInstanceState.getString("current uri");
+            vidUri = savedInstanceState.getStringArrayList("uri's");
+            l = savedInstanceState.getStringArrayList("l's");
+            names = savedInstanceState.getStringArrayList("names");
 
-            Log.d("sa","restored");
+            Log.d("sa", "restored");
         }
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
     protected void onPause() {
-        Log.d("sa","Ativity pause");
+        Log.d("sa", "Ativity pause");
         SharedPreferences.Editor ed = mSettings.edit();
         ed.putInt(SaveTime, video_fragment.currentPos);
         ed.commit();
@@ -232,13 +232,13 @@ public class Video extends AppCompatActivity
     @Override
     protected void onResume() {
 
-        video_fragment.currentPos = mSettings.getInt(SaveTime,0);
+        video_fragment.currentPos = mSettings.getInt(SaveTime, 0);
 
-        Log.d("sa","Ativity resume/curPos= "+mSettings.getInt(SaveTime,0));
+        Log.d("sa", "Ativity resume/curPos= " + mSettings.getInt(SaveTime, 0));
         super.onResume();
     }
 
-    public boolean internet(){
+    public boolean internet() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         if (isNetworkOnline(this)) {
@@ -268,7 +268,8 @@ public class Video extends AppCompatActivity
         return status;
 
     }
-    public void alarm(){
+
+    public void alarm() {
         AlertDialog.Builder builder = new AlertDialog.Builder(Video.this);
         builder.setTitle("Важное сообщение!")
                 .setMessage("Отсутствует доступ к сети!")
@@ -283,20 +284,20 @@ public class Video extends AppCompatActivity
         alert.show();
     }
 
-    private void Hide(){
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    private void Hide() {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-            vidParam.weight=0.0f;
+            vidParam.weight = 0.0f;
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow()
                     .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            annoParam.weight=1.0f;
-        }else {
+            annoParam.weight = 1.0f;
+        } else {
 
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -304,21 +305,22 @@ public class Video extends AppCompatActivity
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         }
-        ActionBar actionBar=getSupportActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
         play_pause.setVisibility(View.GONE);
         seek_video.setVisibility(View.GONE);
         Prevbut.setVisibility(View.GONE);
         Nextbut.setVisibility(View.GONE);
     }
-    private void Show(){
+
+    private void Show() {
         decorView.setVisibility(View.VISIBLE);
-        ActionBar actionBar=getSupportActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.show();
         play_pause.setVisibility(View.VISIBLE);
         seek_video.setVisibility(View.VISIBLE);
-        if(nextSeria!="")Nextbut.setVisibility(View.VISIBLE);
-        if(previusSeria!="")Prevbut.setVisibility(View.VISIBLE);
+        if (nextSeria != "") Nextbut.setVisibility(View.VISIBLE);
+        if (previusSeria != "") Prevbut.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -338,7 +340,8 @@ public class Video extends AppCompatActivity
         return true;
     }
 
-    int last_id=-1;
+    int last_id = -1;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -347,35 +350,35 @@ public class Video extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.low&&last_id!=id) {
+        if (id == R.id.low && last_id != id) {
             String tmp = "";
-            tmp = curUri.substring(0, curUri.indexOf("hls/")+4);
-            curUri=tmp+"360/index.m3u8";
-            currentPos=video_fragment.video.getCurrentPosition();
-            video_fragment.seturi(curUri,currentPos);
-            last_id=id;
+            tmp = curUri.substring(0, curUri.indexOf("hls/") + 4);
+            curUri = tmp + "360/index.m3u8";
+            currentPos = video_fragment.video.getCurrentPosition();
+            video_fragment.seturi(curUri, currentPos);
+            last_id = id;
             return true;
         }
-        if (id == R.id.medium&&last_id!=id) {
+        if (id == R.id.medium && last_id != id) {
             String tmp = "";
-            tmp = curUri.substring(0, curUri.indexOf("hls/")+4);
-            curUri=tmp+"480/index.m3u8";
-            currentPos=video_fragment.video.getCurrentPosition();
-            video_fragment.seturi(curUri,currentPos);
-            last_id=id;
+            tmp = curUri.substring(0, curUri.indexOf("hls/") + 4);
+            curUri = tmp + "480/index.m3u8";
+            currentPos = video_fragment.video.getCurrentPosition();
+            video_fragment.seturi(curUri, currentPos);
+            last_id = id;
             return true;
         }
-        if (id == R.id.high&&last_id!=id) {
+        if (id == R.id.high && last_id != id) {
             String tmp = "";
-            tmp = curUri.substring(0, curUri.indexOf("hls/")+4);
-            curUri=tmp+"720/index.m3u8";
-            currentPos=video_fragment.video.getCurrentPosition();
-            video_fragment.seturi(curUri,currentPos);
-            last_id=id;
+            tmp = curUri.substring(0, curUri.indexOf("hls/") + 4);
+            curUri = tmp + "720/index.m3u8";
+            currentPos = video_fragment.video.getCurrentPosition();
+            video_fragment.seturi(curUri, currentPos);
+            last_id = id;
             return true;
         }
         if (id == R.id.engSub) {
-            if(finalySusbtitleEngSource.contains("vtt")){
+            if (finalySusbtitleEngSource.contains("vtt")) {
                 try {
                     video_fragment.setSub(finalySusbtitleEngSource);
                 } catch (IOException e) {
@@ -394,16 +397,16 @@ public class Video extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",0));
+            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
             finish();
         } else if (id == R.id.nav_gallery) {
-            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",1));
+            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 1));
             finish();
         } else if (id == R.id.nav_slideshow) {
-            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",2));
+            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 2));
             finish();
         } else if (id == R.id.nav_manage) {
-            startActivity(new Intent(this,All_serials_activity.class).putExtra("param",3));
+            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 3));
             finish();
         } else if (id == R.id.nav_share) {
 
@@ -417,30 +420,32 @@ public class Video extends AppCompatActivity
     }
 
 
-    int i=0;
+    int i = 0;
     protected String uri;
-    public static String previusSeria="",nextSeria="";
-    String description="";
+    public static String previusSeria = "", nextSeria = "";
+    String description = "";
     String finalySusbtitleRusSource = "", finalySusbtitleEngSource = "";
 
     @Override
-    public void fillFrag(final boolean rest, ArrayList<String> l, final ArrayList<String> vidUri,String descript) {
-        annoFrag.fill(rest,l,vidUri,descript);
+    public void fillFrag(final boolean rest, ArrayList<String> l, final ArrayList<String> vidUri, String descript) {
+        annoFrag.fill(rest, l, vidUri, descript);
     }
-String toolbarTit="";
+
+    String toolbarTit = "";
+
     class getHref extends AsyncTask<Void, Void, Void> {
 
 
         @Override
         protected Void doInBackground(Void... parametr) {
             Document doc;
-            String agent="Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
-            if(!s2.contains("fanserials")){
+            String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Mobile Safari/537.36";
+            if (!s2.contains("fanserials")) {
                 SharedPreferences sPref;
                 String SAVED_TEXT = "saved_text";
-                sPref = getSharedPreferences("URL",MODE_PRIVATE);
+                sPref = getSharedPreferences("URL", MODE_PRIVATE);
                 String queryUrl = sPref.getString(SAVED_TEXT, "");
-                s2=queryUrl+s2;
+                s2 = queryUrl + s2;
             }
             try {
                 if (quick_help.CheckResponceCode(s2)) {
@@ -455,7 +460,7 @@ String toolbarTit="";
                     nextSeria = (doc.select("a.arrow.next").attr("href"));
                     Log.d("tmp", "prev=" + previusSeria);
                     Log.d("tmp", "next=" + nextSeria);
-                    Seria seria=(Seria)getIntent().getSerializableExtra("Seria");
+                    Seria seria = (Seria) getIntent().getSerializableExtra("Seria");
                     if (seria.getName() == "")
                         toolbarTit = doc.select("h1.page-title").text();
 /*
@@ -465,23 +470,25 @@ String toolbarTit="";
                             Log.d("tmp", "sound" + ss.text());
                         }
                     }*/
-                        Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
-                        for (Element ss : iframe) {
-                            String str = ss.toString();
-                            str="{\"uris\":["+str.substring(0,str.indexOf("]';</script>")).substring(str.indexOf(" = '[")+5).replace("\\/","/")+"]}";
-                            JSONObject jsonDATA=new JSONObject(str);
-                            JSONArray jsonUris=jsonDATA.getJSONArray("uris");
-                            for(int i=0;i<jsonUris.length();i++) {
-                                JSONObject soundURI = jsonUris.getJSONObject(i);
-                                str=soundURI.getString("player");
-                                Log.d("tmp", "frame=" + str);
-                                names.add(str);
-                                l.add(soundURI.getString("name"));
-                            }
+
+                    Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
+                    for (Element ss : iframe) {
+                        String str = ss.toString();
+                        Log.d("tmp", "json= " + str);
+                        str = "{\"uris\":[" + str.substring(0, str.indexOf("]';</script>")).substring(str.indexOf(" = '[") + 5).replace("\\/", "/") + "]}";
+                        JSONObject jsonDATA = new JSONObject(str);
+                        JSONArray jsonUris = jsonDATA.getJSONArray("uris");
+                        for (int i = 0; i < jsonUris.length(); i++) {
+                            JSONObject soundURI = jsonUris.getJSONObject(i);
+                            str = soundURI.getString("player");
+                            Log.d("tmp", "frame=" + str);
+                            names.add(str);
+                            l.add(soundURI.getString("name"));
                         }
+                    }
 
                     for (String name : names) {
-                        if (name.contains("fanserials") || name.contains("umovies") || name.contains("seplay")) {
+                        if (name.contains("fanserials") || name.contains("umovies") || name.contains("seplay") || name.contains("player")) {
                             try {
                                 if (quick_help.CheckResponceCode(name)) {
                                     Log.d("con", "href= " + name);
@@ -509,9 +516,13 @@ String toolbarTit="";
                                     tmp = s.substring(0, s.indexOf("index.m3u8") + 10);
                                     tmp = tmp.substring(tmp.lastIndexOf("src:  \"") + 7);
                                     */
-                                    String tmp = doc.getElementsByAttribute("data-hls").attr("data-hls");
+                                    String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
                                     Log.d("tmp", tmp);
-                                    vidUri.add(tmp);
+                                    JSONObject jsonDATA = new JSONObject(tmp);
+
+                                    Log.d("tmp", "js= " + jsonDATA.get("hls"));
+
+                                    vidUri.add(jsonDATA.get("hls").toString());
                                 }
                             } catch (Exception e) {
                                 Log.d("tmp", "just not work  " + e);
@@ -528,7 +539,7 @@ String toolbarTit="";
                 e.printStackTrace();
                 return null;
             }
-            for(int i=0;i<vidUri.size();i++) {
+            for (int i = 0; i < vidUri.size(); i++) {
                 if (vidUri.get(i).equals("some.mp4")) {
                     vidUri.remove(i);
                     l.remove(i);
@@ -555,17 +566,17 @@ String toolbarTit="";
             super.onPostExecute(result);
             pr.setVisibility(View.INVISIBLE);
             play_pause.setVisibility(View.VISIBLE);
-            if(nextSeria!=""){
+            if (nextSeria != "") {
                 Nextbut.setVisibility(View.VISIBLE);
-                Log.d("tmp","next !null");
+                Log.d("tmp", "next !null");
             }
-            if(previusSeria!=""){
+            if (previusSeria != "") {
                 Prevbut.setVisibility(View.VISIBLE);
-                Log.d("tmp","prev !null");
+                Log.d("tmp", "prev !null");
             }
-            if(toolbarTit!="")toolbar.setTitle(toolbarTit);
+            if (toolbarTit != "") toolbar.setTitle(toolbarTit);
             setSupportActionBar(toolbar);
-            fillFrag(false,l,vidUri,description);
+            fillFrag(false, l, vidUri, description);
         }
 
 

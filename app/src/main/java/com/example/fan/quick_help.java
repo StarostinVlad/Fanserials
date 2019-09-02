@@ -77,7 +77,7 @@ public class quick_help {
         ArrayList<MyGroup> list = null;
         try {
             URLConnection connection = new URL(url+value).openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36 OPR/54.0.2952.64");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Mobile Safari/537.36");
             connection.setRequestProperty("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
             connection.setRequestProperty("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
             connection.setUseCaches(false);
@@ -137,7 +137,7 @@ public class quick_help {
 
                         String name = Serial;
                         Serial = Serial.substring(Serial.indexOf("=\\\"") + "=\\\"".length());
-                        Serial = Serial.substring(1, Serial.indexOf("\">"));
+                        Serial = Serial.substring(1, Serial.indexOf("\\/\\\">"));
                         Log.d("tnp_cartoon", "serial header:" + Serial);
                         Log.d("tnp_cartoon", "name header:" + name);
                         name = name.substring(name.indexOf("\">") + 2);
