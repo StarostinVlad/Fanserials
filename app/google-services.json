@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "690560640266",
+    "firebase_url": "https://fanserials-not-official.firebaseio.com",
+    "project_id": "fanserials-not-official",
+    "storage_bucket": "fanserials-not-official.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690560640266:android:c3cca2bf76252d70adc6f3",
+        "android_client_info": {
+          "package_name": "com.example.fan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690560640266-ch1iuklikisnv63e9d9a6v52on2udp2q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fan",
+            "certificate_hash": "48ab1ac683403daf1d182216c838def183a5b272"
+          }
+        },
+        {
+          "client_id": "690560640266-3fenq8dc8nbtqpqnirjrk6160i0cdhqb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJkq_evpRPSLtE1GrkzWbEoPgAm47kr8A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690560640266-3fenq8dc8nbtqpqnirjrk6160i0cdhqb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -16,16 +15,16 @@ import java.util.ArrayList;
 
 public class MyExpandableAdapter extends BaseExpandableListAdapter {
 
-    private ArrayList<MyGroup> groups;
+    private ArrayList<LiteralOfSerials> groups;
     private Context context;
-    public MyExpandableAdapter(Context context, ArrayList<MyGroup> groups) {
+    public MyExpandableAdapter(Context context, ArrayList<LiteralOfSerials> groups) {
         this.context=context;
         this.groups=groups;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        ArrayList<Child> chList = groups.get(groupPosition).getItems();
+        ArrayList<Serial> chList = groups.get(groupPosition).getItems();
         return chList.get(childPosition);
     }
 
@@ -38,14 +37,14 @@ public class MyExpandableAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-        Child child = (Child) getChild(groupPosition, childPosition);
+        Serial child = (Serial) getChild(groupPosition, childPosition);
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) context
                     .getSystemService(context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.expandablelist_child_style, null);
         }
         TextView tv = (TextView) convertView.findViewById(R.id.Tittle_text);
-        //ImageView iv = (ImageView) convertView.findViewById(R.id.poster);
+        //ImageView iv = (ImageView) convertView.findViewById(R.episodeId.foundSerialPoster);
 
         tv.setText(child.getName().toString());
         //Picasso.with(getApplicationContext()).load(child.getImage()).error(R.drawable.no_image).placeholder(R.drawable.no_image).into(iv);
@@ -54,7 +53,7 @@ public class MyExpandableAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        ArrayList<Child> chList = groups.get(groupPosition).getItems();
+        ArrayList<Serial> chList = groups.get(groupPosition).getItems();
         return chList.size();
     }
 
@@ -76,7 +75,7 @@ public class MyExpandableAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        MyGroup group = (MyGroup) getGroup(groupPosition);
+        LiteralOfSerials group = (LiteralOfSerials) getGroup(groupPosition);
         if (convertView == null) {
             LayoutInflater inf = (LayoutInflater) context
                     .getSystemService(context.LAYOUT_INFLATER_SERVICE);

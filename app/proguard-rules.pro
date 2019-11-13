@@ -10,7 +10,7 @@
 # Add any project specific keep options here:
 
 # If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
+# and specify the fully qualified class episodeName to the JavaScript interface
 # class:
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
@@ -21,5 +21,10 @@
 #-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
-# hide the original source file name.
+# hide the original source file episodeName.
 #-renamesourcefileattribute SourceFile
+-ignorewarnings
+
+-keep class com.example.fan.AllSerialsFragment.java
+-keep class com.example.fan.FanserJsonApi
+-keep class com.example.fan.SearchJsonApi

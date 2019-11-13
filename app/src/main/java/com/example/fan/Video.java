@@ -1,6 +1,5 @@
 package com.example.fan;
 
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,26 +9,24 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,45 +36,50 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Map;
 
 public class Video extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, Fragment_Interface {
-
-    public String s2;
-    ProgressBar pr;
-    ArrayList<String> l, names, vidUri, sound_param;
-    anno_frag annoFrag;
-    video_fragment videoFragment;
-    Button play_pause;
-    Toolbar toolbar;
-
-    Seria currentSeria;
-
-
-    LinearLayout.LayoutParams vidParam, annoParam;
-    FrameLayout vidLayout, annoLayout;
-    private View decorView;
-
-    boolean AUTO_HIDE = true;
-    private SeekBar seek_video;
+        implements Fragment_Interface {
 
     public static final String SaveTime = "SaveTime";
     public static final String CurrentTime = "CurrentTime";
+    public static String previusSeria = "", nextSeria = "";
+    static String curUri;
+    final String or = "orient";
+    public String s2;
+    protected String uri;
+    ProgressBar pr;
+    ArrayList<String> l, names, vidUri, sound_param;
+    DescriptionFragment annoFrag;
+    VideoFragment videoFragment;
+    Button play_pause;
+    Toolbar toolbar;
+    Seria currentSeria;
+    LinearLayout.LayoutParams vidParam, annoParam;
+    FrameLayout vidLayout, annoLayout;
+    boolean AUTO_HIDE = true;
+    int currentPos;
+    int last_id = -1;
+    int i = 0;
+    String description = "";
+    String finalySusbtitleRusSource = "", finalySusbtitleEngSource = "";
+    String toolbarTit = "";
+    private View decorView;
+    private SeekBar seek_video;
     private SharedPreferences mSettings;
     private Button Nextbut, Prevbut;
+
+    TextView duration;
+    TextView current_time;
+
+    ImageView top_gradient, bottom_gradient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        setContentView(R.layout.act_video);
+        setContentView(R.layout.app_bar_video);
         Intent in = getIntent();
 
         currentSeria = (Seria) in.getSerializableExtra("Seria");
@@ -91,31 +93,27 @@ public class Video extends AppCompatActivity
 
         decorView = getWindow().getDecorView();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+        videoFragment = new VideoFragment();
+        getFragmentManager().beginTransaction().replace(R.id.vidFrame, videoFragment).commit();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        annoFrag = new DescriptionFragment();
+        getFragmentManager().beginTransaction().replace(R.id.annoFrame, annoFrag).commit();
 
-        videoFragment = (video_fragment) getFragmentManager().findFragmentById(R.id.Fvid);
+        seek_video = (SeekBar) findViewById(R.id.seekBar);
 
-        annoFrag = (anno_frag) getFragmentManager().findFragmentById(R.id.Avid);
+        play_pause = (Button) findViewById(R.id.buttonPlay);
 
-        seek_video = (SeekBar) videoFragment.getView().findViewById(R.id.seekBar);
+        top_gradient = (ImageView) findViewById(R.id.top_gradient);
+        bottom_gradient = (ImageView) findViewById(R.id.bottom_gradient);
 
-        play_pause = (Button) videoFragment.getView().findViewById(R.id.button);
-        play_pause.setVisibility(View.GONE);
+        Nextbut = (Button) findViewById(R.id.button3);
+        Prevbut = (Button) findViewById(R.id.button2);
 
-        Nextbut = (Button) videoFragment.getView().findViewById(R.id.button3);
-        Prevbut = (Button) videoFragment.getView().findViewById(R.id.button2);
-        Prevbut.setVisibility(View.GONE);
-        Nextbut.setVisibility(View.GONE);
+        duration = (TextView) findViewById(R.id.duration);
+        current_time = (TextView) findViewById(R.id.current_time);
 
-        pr = (ProgressBar) videoFragment.getView().findViewById(R.id.progressBar2);
-        pr.setVisibility(View.INVISIBLE);
+        pr = (ProgressBar) findViewById(R.id.progressBar2);
+
         vidLayout = (FrameLayout) findViewById(R.id.vidFrame);
         vidLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -127,6 +125,7 @@ public class Video extends AppCompatActivity
                     Show();
                     AUTO_HIDE = true;
                 }
+//                play_pause.setVisibility(View.GONE);
                 return false;
             }
         });
@@ -140,6 +139,7 @@ public class Video extends AppCompatActivity
             Log.d(or, "land");
         }
 
+
         if (savedInstanceState != null) {
             currentPos = savedInstanceState.getInt("current position");
             curUri = savedInstanceState.getString("current uri");
@@ -147,7 +147,7 @@ public class Video extends AppCompatActivity
             vidUri = savedInstanceState.getStringArrayList("uri's");
             names = savedInstanceState.getStringArrayList("names");
             l = savedInstanceState.getStringArrayList("l's");
-            video_fragment.uri = curUri;
+            VideoFragment.uri = curUri;
 
             fillFrag(true, l, vidUri, description);
 
@@ -155,11 +155,9 @@ public class Video extends AppCompatActivity
             getHref gf = new getHref();
             gf.execute();
         }
+        Log.d(or, "end create");
         i = 0;
     }
-
-    int currentPos;
-    static String curUri;
 
     @Override
     protected void onDestroy() {
@@ -177,23 +175,23 @@ public class Video extends AppCompatActivity
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow()
-                    .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                    .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             vidParam.weight = 0.0f;
             annoParam.weight = 1.0f;
             Log.d(or, "land");
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             if (annoFrag == null)
                 Log.d(or, "port");
-            vidParam.weight = 0.6f;
-            annoParam.weight = 0.4f;
+            vidParam.weight = 0.7f;
+            annoParam.weight = 0.3f;
             decorView.setVisibility(View.VISIBLE);
         }
         Log.d(or, "change config");
     }
-
-    final String or = "orient";
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -224,7 +222,7 @@ public class Video extends AppCompatActivity
     protected void onPause() {
         Log.d("sa", "Ativity pause");
         SharedPreferences.Editor ed = mSettings.edit();
-        ed.putInt(SaveTime, video_fragment.currentPos);
+        ed.putInt(SaveTime, VideoFragment.currentPos);
         ed.commit();
         super.onPause();
     }
@@ -232,15 +230,13 @@ public class Video extends AppCompatActivity
     @Override
     protected void onResume() {
 
-        video_fragment.currentPos = mSettings.getInt(SaveTime, 0);
+        VideoFragment.currentPos = mSettings.getInt(SaveTime, 0);
 
         Log.d("sa", "Ativity resume/curPos= " + mSettings.getInt(SaveTime, 0));
         super.onResume();
     }
 
     public boolean internet() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
         if (isNetworkOnline(this)) {
             return true;
         } else {
@@ -252,7 +248,8 @@ public class Video extends AppCompatActivity
     public boolean isNetworkOnline(Context context) {
         boolean status = false;
         try {
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager cm = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo netInfo = cm.getNetworkInfo(0);
             if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
                 status = true;
@@ -293,9 +290,11 @@ public class Video extends AppCompatActivity
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
             vidParam.weight = 0.0f;
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow()
-                    .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                    .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             annoParam.weight = 1.0f;
         } else {
 
@@ -307,30 +306,39 @@ public class Video extends AppCompatActivity
         }
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
-        play_pause.setVisibility(View.GONE);
-        seek_video.setVisibility(View.GONE);
-        Prevbut.setVisibility(View.GONE);
-        Nextbut.setVisibility(View.GONE);
+
+        videoFragment.durationTextView.setVisibility(View.GONE);
+        videoFragment.current_time.setVisibility(View.GONE);
+
+        videoFragment.top_gradient.setVisibility(View.GONE);
+        videoFragment.bottom_gradient.setVisibility(View.GONE);
+//        play_pause.setVisibility(View.GONE);
+        videoFragment.btn.setVisibility(View.GONE);
+//        seek_video.setVisibility(View.GONE);
+        videoFragment.video_seek.setVisibility(View.GONE);
+//        Prevbut.setVisibility(View.GONE);
+        videoFragment.Prev.setVisibility(View.GONE);
+//        Nextbut.setVisibility(View.GONE);
+        videoFragment.Next.setVisibility(View.GONE);
     }
 
     private void Show() {
         decorView.setVisibility(View.VISIBLE);
         ActionBar actionBar = getSupportActionBar();
         actionBar.show();
-        play_pause.setVisibility(View.VISIBLE);
-        seek_video.setVisibility(View.VISIBLE);
-        if (nextSeria != "") Nextbut.setVisibility(View.VISIBLE);
-        if (previusSeria != "") Prevbut.setVisibility(View.VISIBLE);
-    }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        videoFragment.durationTextView.setVisibility(View.VISIBLE);
+        videoFragment.current_time.setVisibility(View.VISIBLE);
+
+        videoFragment.top_gradient.setVisibility(View.VISIBLE);
+        videoFragment.bottom_gradient.setVisibility(View.VISIBLE);
+
+//        play_pause.setVisibility(View.VISIBLE);
+        videoFragment.btn.setVisibility(View.VISIBLE);
+//        seek_video.setVisibility(View.VISIBLE);
+        videoFragment.video_seek.setVisibility(View.VISIBLE);
+        if (nextSeria != "") videoFragment.Next.setVisibility(View.VISIBLE);
+        if (previusSeria != "") videoFragment.Prev.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -339,8 +347,6 @@ public class Video extends AppCompatActivity
         getMenuInflater().inflate(R.menu.video, menu);
         return true;
     }
-
-    int last_id = -1;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -354,8 +360,8 @@ public class Video extends AppCompatActivity
             String tmp = "";
             tmp = curUri.substring(0, curUri.indexOf("hls/") + 4);
             curUri = tmp + "360/index.m3u8";
-            currentPos = video_fragment.video.getCurrentPosition();
-            video_fragment.seturi(curUri, currentPos);
+            currentPos = VideoFragment.video.getCurrentPosition();
+            VideoFragment.seturi(curUri, currentPos);
             last_id = id;
             return true;
         }
@@ -363,8 +369,8 @@ public class Video extends AppCompatActivity
             String tmp = "";
             tmp = curUri.substring(0, curUri.indexOf("hls/") + 4);
             curUri = tmp + "480/index.m3u8";
-            currentPos = video_fragment.video.getCurrentPosition();
-            video_fragment.seturi(curUri, currentPos);
+            currentPos = VideoFragment.video.getCurrentPosition();
+            VideoFragment.seturi(curUri, currentPos);
             last_id = id;
             return true;
         }
@@ -372,66 +378,19 @@ public class Video extends AppCompatActivity
             String tmp = "";
             tmp = curUri.substring(0, curUri.indexOf("hls/") + 4);
             curUri = tmp + "720/index.m3u8";
-            currentPos = video_fragment.video.getCurrentPosition();
-            video_fragment.seturi(curUri, currentPos);
+            currentPos = VideoFragment.video.getCurrentPosition();
+            VideoFragment.seturi(curUri, currentPos);
             last_id = id;
             return true;
-        }
-        if (id == R.id.engSub) {
-            if (finalySusbtitleEngSource.contains("vtt")) {
-                try {
-                    video_fragment.setSub(finalySusbtitleEngSource);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return true;
-            }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
-            finish();
-        } else if (id == R.id.nav_gallery) {
-            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 1));
-            finish();
-        } else if (id == R.id.nav_slideshow) {
-            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 2));
-            finish();
-        } else if (id == R.id.nav_manage) {
-            startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 3));
-            finish();
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-
-    int i = 0;
-    protected String uri;
-    public static String previusSeria = "", nextSeria = "";
-    String description = "";
-    String finalySusbtitleRusSource = "", finalySusbtitleEngSource = "";
-
-    @Override
-    public void fillFrag(final boolean rest, ArrayList<String> l, final ArrayList<String> vidUri, String descript) {
+    public void fillFrag(final boolean rest, ArrayList<String> l,
+                         final ArrayList<String> vidUri, String descript) {
         annoFrag.fill(rest, l, vidUri, descript);
     }
-
-    String toolbarTit = "";
 
     class getHref extends AsyncTask<Void, Void, Void> {
 
@@ -447,23 +406,28 @@ public class Video extends AppCompatActivity
                 String queryUrl = sPref.getString(SAVED_TEXT, "");
                 s2 = queryUrl + s2;
             }
+            Log.d("tmp", "current: " + s2);
             try {
                 if (quick_help.CheckResponceCode(s2)) {
-                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
+//                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
+                    Connection.Response res = Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).method(Connection.Method.GET).execute();
+                    doc = res.parse();
+                    Map cookie = res.cookies();
+                    Log.d("tmp", res.cookies().toString());
                     //Elements iframe = doc.select("iframe");//doc.select("iframe");
-                    Elements ulli = doc.select("ul.nav.nav-tabs.tabs-voice.mobile-tabs-scroll.show-for-small-only li a");
+                    Elements ulli = doc.select("ul.nav.nav-tabs.tabs-voice.mobile-tabs-scroll.show-for-smallImage-only li a");
                     description = doc.select(".well div").text();
                     names = new ArrayList<String>();
                     vidUri = new ArrayList<String>();
                     l = new ArrayList<String>();
-                    previusSeria = (doc.select("a.arrow.prev").attr("href"));
-                    nextSeria = (doc.select("a.arrow.next").attr("href"));
+                    previusSeria = (doc.select("a.arrow.prev").attr("serialHref"));
+                    nextSeria = (doc.select("a.arrow.next").attr("serialHref"));
                     Log.d("tmp", "prev=" + previusSeria);
                     Log.d("tmp", "next=" + nextSeria);
                     Seria seria = (Seria) getIntent().getSerializableExtra("Seria");
                     if (seria.getName() == "")
-                        toolbarTit = doc.select("h1.page-title").text();
-/*
+                        toolbarTit = doc.select("h1.page-serialTitle").text();
+                    /*
                     for (Element ss : ulli) {
                         if (ss.text() != "") {
                             l.add(ss.text());
@@ -483,16 +447,21 @@ public class Video extends AppCompatActivity
                             str = soundURI.getString("player");
                             Log.d("tmp", "frame=" + str);
                             names.add(str);
-                            l.add(soundURI.getString("name"));
+                            l.add(soundURI.getString("episodeName"));
                         }
                     }
 
                     for (String name : names) {
                         if (name.contains("fanserials") || name.contains("umovies") || name.contains("seplay") || name.contains("player")) {
                             try {
-                                if (quick_help.CheckResponceCode(name)) {
-                                    Log.d("con", "href= " + name);
-                                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(name));
+                                Connection.Response sub_res = Jsoup.connect(name).cookies(cookie)
+                                        .method(Connection.Method.GET).referrer(s2).execute();
+//                                if (quick_help.CheckResponceCode(episodeName)) {
+                                if (sub_res.statusCode() == 200) {
+                                    Log.d("con", "serialHref= " + name);
+//                                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(episodeName));
+                                    doc = sub_res.parse();
+                                    Log.d("tmp", sub_res.cookies().toString());
                                     /*
                                     Elements vsrc = doc.getElementsByAttributeValue("type", "text/javascript");
                                     String s = vsrc.toString();
@@ -516,7 +485,7 @@ public class Video extends AppCompatActivity
                                     tmp = s.substring(0, s.indexOf("index.m3u8") + 10);
                                     tmp = tmp.substring(tmp.lastIndexOf("src:  \"") + 7);
                                     */
-                                    String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
+                                    String tmp = doc.getElementsByAttribute("dataOfSerials-config").attr("dataOfSerials-config");
                                     Log.d("tmp", tmp);
                                     JSONObject jsonDATA = new JSONObject(tmp);
 
@@ -557,24 +526,24 @@ public class Video extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pr.setVisibility(View.VISIBLE);
+            //videoFragment.pr.setVisibility(View.VISIBLE);
             //annoFrag.prVisible(true);
         }
 
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            pr.setVisibility(View.INVISIBLE);
-            play_pause.setVisibility(View.VISIBLE);
-            if (nextSeria != "") {
-                Nextbut.setVisibility(View.VISIBLE);
+            videoFragment.pr.setVisibility(View.INVISIBLE);
+            videoFragment.btn.setVisibility(View.VISIBLE);
+            if (!nextSeria.equals("")) {
+                videoFragment.Next.setVisibility(View.VISIBLE);
                 Log.d("tmp", "next !null");
             }
-            if (previusSeria != "") {
-                Prevbut.setVisibility(View.VISIBLE);
+            if (!previusSeria.equals("")) {
+                videoFragment.Prev.setVisibility(View.VISIBLE);
                 Log.d("tmp", "prev !null");
             }
-            if (toolbarTit != "") toolbar.setTitle(toolbarTit);
+            if (!toolbarTit.equals("")) toolbar.setTitle(toolbarTit);
             setSupportActionBar(toolbar);
             fillFrag(false, l, vidUri, description);
         }

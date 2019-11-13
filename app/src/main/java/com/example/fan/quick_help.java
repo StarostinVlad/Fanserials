@@ -1,8 +1,8 @@
 package com.example.fan;
 
-import android.content.SharedPreferences;
 import android.util.Log;
 
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,13 +13,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Star on 03.02.2018.
@@ -56,8 +49,10 @@ public class quick_help {
             //Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("188.40.141.216", 3128));
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             connection.connect();
-            if (connection.getResponseCode()!=200)
+            if (connection.getResponseCode()!=200) {
+                connection.disconnect();
                 return false;
+            }
             connection.disconnect();
         }catch (Exception e){
             e.printStackTrace();
@@ -72,9 +67,9 @@ public class quick_help {
         Log.d("tnp_cartoon", "enc: "+decodeString);
         return decodeString;
     }
-    public static ArrayList<MyGroup> sendReq(String url, int value) {
+    public static ArrayList<LiteralOfSerials> sendReq(String url, int value) {
         String content = "";
-        ArrayList<MyGroup> list = null;
+        ArrayList<LiteralOfSerials> list = null;
         try {
             URLConnection connection = new URL(url+value).openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Mobile Safari/537.36");
@@ -108,9 +103,9 @@ public class quick_help {
 
             String[] Htmltext=str.split("<div class=\\\\\"literal\\\\\" id=\\\\\"as-.{0,2}\\\\\" data-id=\\\\\"[0-9]{1,5}\\\\\"");
             Log.d("tnp_cartoon", "alfabet length : "+Htmltext.length);
-            list = new ArrayList<MyGroup>();
-            ArrayList<Child> ch_list = new ArrayList<Child>();
-            MyGroup gru = null;
+            list = new ArrayList<LiteralOfSerials>();
+            ArrayList<Serial> ch_list = new ArrayList<Serial>();
+            LiteralOfSerials gru = null;
             boolean exist=false,end=false;
             for (String decodedString: Htmltext){
                 //Log.d("tnp_cartoon", "result: "+decodedString);
@@ -120,36 +115,36 @@ public class quick_help {
                         gru.setItems(ch_list);
                         list.add(gru);
                     }*/
-                    gru = new MyGroup();
+                    gru = new LiteralOfSerials("",ch_list);
                     decodedString = decodedString.substring(decodedString.indexOf("<div class=\\\"literal__header\\\">") + 31);
-                    Log.d("tnp_cartoon", "literal header:" + decodedString);
+                    Log.d("tnp_cartoon", "literalOfSerial header:" + decodedString);
                     String GroupName = decodedString.substring(0, decodedString.indexOf("<\\/div>"));
                     GroupName = decode(GroupName);
                     if (GroupName.equals("#")) GroupName = "0-9";
                     else if (GroupName.equals("?")) end = true;
                     gru.setName(GroupName);
-                    ch_list = new ArrayList<Child>();
+                    ch_list = new ArrayList<Serial>();
                     String[] Serials = decodedString.split("<li class=\\\\\"literal__item not-loaded\\\\\".{0,1000}\\\\\" >");
                     for (String Serial : Serials) {
-                        //Log.d("tnp_cartoon", "serial header:" + Serial);
-                        if (!Serial.contains("href="))
+                        //Log.d("tnp_cartoon", "newSerial header:" + Serial);
+                        if (!Serial.contains("serialHref="))
                             continue;
 
                         String name = Serial;
                         Serial = Serial.substring(Serial.indexOf("=\\\"") + "=\\\"".length());
                         Serial = Serial.substring(1, Serial.indexOf("\\/\\\">"));
-                        Log.d("tnp_cartoon", "serial header:" + Serial);
-                        Log.d("tnp_cartoon", "name header:" + name);
+                        Log.d("tnp_cartoon", "newSerial header:" + Serial);
+                        Log.d("tnp_cartoon", "episodeName header:" + name);
                         name = name.substring(name.indexOf("\">") + 2);
                         name = name.substring(0, name.indexOf("<\\/a>"));
                         name = decode(name);
-                        Log.d("tnp_cartoon", "name: " + name);
-                        Log.d("tnp_cartoon", "url: " + Serial);
+                        Log.d("tnp_cartoon", "episodeName: " + name);
+                        Log.d("tnp_cartoon", "episodeUrl: " + Serial);
                         if (!name.equals("Показать все")) {
-                            Child ch = new Child();
+                            com.example.fan.Serial ch = new Serial();
                             ch.setName(name);
                             ch.setImage("jgh");
-                            //ch.setImage(serial.select("div div.poster a img").attr("src"));
+                            //ch.setImage(newSerial.select("div div.foundSerialPoster a img").attr("src"));
                             ch.setUri(Serial);
                             ch_list.add(ch);
                         }
@@ -159,20 +154,20 @@ public class quick_help {
                     exist = true;
 
                 }
-                /*else if(decodedString.contains("<a href=\\\"")&&exist){
-                    String name = decodedString;
-                    decodedString = decodedString.substring(decodedString.indexOf("<a href=\\\"")+10);
+                /*else if(decodedString.contains("<a serialHref=\\\"")&&exist){
+                    String episodeName = decodedString;
+                    decodedString = decodedString.substring(decodedString.indexOf("<a serialHref=\\\"")+10);
                     decodedString = decodedString.substring(1, decodedString.indexOf("\">")).replace("\\","");
-                    name = name.substring(name.indexOf("\">")+2);
-                    name = name.substring(0, name.indexOf("<\\/a>\\"));
-                    name=decode(name);
-                    Log.d("tnp_cartoon", name);
+                    episodeName = episodeName.substring(episodeName.indexOf("\">")+2);
+                    episodeName = episodeName.substring(0, episodeName.indexOf("<\\/a>\\"));
+                    episodeName=decode(episodeName);
+                    Log.d("tnp_cartoon", episodeName);
                     Log.d("tnp_cartoon", decodedString);
-                    if(!name.equals("Показать все")) {
-                        Child ch = new Child();
-                        ch.setName(name);
+                    if(!episodeName.equals("Показать все")) {
+                        Serial ch = new Serial();
+                        ch.setName(episodeName);
                         ch.setImage("jgh");
-                        //ch.setImage(serial.select("div div.poster a img").attr("src"));
+                        //ch.setImage(newSerial.select("div div.foundSerialPoster a img").attr("src"));
                         ch.setUri(decodedString);
                         ch_list.add(ch);
                     }

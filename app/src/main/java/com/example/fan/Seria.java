@@ -41,10 +41,10 @@ public class Seria implements Serializable {
     }
 
     public Seria(String name, String uri, String img, String description) {
-        this.name = name;
-        this.uri = uri;
-        this.img = img;
-        this.description = description;
+        this.name = name.isEmpty()?"":name;
+        this.uri = uri.isEmpty()?"":uri;
+        this.img = img.isEmpty()?"":img;
+        this.description = description.isEmpty()?"":description;
     }
 
     String name;

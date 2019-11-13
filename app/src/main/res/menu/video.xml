@@ -16,16 +16,4 @@
     android:orderInCategory="100"
     android:title="720p"
     app:showAsAction="never" />
-    <item
-        android:id="@+id/engSub"
-        android:orderInCategory="100"
-        android:title="анг. суб"
-        android:visible="true"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/ruSub"
-        android:orderInCategory="100"
-        android:title="рус.суб"
-        android:visible="false"
-        app:showAsAction="never" />
 </menu>
