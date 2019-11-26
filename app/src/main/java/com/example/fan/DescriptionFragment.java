@@ -26,11 +26,11 @@ public class DescriptionFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d("sa","onAnnoCreateView fragment");
+        //Log.d("sa","onAnnoCreateView fragment");
         View v=inflater.inflate(R.layout.description_fragment,container,false);
         text=(TextView) v.findViewById(R.id.textView3);
         sp = (Spinner)v.findViewById(R.id.spinner);
-        Log.d("sa","onAnnoCreateView end fragment");
+        //Log.d("sa","onAnnoCreateView end fragment");
         return v;
     }
     protected String uri;
@@ -58,7 +58,7 @@ public class DescriptionFragment extends Fragment {
                 }
             });
             else for (String vid : vidUri) {
-                Log.d("tmp","vid="+vid );
+                //Log.d("tmp","vid="+vid );
             }
         }catch (Exception e){
         }

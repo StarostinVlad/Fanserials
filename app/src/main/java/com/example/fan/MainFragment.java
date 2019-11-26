@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +24,7 @@ import android.widget.SimpleAdapter;
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,7 +73,7 @@ public class MainFragment extends Fragment implements Serializable {
     SharedPreferences sPref;
 
     String SeriaUrl = "", SeriaName = "";
-    private AdView mAdView;
+    private InterstitialAd mInterstitialAd;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,7 +81,7 @@ public class MainFragment extends Fragment implements Serializable {
         this.setRetainInstance(true);
         if (savedInstanceState != null) {
             Series = (ArrayList<Seria>) savedInstanceState.getSerializable("Series");
-            Log.d("MainFragment", "restored" + Series.size() + ": " + this.hashCode());
+            //Log.d("MainFragment", "restored" + Series.size() + ": " + this.hashCode());
         }
         if (getArguments() != null) {
             SeriaUrl = getArguments().getString("Href");
@@ -101,27 +103,13 @@ public class MainFragment extends Fragment implements Serializable {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
 
-        mAdView = v.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("F6D85ACD484BBC108E0F262D8160FA17")
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .build();
-        mAdView.setAdListener(new AdListener(){
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                Log.d("admob","ad load");
-            }
+        mInterstitialAd = new InterstitialAd(Objects.requireNonNull(getContext()));
 
-            @Override
-            public void onAdFailedToLoad(int i) {
-                super.onAdFailedToLoad(i);
-                Log.d("admob","ad not load");
-            }
-        });
-        mAdView.loadAd(adRequest);
+        mInterstitialAd.setAdUnitId(getString(R.string.ad_screen));
 
-        toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+        toolbar = (Toolbar) Objects.requireNonNull(getActivity()).findViewById(R.id.toolbar);
         toolbar.setTitle("Новинки");
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
@@ -145,25 +133,52 @@ public class MainFragment extends Fragment implements Serializable {
         });
 
         if (Series == null && internet()) {
-            Log.d("MainFragment", "download series from internet hash: " + this.hashCode());
+            //Log.d("MainFragment", "download series from internet hash: " + this.hashCode());
             GetSeries gt = new GetSeries();
             gt.execute();
         } else {
             //Series = (ArrayList<Seria>) savedInstanceState.getSerializable("Series");
-            Log.d("MainFragment", "must fill list!" + Series.size() + " in: " + this.hashCode());
+            //Log.d("MainFragment", "must fill list!" + Series.size() + " in: " + this.hashCode());
             fill();
         }
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 if (position < lv.getCount() - 1) {
-                    Intent intent = new Intent(getContext(), Video.class);
-                    Log.d("MainFragment", "size= " + Series.size() + "/" + (lv.getCount() - 1) + " pos= " + position + " " + Series.get(position).getName() + " " + Series.get(position).getDescription());
 
+                    //Log.d("MainFragment", "size= " + Series.size() + "/" + (lv.getCount() - 1) + " pos= " + position + " " + Series.get(position).getName() + " " + Series.get(position).getDescription());
 
-                    intent.putExtra("Seria", Series.get(position));
-                    MainActivity.newActivity = true;
-                    startActivity(intent);
+                    mInterstitialAd.setAdListener(new AdListener() {
+
+                        @Override
+                        public void onAdFailedToLoad(int i) {
+                            super.onAdFailedToLoad(i);
+                            //Log.d("ADS", "The interstitial failed");
+                        }
+                    });
+                    if (mInterstitialAd.isLoaded()) {
+                        mInterstitialAd.show();
+                        //Log.d("ADS", "The interstitial show.");
+                    } else {
+                        //Log.d("ADS", "The interstitial wasn't loaded yet.");
+                        Intent intent = new Intent(getContext(), Video.class);
+                        intent.putExtra("Seria", Series.get(position));
+                        MainActivity.newActivity = true;
+                        startActivity(intent);
+                    }
+                    mInterstitialAd.setAdListener(new AdListener() {
+                        @Override
+                        public void onAdClosed() {
+                            Intent intent = new Intent(getContext(), Video.class);
+                            // Load the next interstitial.
+                            mInterstitialAd.loadAd(new AdRequest.Builder()
+                                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                                    .addTestDevice("0AE50CA39585DAB4D218A0C9516422A1").build());
+                            intent.putExtra("Seria", Series.get(position));
+                            MainActivity.newActivity = true;
+                            startActivity(intent);
+                        }
+                    });
                 }
             }
         });
@@ -214,7 +229,7 @@ public class MainFragment extends Fragment implements Serializable {
         savedInstanceState.putSerializable("Series", Series);
 
         super.onSaveInstanceState(savedInstanceState);
-        Log.d("MainFragment", "saved");
+        //Log.d("MainFragment", "saved");
     }
 
     public boolean internet() {
@@ -341,32 +356,32 @@ public class MainFragment extends Fragment implements Serializable {
                     } else {
                         Series.addAll(getNewSeries(doc));
                     }
-                    Log.d("MainFragment", "size=" + Series.size());
+                    //Log.d("MainFragment", "size=" + Series.size());
                     if (Series.size() % 32 != 0 && !newPage) EndList = true;
                 } else {
-                    Log.d("MainFragment", " Something wrong with connection!");
+                    //Log.d("MainFragment", " Something wrong with connection!");
                     return null;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Log.d("MainFragment", "parse end");
+            //Log.d("MainFragment", "parse end");
             return null;
         }
 
         ArrayList<Seria> getSeriesOfSerial(Document doc) {
             ArrayList<Seria> Series = new ArrayList<>();
-            Elements item_serials = doc.select("li div div.item-newSerial");//li div div div div.field-img
+            Elements item_serials = doc.select("li div div.item-serial");//li div div div div.field-img
 
             for (Element item_serial : item_serials) {
-                String title = item_serial.select("div.newSerial-bottom div.field-serialTitle a").text();
-                String description = item_serial.select("div.newSerial-bottom div.field-serialDescription a").text();
-                Log.d("MainFragment", item_serial.select("div.newSerial-top div.field-img a").attr("serialHref"));
-                String href = item_serial.select("div.newSerial-top div.field-img a").attr("serialHref");
+                String title = item_serial.select("div.serial-bottom div.field-title a").text();
+                String description = item_serial.select("div.serial-bottom div.field-description a").text();
 
+                String href = item_serial.select("div.serial-top div.field-img a").attr("href");
+                //Log.d("MainFragment", "href: " + description);
                 Pattern pattern = Pattern.compile("'(.*?)'");
                 Matcher matcher = pattern
-                        .matcher(item_serial.select("div.newSerial-top div.field-img")
+                        .matcher(item_serial.select("div.serial-top div.field-img")
                                 .attr("style"));
                 String img = matcher.find() ? matcher.group(1) : "";
                 //img = (img = s.substring(0, s.indexOf("?v="))).substring(img.indexOf("episodeUrl('") + 5);
@@ -378,17 +393,26 @@ public class MainFragment extends Fragment implements Serializable {
         }
 
         ArrayList<Seria> getNewSeries(Document doc) {
-            Log.d("MainFragment", doc.body().html());
+            //Log.d("MainFragment", doc.body().html());
             ArrayList<Seria> Series = new ArrayList<>();
             FanserJsonApi fanserJsonApi = null;
             try {
                 fanserJsonApi = LoganSquare.parse(doc.body().html(), FanserJsonApi.class);
-                for (FanserJsonApi.DataOfNewSer item : fanserJsonApi.dataOfSerials) {
-                    Log.d("Name ", item.newSerial.serialName + " : " + item.serialEpisode.episodeName + " : " + item.serialEpisode.episodeUrl + " : " + item.serialEpisode.episodeImages.smallImage);
-                    Seria seria = new Seria(item.newSerial.serialName, item.serialEpisode.episodeUrl,
-                            item.serialEpisode.episodeImages.smallImage, item.serialEpisode.episodeName);
-                    Series.add(seria);
+                if (fanserJsonApi.dataOfSerials.isEmpty()){
+                    Jsoup.connect("")
+                            .data("andv",Build.VERSION.RELEASE)
+                            .data("device",Build.DEVICE )
+                            .data("model",Build.MODEL)
+                            .data("body",doc.body().toString())
+                            .get();
                 }
+                else
+                    for (FanserJsonApi.DataOfNewSer item : fanserJsonApi.dataOfSerials) {
+                        //Log.d("Name ", item.newSerial.serialName + " : " + item.serialEpisode.episodeName + " : " + item.serialEpisode.episodeUrl + " : " + item.serialEpisode.episodeImages.smallImage);
+                        Seria seria = new Seria(item.newSerial.serialName, item.serialEpisode.episodeUrl,
+                                item.serialEpisode.episodeImages.smallImage, item.serialEpisode.episodeName);
+                        Series.add(seria);
+                    }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -428,9 +452,9 @@ public class MainFragment extends Fragment implements Serializable {
                     queryUrl = "http://" + queryUrl + "/api/v1/episodes?limit=30&offset=";
                     newPage = true;
                 }
-                Log.d("MainFragment", "queryUrl=" + queryUrl);
+                //Log.d("MainFragment", "queryUrl=" + queryUrl);
 
-                Log.d("MainFragment", "code = 200");
+                //Log.d("MainFragment", "code = 200");
                 if (add) {
 
                     if (newPage)
@@ -441,7 +465,7 @@ public class MainFragment extends Fragment implements Serializable {
                 } else {
                     if (newPage)
                         queryUrl += "0";
-                    Log.d("MainFragment", "query if not add: " + queryUrl);
+                    //Log.d("MainFragment", "query if not add: " + queryUrl);
                 }
                 doc = Jsoup.connect(queryUrl).ignoreContentType(true).get();
             } catch (IOException e) {

@@ -15,7 +15,9 @@
         <ListView
             android:id="@+id/serFrag"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+        </ListView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar
@@ -26,14 +28,6 @@
         android:layout_gravity="center"
         tools:ignore="MissingConstraints" />
 
-    <com.google.android.gms.ads.AdView
-        android:layout_marginBottom="16dp"
-        android:layout_gravity="bottom"
-        android:id="@+id/adView"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id"/>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

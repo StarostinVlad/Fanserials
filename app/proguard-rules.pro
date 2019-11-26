@@ -25,6 +25,9 @@
 #-renamesourcefileattribute SourceFile
 -ignorewarnings
 
--keep class com.example.fan.AllSerialsFragment.java
--keep class com.example.fan.FanserJsonApi
--keep class com.example.fan.SearchJsonApi
+-keep class com.bluelinelabs.logansquare.** { *; }
+-keep @com.bluelinelabs.logansquare.annotation.JsonObject class *
+-keep class **$$JsonObjectMapper { *; }
+-keep public class com.example.fan.FanserJsonApi
+-keepattributes JsonObject
+-keepattributes JsonField

@@ -9,10 +9,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +24,8 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.json.JSONArray;
+import com.bluelinelabs.logansquare.LoganSquare;
+
 import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -38,6 +35,11 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 public class Video extends AppCompatActivity
         implements Fragment_Interface {
@@ -65,15 +67,13 @@ public class Video extends AppCompatActivity
     String description = "";
     String finalySusbtitleRusSource = "", finalySusbtitleEngSource = "";
     String toolbarTit = "";
+    TextView duration;
+    TextView current_time;
+    ImageView top_gradient, bottom_gradient;
     private View decorView;
     private SeekBar seek_video;
     private SharedPreferences mSettings;
     private Button Nextbut, Prevbut;
-
-    TextView duration;
-    TextView current_time;
-
-    ImageView top_gradient, bottom_gradient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,14 +136,14 @@ public class Video extends AppCompatActivity
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             vidParam.weight = 0.0f;
             annoParam.weight = 1.0f;
-            Log.d(or, "land");
+            //Log.d(or, "land");
         }
 
 
         if (savedInstanceState != null) {
             currentPos = savedInstanceState.getInt("current position");
             curUri = savedInstanceState.getString("current uri");
-            Log.d("cururi", "cururi: " + curUri);
+            //Log.d("cururi", "cururi: " + curUri);
             vidUri = savedInstanceState.getStringArrayList("uri's");
             names = savedInstanceState.getStringArrayList("names");
             l = savedInstanceState.getStringArrayList("l's");
@@ -155,7 +155,7 @@ public class Video extends AppCompatActivity
             getHref gf = new getHref();
             gf.execute();
         }
-        Log.d(or, "end create");
+        //Log.d(or, "end create");
         i = 0;
     }
 
@@ -182,15 +182,15 @@ public class Video extends AppCompatActivity
                             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             vidParam.weight = 0.0f;
             annoParam.weight = 1.0f;
-            Log.d(or, "land");
+            //Log.d(or, "land");
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if (annoFrag == null)
-                Log.d(or, "port");
-            vidParam.weight = 0.7f;
-            annoParam.weight = 0.3f;
+//            if (annoFrag == null)
+                //Log.d(or, "port");
+            vidParam.weight = 0.6f;
+            annoParam.weight = 0.4f;
             decorView.setVisibility(View.VISIBLE);
         }
-        Log.d(or, "change config");
+        //Log.d(or, "change config");
     }
 
     @Override
@@ -202,7 +202,7 @@ public class Video extends AppCompatActivity
         savedInstanceState.putStringArrayList("names", names);
 
         super.onSaveInstanceState(savedInstanceState);
-        Log.d("sa", "saved");
+        //Log.d("sa", "saved");
     }
 
     @Override
@@ -213,14 +213,14 @@ public class Video extends AppCompatActivity
             l = savedInstanceState.getStringArrayList("l's");
             names = savedInstanceState.getStringArrayList("names");
 
-            Log.d("sa", "restored");
+            //Log.d("sa", "restored");
         }
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
     protected void onPause() {
-        Log.d("sa", "Ativity pause");
+        //Log.d("sa", "Ativity pause");
         SharedPreferences.Editor ed = mSettings.edit();
         ed.putInt(SaveTime, VideoFragment.currentPos);
         ed.commit();
@@ -232,7 +232,7 @@ public class Video extends AppCompatActivity
 
         VideoFragment.currentPos = mSettings.getInt(SaveTime, 0);
 
-        Log.d("sa", "Ativity resume/curPos= " + mSettings.getInt(SaveTime, 0));
+        //Log.d("sa", "Ativity resume/curPos= " + mSettings.getInt(SaveTime, 0));
         super.onResume();
     }
 
@@ -392,8 +392,9 @@ public class Video extends AppCompatActivity
         annoFrag.fill(rest, l, vidUri, descript);
     }
 
-    class getHref extends AsyncTask<Void, Void, Void> {
+    Map cookie;
 
+    class getHref extends AsyncTask<Void, String, Void> {
 
         @Override
         protected Void doInBackground(Void... parametr) {
@@ -406,27 +407,27 @@ public class Video extends AppCompatActivity
                 String queryUrl = sPref.getString(SAVED_TEXT, "");
                 s2 = queryUrl + s2;
             }
-            Log.d("tmp", "current: " + s2);
+            //Log.d("tmp", "current: " + s2);
             try {
                 if (quick_help.CheckResponceCode(s2)) {
 //                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
                     Connection.Response res = Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).method(Connection.Method.GET).execute();
                     doc = res.parse();
-                    Map cookie = res.cookies();
+                    cookie = res.cookies();
                     Log.d("tmp", res.cookies().toString());
                     //Elements iframe = doc.select("iframe");//doc.select("iframe");
-                    Elements ulli = doc.select("ul.nav.nav-tabs.tabs-voice.mobile-tabs-scroll.show-for-smallImage-only li a");
+//                    Elements ulli = doc.select("ul.nav.nav-tabs.tabs-voice.mobile-tabs-scroll.show-for-smallImage-only li a");
                     description = doc.select(".well div").text();
                     names = new ArrayList<String>();
                     vidUri = new ArrayList<String>();
                     l = new ArrayList<String>();
-                    previusSeria = (doc.select("a.arrow.prev").attr("serialHref"));
-                    nextSeria = (doc.select("a.arrow.next").attr("serialHref"));
+                    previusSeria = (doc.select("a.arrow.prev").attr("href"));
+                    nextSeria = (doc.select("a.arrow.next").attr("href"));
                     Log.d("tmp", "prev=" + previusSeria);
                     Log.d("tmp", "next=" + nextSeria);
                     Seria seria = (Seria) getIntent().getSerializableExtra("Seria");
                     if (seria.getName() == "")
-                        toolbarTit = doc.select("h1.page-serialTitle").text();
+                        toolbarTit = doc.select("h1.page-title").text();
                     /*
                     for (Element ss : ulli) {
                         if (ss.text() != "") {
@@ -440,19 +441,26 @@ public class Video extends AppCompatActivity
                         String str = ss.toString();
                         Log.d("tmp", "json= " + str);
                         str = "{\"uris\":[" + str.substring(0, str.indexOf("]';</script>")).substring(str.indexOf(" = '[") + 5).replace("\\/", "/") + "]}";
-                        JSONObject jsonDATA = new JSONObject(str);
-                        JSONArray jsonUris = jsonDATA.getJSONArray("uris");
-                        for (int i = 0; i < jsonUris.length(); i++) {
-                            JSONObject soundURI = jsonUris.getJSONObject(i);
-                            str = soundURI.getString("player");
+                        SeriaJsonClass seriaJsonClass = LoganSquare.parse(str, SeriaJsonClass.class);
+                        Log.d("json ", "player: " + seriaJsonClass.uris.get(0).title);
+//                        JSONObject jsonDATA = new JSONObject(str);
+//                        JSONArray jsonUris = jsonDATA.getJSONArray("uris");
+                        for (int i = 0; i < seriaJsonClass.uris.size(); i++) {
+//                            JSONObject soundURI = jsonUris.getJSONObject(i);
+//                            str = soundURI.getString("player");
+                            str = seriaJsonClass.uris.get(i).player;
                             Log.d("tmp", "frame=" + str);
                             names.add(str);
-                            l.add(soundURI.getString("episodeName"));
+//                            l.add(soundURI.getString("name"));
+                            l.add(seriaJsonClass.uris.get(i).title);
                         }
                     }
 
                     for (String name : names) {
-                        if (name.contains("fanserials") || name.contains("umovies") || name.contains("seplay") || name.contains("player")) {
+                        if (name.contains("limited")) {
+                            publishProgress("Недоступно в данной стране, воспользуйтесь VPN");
+                            break;
+                        } else if (name.contains("fanserials") || name.contains("umovies") || name.contains("seplay") || name.contains("player")) {
                             try {
                                 Connection.Response sub_res = Jsoup.connect(name).cookies(cookie)
                                         .method(Connection.Method.GET).referrer(s2).execute();
@@ -462,30 +470,8 @@ public class Video extends AppCompatActivity
 //                                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(episodeName));
                                     doc = sub_res.parse();
                                     Log.d("tmp", sub_res.cookies().toString());
-                                    /*
-                                    Elements vsrc = doc.getElementsByAttributeValue("type", "text/javascript");
-                                    String s = vsrc.toString();
-                                    if(s.contains("subtitles")&&s.contains(".vtt")) {
-                                        Log.d("subs", "sub found");
-                                        String subtitleSourceRus = vsrc.toString();
-                                        String subtitleSourceEng = vsrc.toString();
-                                        if (s.contains("Russian")){
-                                            finalySusbtitleRusSource = subtitleSourceRus.substring(subtitleSourceRus.indexOf("ru"), subtitleSourceRus.indexOf(".vtt") + 4);
-                                            finalySusbtitleRusSource = finalySusbtitleRusSource.substring(finalySusbtitleRusSource.lastIndexOf("src:  \"") + 7);
-                                            Log.d("subs", "sub(ru)=" + finalySusbtitleRusSource);
-                                        }
-                                        if(s.contains("English")) {
-                                            finalySusbtitleEngSource = subtitleSourceEng.substring(subtitleSourceEng.indexOf("English"), subtitleSourceEng.length());
-                                            finalySusbtitleEngSource = finalySusbtitleEngSource.substring(0, finalySusbtitleEngSource.indexOf(".vtt") + 4);
-                                            finalySusbtitleEngSource = finalySusbtitleEngSource.substring(finalySusbtitleEngSource.indexOf("src:  \"") + 7);
-                                            Log.d("subs", "sub(en)=" + finalySusbtitleEngSource);
-                                        }
-                                    }
-                                    String tmp = "";
-                                    tmp = s.substring(0, s.indexOf("index.m3u8") + 10);
-                                    tmp = tmp.substring(tmp.lastIndexOf("src:  \"") + 7);
-                                    */
-                                    String tmp = doc.getElementsByAttribute("dataOfSerials-config").attr("dataOfSerials-config");
+
+                                    String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
                                     Log.d("tmp", tmp);
                                     JSONObject jsonDATA = new JSONObject(tmp);
 
@@ -499,7 +485,7 @@ public class Video extends AppCompatActivity
                                 vidUri.add("some.mp4");
                             }
                         } else {
-                            Log.d("tmp", "alt palyer");
+                            Log.d("tmp", "alt player");
                             vidUri.add("some.mp4");
                         }
                     }
@@ -519,8 +505,21 @@ public class Video extends AppCompatActivity
         }
 
         @Override
-        protected void onProgressUpdate(Void... values) {
+        protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
+            AlertDialog.Builder builder = new AlertDialog.Builder(Video.this);
+            builder.setTitle("Важное сообщение!")
+                    .setMessage(values[0])
+                    .setCancelable(false)
+                    .setNegativeButton("ОК",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    finish();
+                                    dialog.cancel();
+                                }
+                            });
+            AlertDialog alert = builder.create();
+            alert.show();
         }
 
         @Override
@@ -545,9 +544,79 @@ public class Video extends AppCompatActivity
             }
             if (!toolbarTit.equals("")) toolbar.setTitle(toolbarTit);
             setSupportActionBar(toolbar);
-            fillFrag(false, l, vidUri, description);
+            if(vidUri.size()>=1)
+                fillFrag(false, l, vidUri, description);
+            else
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(Video.this);
+                builder.setTitle("Важное сообщение!")
+                        .setMessage("Что-то пошло не так!")
+                        .setCancelable(false)
+                        .setNegativeButton("ОК",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        finish();
+                                        dialog.cancel();
+                                    }
+                                });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
         }
 
 
+    }
+    class getVideoUri extends AsyncTask<String,Void,Void>{
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            if(strings.length==0)
+                return  null;
+            if(strings[0].equals(""))
+                return null;
+            if (strings[0].contains("limited")) {
+                publishProgress("Недоступно в данной стране, воспользуйтесь VPN");
+                return null;
+            } else if (strings[0].contains("seplay")) {
+                try {
+                    Connection.Response sub_res = Jsoup.connect(strings[0]).cookies(cookie)
+                            .method(Connection.Method.GET).referrer(s2).execute();
+//                                if (quick_help.CheckResponceCode(episodeName)) {
+                    if (sub_res.statusCode() == 200) {
+                        Log.d("con", "serialHref= " + strings[0]);
+//                                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(episodeName));
+                        Document doc = sub_res.parse();
+                        Log.d("tmp", sub_res.cookies().toString());
+
+                        String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
+                        Log.d("tmp", tmp);
+                        JSONObject jsonDATA = new JSONObject(tmp);
+
+                        Log.d("tmp", "js= " + jsonDATA.get("hls"));
+
+                        vidUri.add(jsonDATA.get("hls").toString());
+                    }
+                } catch (Exception e) {
+                    Log.d("tmp", "just not work  " + e);
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        private void publishProgress(String s) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(Video.this);
+            builder.setTitle("Важное сообщение!")
+                    .setMessage(s)
+                    .setCancelable(false)
+                    .setNegativeButton("ОК",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 }

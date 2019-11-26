@@ -11,4 +11,69 @@
     <string name="title_activity_all_serials_activity">Все сериалы</string>
     <string name="title_activity_new_video">NewVideoActivity</string>
     <string name="banner_ad_unit_id">ca-app-pub-9409630953625719/5828013730</string>
+    <string name="ad_screen">ca-app-pub-9409630953625719/4579963943</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="copyright">
+        <![CDATA[
+        <html>
+        <style>
+        p{
+            text-align:justify;
+            text-indent: 25px;
+        }
+        </style>
+        <body>
+        <p>Данное приложение действует в соответствии с законодательством Российской Федерации о
+            защите информации и авторских прав.
+        </p>
+        <p>Весь размещенный в приложении контент представляет собой материал, находящийся в
+            свободном доступе для просмотра в сети Интернет.
+        </p>
+        <p>Администрация приложения также не осуществляет деятельность, связанную с публикацией
+            нелицензионного контента, незаконно украденного и находящегося под защитой
+            правообладателей.
+        </p>
+        <p>Автоматизированная система публикует только находящийся в свободном доступе материал из
+            открытых источников.
+        </p>
+        <p>Администрация приложения всегда открыта для сотрудничества с правообладателями. Если Ваши
+            исключительные права на объекты авторской собственности нарушаются каким-либо образом с
+            использованием данного приложения (размещение информации, защищенной авторским правом),
+            администрация готова оказать Вам содействие и удалить с сайта соответствующие материалы.
+        </p>
+        <p>При возникновении спорных ситуаций мы просим Вас прислать нам письмо в электронном виде,
+            где необходимо указать следующее:
+        </p>
+        <ol>
+            <li>Документальное подтверждение Ваших прав на материал, защищённый авторским правом:
+            отсканированный документ с печатью, либо email с официального почтового домена компании
+            правообладателя, либо иная информация, позволяющая однозначно идентифицировать Вас как
+            правообладателя данного материала.</li>
+            <li>Название фильмов, опубликованные с нарушением авторских прав. При получении письма,
+            содержащего данное подтверждение, в течение 48 часов мы удалим из приложения защищенный
+            авторским правом контент.</li>
+        </ol>
+        <p>По вопросам просим Вас обращаться на почту:
+            <a href="#">fanserials@gmail.com</a>
+        </p>
+        </body></html>
+        ]]>
+    </string>
+    <string name="msg_subscribe_failed">error</string>
+    <string name="msg_subscribed">complete</string>
 </resources>

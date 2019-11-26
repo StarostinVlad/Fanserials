@@ -30,18 +30,18 @@ public class quick_help {
             {
                 BufferedReader in=new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
                 String line;
-                Log.d("check","start reading");
+                ////Log.d("check","start reading");
                 while((line=in.readLine())!=null){
                     content=content +line;
                     //Log.d("check","read... "+line);
                 }
-            }else Log.d("check","not 200 when read");
+            }//else Log.d("check","not 200 when read");
 
     }catch (Exception e){
-            Log.d("check","exep!!");
+            //Log.d("check","exep!!");
             e.printStackTrace();
         }
-        Log.d("check","result: "+content);
+        //Log.d("check","result: "+content);
         return content;
     }
     public static boolean CheckResponceCode(String url) {
@@ -62,11 +62,18 @@ public class quick_help {
     }
     public static String decode(String decodeString) throws UnsupportedEncodingException {
         String Encode="";
-        Log.d("tnp_cartoon", "dec: "+decodeString);
+        //Log.d("tnp_cartoon", "dec: "+decodeString);
         decodeString=StringEscapeUtils.unescapeJava(decodeString);
-        Log.d("tnp_cartoon", "enc: "+decodeString);
+        //Log.d("tnp_cartoon", "enc: "+decodeString);
         return decodeString;
     }
+
+    private boolean stop;
+
+    boolean getStop(){
+        return stop;
+    }
+
     public static ArrayList<LiteralOfSerials> sendReq(String url, int value) {
         String content = "";
         ArrayList<LiteralOfSerials> list = null;
@@ -99,10 +106,10 @@ public class quick_help {
             String str = new String(buf);
             String endList="\",\"countries";
             str=str.substring(1,str.indexOf(endList)+endList.length());
-            Log.d("tnp_cartoon", "result html : "+str);
+            //Log.d("tnp_cartoon", "result html : "+str);
 
             String[] Htmltext=str.split("<div class=\\\\\"literal\\\\\" id=\\\\\"as-.{0,2}\\\\\" data-id=\\\\\"[0-9]{1,5}\\\\\"");
-            Log.d("tnp_cartoon", "alfabet length : "+Htmltext.length);
+            //Log.d("tnp_cartoon", "alfabet length : "+Htmltext.length);
             list = new ArrayList<LiteralOfSerials>();
             ArrayList<Serial> ch_list = new ArrayList<Serial>();
             LiteralOfSerials gru = null;
@@ -117,7 +124,7 @@ public class quick_help {
                     }*/
                     gru = new LiteralOfSerials("",ch_list);
                     decodedString = decodedString.substring(decodedString.indexOf("<div class=\\\"literal__header\\\">") + 31);
-                    Log.d("tnp_cartoon", "literalOfSerial header:" + decodedString);
+                    //Log.d("tnp_cartoon", "literalOfSerial header:" + decodedString);
                     String GroupName = decodedString.substring(0, decodedString.indexOf("<\\/div>"));
                     GroupName = decode(GroupName);
                     if (GroupName.equals("#")) GroupName = "0-9";
@@ -133,13 +140,13 @@ public class quick_help {
                         String name = Serial;
                         Serial = Serial.substring(Serial.indexOf("=\\\"") + "=\\\"".length());
                         Serial = Serial.substring(1, Serial.indexOf("\\/\\\">"));
-                        Log.d("tnp_cartoon", "newSerial header:" + Serial);
-                        Log.d("tnp_cartoon", "episodeName header:" + name);
+                        //Log.d("tnp_cartoon", "newSerial header:" + Serial);
+                        //Log.d("tnp_cartoon", "episodeName header:" + name);
                         name = name.substring(name.indexOf("\">") + 2);
                         name = name.substring(0, name.indexOf("<\\/a>"));
                         name = decode(name);
-                        Log.d("tnp_cartoon", "episodeName: " + name);
-                        Log.d("tnp_cartoon", "episodeUrl: " + Serial);
+                        //Log.d("tnp_cartoon", "episodeName: " + name);
+                        //Log.d("tnp_cartoon", "episodeUrl: " + Serial);
                         if (!name.equals("Показать все")) {
                             com.example.fan.Serial ch = new Serial();
                             ch.setName(name);

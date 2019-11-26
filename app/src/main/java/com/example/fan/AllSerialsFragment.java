@@ -1,6 +1,5 @@
 package com.example.fan;
 
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -30,11 +29,9 @@ import java.util.ArrayList;
 
 public class AllSerialsFragment extends Fragment implements Serializable {
 
-    final String SAVED_TEXT = "saved_text";
     ExpandableListView elvMain;
     ArrayList<LiteralOfSerials> list;
     int SerialType = 0;
-    SharedPreferences sPref;
 
 //    public void onSaveInstanceState(Bundle savedInstanceState) {
 //        savedInstanceState.putSerializable("SerialsList", list);
@@ -42,6 +39,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
 //        super.onSaveInstanceState(savedInstanceState);
 //        Log.d("AllSerialsFragment", "saved: "+!savedInstanceState.isEmpty());
 //    }
+
     private ProgressBar pr;
 
     @Override
@@ -103,8 +101,8 @@ public class AllSerialsFragment extends Fragment implements Serializable {
         elvMain.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Log.d("AllSerialsFragment", list.get(groupPosition).getItems().get(childPosition).getName());
-                Log.d("AllSerialsFragment", list.get(groupPosition).getItems().get(childPosition).getUri());
+                //Log.d("AllSerialsFragment", list.get(groupPosition).getItems().get(childPosition).getName());
+                //Log.d("AllSerialsFragment", list.get(groupPosition).getItems().get(childPosition).getUri());
 
                 Bundle args = new Bundle();
                 args.putString("Href", list.get(groupPosition).getItems().get(childPosition).getUri());
@@ -113,10 +111,8 @@ public class AllSerialsFragment extends Fragment implements Serializable {
                 bFragment.setArguments(args);
                 getFragmentManager().beginTransaction().replace(R.id.main_act_id, bFragment)
                         .addToBackStack(null).commit();
+                MainActivity.lastItem.add(R.id.new_series);
 
-//                startActivity(new Intent(getContext(),MainActivity.class)
-//                        .putExtra("Uri",list.get(groupPosition).getItems().get(childPosition).getUri())
-//                        .putExtra("Name",list.get(groupPosition).getItems().get(childPosition).getName()));
                 return false;
             }
         });
@@ -125,7 +121,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
     void saveFile(String string) throws IOException {
         File path = getContext().getExternalFilesDir(null);
         File file = new File(path, "my-file-episodeName.txt");
-        Log.d("AllSerialsFragment", "path=" + path.getAbsolutePath());
+        //Log.d("AllSerialsFragment", "path=" + path.getAbsolutePath());
         FileOutputStream stream = new FileOutputStream(file);
         try {
             String h = (string);
@@ -142,57 +138,21 @@ public class AllSerialsFragment extends Fragment implements Serializable {
             Document doc;
             list = new ArrayList<>();
 
-            sPref = getActivity().getSharedPreferences("URL", 0);
-            String queryUrl = sPref.getString(SAVED_TEXT, "") + "/alphabet/" + SerialType;
-            queryUrl = "https://mrstarostinvlad.000webhostapp.com/fanka"+SerialType+".json";
-            Log.d("AllSerialsFragment", "queryUrl " + queryUrl);
+            String queryUrl = "https://mrstarostinvlad.000webhostapp.com/fanka"+SerialType+".json";
+            //Log.d("AllSerialsFragment", "queryUrl " + queryUrl);
 
             String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
             try {
                 doc = Jsoup.connect(queryUrl).ignoreContentType(true).get();
 
-//                String decodeDoc = StringEscapeUtils.unescapeHtml(doc.html()).replace("<\\","<")
-//                        .replace("\\/","/")
-//                        .replace("\\\"","");
-//                String decodeDoc = StringEscapeUtils.unescapeJavaScript((doc.body().html()));
-//                decodeDoc = decodeDoc.substring(0,decodeDoc.indexOf("\",\"countries"));
-//                String find = "alphabet\":\"";
-//                decodeDoc = decodeDoc.substring(decodeDoc.indexOf(find)+find.length());
-
-
-//                Log.d("AllSerialsFragment", "html: " + decodeDoc);
-
-//                doc = Jsoup.parse(decodeDoc);
-//                doc = Jsoup.parse(StringEscapeUtils.unescapeHtml((doc.html())));
-
                 FanserialsAlphabetApi fanserialsAlphabetApi =
                         LoganSquare.parse(doc.body().html(), FanserialsAlphabetApi.class);
 
-//                doc = Jsoup.parse(fanserialsAlphabetApi.alphabet);
-//
-//                Elements literals = doc.select("div.literalOfSerial");
-//                for (Element literalOfSerial : literals) {
-//                    String liter = StringEscapeUtils.unescapeJava(literalOfSerial.select("div.literal__header").text());
-//                    Log.d("AllSerialsFragment", "literalOfSerial: " + literalOfSerial.html());
-//                    ArrayList<Serial> Serials = new ArrayList<>();
-//                    for (Element li : literalOfSerial.select("ul li")) {
-//                        String text = StringEscapeUtils.unescapeJava(li.text());
-//                        Log.d("AllSerialsFragment", "li text: " + text);
-//                        //Log.d("AllSerialsFragment","li src: "+li.select("img").attr("src"));
-//                        Serial Serial = new Serial();
-//                        Serial.setName(text);
-//                        Serial.setUri(li.select("a").attr("serialHref"));
-//                        Serial.setImage(li.select("img").attr("src"));
-//                        Serials.add(Serial);
-//                    }
-//                    LiteralOfSerials group = new LiteralOfSerials(liter, Serials);
-//                    list.add(group);
-//                }
                 if(fanserialsAlphabetApi.dataOfSerials !=null)
                 for(FanserialsAlphabetApi.DataOfSerial dataOfSerial : fanserialsAlphabetApi.dataOfSerials){
                     ArrayList<Serial> Serials = new ArrayList<>();
                     for (FanserialsAlphabetApi.DataOfSerial.Serial serial : dataOfSerial.serialsList){
-                        Log.d("AllSerialsFragment", "ser: "+serial.serialTitle +" : "+serial.serialHref);
+                        //Log.d("AllSerialsFragment", "ser: "+serial.serialTitle +" : "+serial.serialHref);
                         Serial Serial = new Serial();
                         Serial.setName(serial.serialTitle);
                         Serial.setUri(serial.serialHref);
@@ -204,9 +164,6 @@ public class AllSerialsFragment extends Fragment implements Serializable {
             } catch (Exception e) {
                 Log.e("AllSerialsFragment", "error: " + e);
             }
-//            if(quick_help.CheckResponceCode(queryUrl)){
-//                list=quick_help.sendReq(queryUrl+"/alphabet/",SerialType);
-//            }
             return null;
         }
 

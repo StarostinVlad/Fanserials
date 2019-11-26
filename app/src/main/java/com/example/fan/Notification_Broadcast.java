@@ -3,6 +3,7 @@ package com.example.fan;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 
 /**
  * Created by Star on 27.01.2018.
@@ -11,7 +12,10 @@ import android.content.Intent;
 public class Notification_Broadcast extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent NotifyService=new Intent(context,Notification_Service.class);
-        context.startService(NotifyService);
+        if(Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            Intent NotifyService = new Intent(context, Notification_Service.class);
+            context.startService(NotifyService);
+            Toast.makeText(context,"started!",Toast.LENGTH_LONG).show();
+        }
     }
 }

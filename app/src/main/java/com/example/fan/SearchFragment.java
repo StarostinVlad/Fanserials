@@ -2,6 +2,7 @@ package com.example.fan;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -81,7 +82,7 @@ public class SearchFragment extends Fragment {
                 bFragment.setArguments(args);
                 getFragmentManager().beginTransaction().replace(R.id.main_act_id, bFragment)
                         .addToBackStack(null).commit();
-                Log.d("MainFragment", "size= " + Series.size() + "/" + (lv.getCount() - 1) + " pos= " + position + " " + Series.get(position).getName() + " " + Series.get(position).getDescription());
+                //Log.d("MainFragment", "size= " + Series.size() + "/" + (lv.getCount() - 1) + " pos= " + position + " " + Series.get(position).getName() + " " + Series.get(position).getDescription());
 
             }
         });
@@ -124,7 +125,7 @@ public class SearchFragment extends Fragment {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Log.d("SearchFrag", "parse end");
+                //Log.d("SearchFrag", "parse end");
             }
             return null;
         }
@@ -132,14 +133,17 @@ public class SearchFragment extends Fragment {
 
         ArrayList<Seria> searchSerials(String query) {
             ArrayList<Seria> Serials = new ArrayList<>();
+            String SAVED_TEXT = "saved_text";
+            SharedPreferences sPref = getActivity().getSharedPreferences("URL", 0);
+            String queryUrl = sPref.getString(SAVED_TEXT, "");
             try {
-                Document doc = Jsoup.connect("http://fanserials.gives/api/v1/serials").ignoreContentType(true).data("query", query).get();
-                Log.d("SearchFrag", doc.body().html());
+                Document doc = Jsoup.connect(queryUrl+"/api/v1/serials").ignoreContentType(true).data("query", query).get();
+                //Log.d("SearchFrag", doc.body().html());
 
                 SearchJsonApi fanserJsonApi = null;
                 fanserJsonApi = LoganSquare.parse(doc.body().html(), SearchJsonApi.class);
                 for (SearchJsonApi.FoundSerials item : fanserJsonApi.foundSerialData) {
-                    Log.d("Name ", item.foundSerialName + " : " + item.foundSerialUrl + " : " + item.serialDescription + " : " + item.foundSerialPoster.smallImage);
+                    //Log.d("Name ", item.foundSerialName + " : " + item.foundSerialUrl + " : " + item.serialDescription + " : " + item.foundSerialPoster.smallImage);
                     Seria seria = new Seria(item.foundSerialName, item.foundSerialUrl, item.foundSerialPoster.smallImage, item.serialDescription);
                     Serials.add(seria);
                 }
