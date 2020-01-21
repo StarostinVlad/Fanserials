@@ -224,77 +224,8 @@ public class Notification_Service extends Service {
 
         @Override
         protected Object doInBackground(Object[] objects) {
-            String queryUrl = sPref.getString(SAVED_TEXT, "");
-            series = new ArrayList<>();
 
-            queryUrl += "/api/v1/episodes?limit=5&offset=0";
-//            queryUrl = "https://mrstarostinvlad.000webhostapp.com/emul.json";
-            //Log.d("service", "episodeUrl: " + queryUrl);
-
-            while (!stop) {
-                //Log.d("service", "force stop: " + stop);
-                try {
-                    if (internet()) {
-                        Document doc;
-                        String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
-                        String s, img = "";
-                        if (quick_help.CheckResponceCode(queryUrl)) {
-//                            doc = Jsoup.parse(quick_help.GiveDocFromUrl(queryUrl+"/new/"));
-                            doc = Jsoup.connect(queryUrl).ignoreContentType(true).get();
-
-                            new_series = new ArrayList<>();
-                            new_series.addAll(getNewSeriesJson(doc));
-
-                            if (series.size() == 0) {
-                                series.addAll(new_series);
-                                //Log.d("service", "last episodeName null");
-                            } else {
-                                //Log.d("service", "last episodeName not null");
-
-                                ArrayList<Integer> series_names = new ArrayList<>();
-                                for (FanserJsonApi.DataOfNewSer seria : series) {
-                                    series_names.add(seria.serialEpisode.episodeId);
-                                    //Log.d("service", "ser: " + seria.serialEpisode.episodeId);
-                                }
-
-                                for (FanserJsonApi.DataOfNewSer new_seria : new_series) {
-//                                        Log.d("service", "есть новая серия" + new_seria.getName());
-                                    if (!series_names.contains(new_seria.serialEpisode.episodeId)) {
-                                        //Log.d("service", "есть новая серия "
-                                              //  + new_seria.serialEpisode.episodeId);
-                                        i++;
-                                        NotifySend(i
-                                                , new_seria.newSerial.serialName
-                                                , new_seria.serialEpisode.episodeName
-                                                , new_seria.serialEpisode.episodeImages.smallImage
-                                        );
-                                    }
-                                }
-                                series.addAll(new_series);
-                                new_series.clear();
-                            }
-                        } else {
-                            doc = Jsoup.parse(quick_help.GiveDocFromUrl("https://mrstarostinvlad.000webhostapp.com/actual_adres.php"));
-                            queryUrl = doc.select("h1").text();
-
-                            sPref = getSharedPreferences("URL", MODE_PRIVATE);
-                            SharedPreferences.Editor ed = sPref.edit();
-                            ed.putString(SAVED_TEXT, "http://" + queryUrl);
-                            ed.commit();
-                        }
-                        try {
-                            Thread.sleep(60000);
-                            //Log.d("notification", "alive but wait");
-//                                NotifySend(i, "Пока ничего", "но я работаю");
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } //else Log.d("service", "no internet");
-                } catch (Exception e) {
-
-                }
-            }
-            return null;
+         return null;
         }
     }
 }

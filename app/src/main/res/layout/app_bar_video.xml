@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.fan.Video"
+    tools:context="com.example.fan.ExoPlayerActivity"
     android:fitsSystemWindows="true">
 
-    <include layout="@layout/content_video" />
+    <include layout="@layout/activity_exo_player" />
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar_exo"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:popupTheme="@style/AppTheme.PopupOverlay"

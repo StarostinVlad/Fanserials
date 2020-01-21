@@ -44,21 +44,19 @@ public class quick_help {
         //Log.d("check","result: "+content);
         return content;
     }
-    public static boolean CheckResponceCode(String url) {
-        try {
+    public static boolean CheckResponceCode(String url) throws IOException {
+
+            boolean connected = true;
             //Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("188.40.141.216", 3128));
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setConnectTimeout(5000);
             connection.connect();
             if (connection.getResponseCode()!=200) {
-                connection.disconnect();
-                return false;
+                connected = false;
             }
             connection.disconnect();
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-        return true;
+            return connected;
+
     }
     public static String decode(String decodeString) throws UnsupportedEncodingException {
         String Encode="";

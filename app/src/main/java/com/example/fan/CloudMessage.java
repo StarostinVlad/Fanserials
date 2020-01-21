@@ -3,16 +3,17 @@ package com.example.fan;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -29,14 +30,28 @@ public class CloudMessage extends FirebaseMessagingService {
     }
 
     void NotifySend(RemoteMessage remoteMessage) {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
+
+        Seria seria = new Seria(Objects.requireNonNull(remoteMessage.getData().get("title")), Objects.requireNonNull(remoteMessage.getData().get("url")),
+                "", Objects.requireNonNull(remoteMessage.getData().get("subtitle")));
+
+
+        Intent notificationIntent = new Intent(getApplicationContext(), Video.class);
+        notificationIntent.putExtra("Seria", seria);
+
         RemoteMessage.Notification notification = remoteMessage.getNotification();
-        PendingIntent contentIntent = PendingIntent.getActivity(this,
+        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(),
                 0, notificationIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(notificationIntent);
+
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
         String imageUri = "";
-        if(remoteMessage.getData().containsKey("largeIcon")) {
+        if (remoteMessage.getData().containsKey("largeIcon")) {
             //Log.d("message", "icon: " + remoteMessage.getData().get("largeIcon"));
             imageUri = remoteMessage.getData().get("largeIcon");
         }
@@ -47,7 +62,7 @@ public class CloudMessage extends FirebaseMessagingService {
 
 //            notification = new NotificationCompat.Builder(getApplicationContext(),App.channelId)
                 Notification customNotification = new Notification.Builder(this, channelId)
-                        .setContentIntent(contentIntent)
+                        .setContentIntent(resultPendingIntent)
                         // обязательные настройки
                         .setSmallIcon(R.drawable.play)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
@@ -77,7 +92,7 @@ public class CloudMessage extends FirebaseMessagingService {
         else {
             try {
                 Notification customNotification = new Notification.Builder(this)
-                        .setContentIntent(contentIntent)
+                        .setContentIntent(resultPendingIntent)
                         // обязательные настройки
                         .setSmallIcon(R.drawable.play)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
@@ -102,7 +117,7 @@ public class CloudMessage extends FirebaseMessagingService {
                 // Альтернативный вариант
                 // NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
                 if (notificationManager != null) {
-                    notificationManager.notify(0,customNotification);
+                    notificationManager.notify(0, customNotification);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

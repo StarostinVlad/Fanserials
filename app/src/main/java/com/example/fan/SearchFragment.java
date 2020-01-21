@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +21,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,10 +62,10 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
 
-        lv = (ListView) v.findViewById(R.id.serFrag);
+        lv = v.findViewById(R.id.serFrag);
         lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lv.setVisibility(View.VISIBLE);
-        pr = (ProgressBar) v.findViewById(R.id.progressBarFrag);
+        pr = v.findViewById(R.id.progressBarFrag);
         pr.setVisibility(View.INVISIBLE);
 
 
@@ -131,14 +131,16 @@ public class SearchFragment extends Fragment {
         }
 
 
-        ArrayList<Seria> searchSerials(String query) {
+        ArrayList<Seria> searchSerials(String query) throws UnsupportedEncodingException {
             ArrayList<Seria> Serials = new ArrayList<>();
             String SAVED_TEXT = "saved_text";
             SharedPreferences sPref = getActivity().getSharedPreferences("URL", 0);
             String queryUrl = sPref.getString(SAVED_TEXT, "");
+//            query = URLEncoder.encode(query,"UTF-8");
+//            Log.d("SearchFrag", query);
             try {
-                Document doc = Jsoup.connect(queryUrl+"/api/v1/serials").ignoreContentType(true).data("query", query).get();
-                //Log.d("SearchFrag", doc.body().html());
+                Document doc = Jsoup.connect(queryUrl + "/api/v1/serials").ignoreContentType(true).data("query", query).get();
+//                Log.d("SearchFrag", doc.body().html());
 
                 SearchJsonApi fanserJsonApi = null;
                 fanserJsonApi = LoganSquare.parse(doc.body().html(), SearchJsonApi.class);

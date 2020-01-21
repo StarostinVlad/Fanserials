@@ -12,10 +12,10 @@ import android.widget.Toast;
 public class Notification_Broadcast extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            Intent NotifyService = new Intent(context, Notification_Service.class);
-            context.startService(NotifyService);
-            Toast.makeText(context,"started!",Toast.LENGTH_LONG).show();
-        }
+//        if(Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+//            Intent NotifyService = new Intent(context, Notification_Service.class);
+//            context.startService(NotifyService);
+//            Toast.makeText(context,"started!",Toast.LENGTH_LONG).show();
+//        }
     }
 }

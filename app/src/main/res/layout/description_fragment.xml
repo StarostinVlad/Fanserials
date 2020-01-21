@@ -13,7 +13,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@color/Gray"
+            android:spinnerMode="dialog" />
+        <Button
+            android:id="@+id/subscribe_button"
+            android:layout_width="match_parent"
+            android:layout_height="100px"
+            android:text="Подписаться"
             />
 
         <TextView

@@ -1,7 +1,7 @@
 package com.example.fan;
 
 
-
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -42,23 +42,29 @@ public class VideoFragment extends Fragment {
     static boolean alive = true;
     static View v;
     static InputStream iss;
-    static boolean end = false;
+    static boolean prepered = false;
     public Button btn, Next, Prev, btnWindow;
     public ProgressBar pr;
     public ImageView top_gradient;
     public ImageView bottom_gradient;
     int duration = 0;
+    VideoProgress videoProgress = new VideoProgress();
 
 
-    public static void seturi(String uri, final int currentPos) {
+    public static void seturi(String uri, int currentPos) {
         video.setVideoURI(Uri.parse(uri));
         video.seekTo(currentPos);
-        //getTempFile(v.getContext(),uri);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         setRetainInstance(true);
+        if (savedInstanceState != null) {
+            seturi(
+                    savedInstanceState.getString("current uri"),
+                    savedInstanceState.getInt("current position")
+            );
+        }
         Log.d("sa", "onCreate fragment");
         super.onCreate(savedInstanceState);
     }
@@ -67,21 +73,21 @@ public class VideoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("sa", "onCreateView fragment");
         v = inflater.inflate(R.layout.video_fragment, container, false);
-        video = (VideoView) v.findViewById(R.id.videoV);
-        pr = (ProgressBar) v.findViewById(R.id.progressBar2);
+        video = v.findViewById(R.id.videoV);
+        pr = v.findViewById(R.id.progressBar2);
 
-        video_seek = (SeekBar) v.findViewById(R.id.seekBar);
+        video_seek = v.findViewById(R.id.seekBar);
 
-        top_gradient = (ImageView) v.findViewById(R.id.top_gradient);
-        bottom_gradient = (ImageView) v.findViewById(R.id.bottom_gradient);
+        top_gradient = v.findViewById(R.id.top_gradient);
+        bottom_gradient = v.findViewById(R.id.bottom_gradient);
 
 
-        btn = (Button) v.findViewById(R.id.buttonPlay);
-        Next = (Button) v.findViewById(R.id.button3);
-        Prev = (Button) v.findViewById(R.id.button2);
+        btn = v.findViewById(R.id.buttonPlay);
+        Next = v.findViewById(R.id.button3);
+        Prev = v.findViewById(R.id.button2);
 
-        durationTextView = (TextView) v.findViewById(R.id.duration);
-        current_time = (TextView) v.findViewById(R.id.current_time);
+        durationTextView = v.findViewById(R.id.duration);
+        current_time = v.findViewById(R.id.current_time);
 
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 //            video.setOnInfoListener(new MediaPlayer.OnInfoListener() {
@@ -131,6 +137,7 @@ public class VideoFragment extends Fragment {
         video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
+                prepered = false;
                 if (TimeUnit.MILLISECONDS.toHours(video.getDuration()) > 0)
                     current_time.setText("0:00:00");
                 else
@@ -139,6 +146,7 @@ public class VideoFragment extends Fragment {
                 duration = mediaPlayer.getDuration();
                 video_seek.setMax(duration);
                 durationTextView.setText(getFormat(duration));
+                prepered = true;
 
             }
         });
@@ -163,42 +171,21 @@ public class VideoFragment extends Fragment {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Thread Seeker = new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        long last = 0;
-//                        int max = video.getDuration();
-//                        video_seek.setMax(max);
-//                        while (alive) {
-//                            try {
-//                                Thread.sleep(100);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-//                            currentPos = video.getCurrentPosition();
-//
-//                            if (currentPos - last > 1000) {
-//                                last = currentPos;
-//                                current_time.setText(getFormat(currentPos));
-//                            }
-//                            video_seek.setProgress(video.getCurrentPosition());
-//                            if (video.getDuration() > 0) {
-//                                max = video.getDuration();
-//                            } else max = 10000;
-//                            video_seek.setMax(max);
-//                            Log.d("window", "cur: " + video.getCurrentPosition() + " / " + video.getDuration());
-//                        }
-//                    }
-//                });
-//                if (!Seeker.isAlive()) {
-//                    Seeker.start();
-//                }
-//                video_seek.setMax(video.getDuration());
-//
-//                durationTextView.setText(getFormat(video.getDuration()));
-                new VideoProgress().execute();
+//                if(videoProgress.getStatus())
+//                Log.d("videoFrame", "staus: " + videoProgress.getStatus());
+//                if (!videoProgress.getStatus().toString().equals("RUNNING"))
+//                    videoProgress.execute();
+//                Log.d("videoFrame", "staus: " + videoProgress.getStatus());
+
+
 
                 if (!starting) {
+                    Log.d("videoFrame", "staus: " + videoProgress.getStatus());
+                    if (prepered) {
+                        if (!videoProgress.getStatus().equals(AsyncTask.Status.RUNNING))
+                            videoProgress.execute();
+                        Log.d("videoFrame", "staus: " + videoProgress.getStatus());
+                    }
                     Play();
                     starting = true;
                 } else if (video.isPlaying()) {
@@ -253,7 +240,7 @@ public class VideoFragment extends Fragment {
     }
 
     void hide() {
-        ActionBar actionBar = ((Video)getActivity()).getSupportActionBar();
+        ActionBar actionBar = ((Video) getActivity()).getSupportActionBar();
         actionBar.hide();
 
         durationTextView.setVisibility(View.GONE);
@@ -261,18 +248,14 @@ public class VideoFragment extends Fragment {
 
         top_gradient.setVisibility(View.GONE);
         bottom_gradient.setVisibility(View.GONE);
-//        play_pause.setVisibility(View.GONE);
         btn.setVisibility(View.GONE);
-//        seek_video.setVisibility(View.GONE);
         video_seek.setVisibility(View.GONE);
-//        Prevbut.setVisibility(View.GONE);
         Prev.setVisibility(View.GONE);
-//        Nextbut.setVisibility(View.GONE);
         Next.setVisibility(View.GONE);
     }
 
     void show() {
-        ActionBar actionBar = ((Video)getActivity()).getSupportActionBar();
+        ActionBar actionBar = ((Video) getActivity()).getSupportActionBar();
         actionBar.show();
 
         durationTextView.setVisibility(View.VISIBLE);
@@ -281,14 +264,13 @@ public class VideoFragment extends Fragment {
         top_gradient.setVisibility(View.VISIBLE);
         bottom_gradient.setVisibility(View.VISIBLE);
 
-//        play_pause.setVisibility(View.VISIBLE);
         btn.setVisibility(View.VISIBLE);
-//        seek_video.setVisibility(View.VISIBLE);
         video_seek.setVisibility(View.VISIBLE);
         if (nextSeria != "") Next.setVisibility(View.VISIBLE);
         if (previusSeria != "") Prev.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("DefaultLocale")
     String getFormat(long time) {
         String hms = "";
         if (TimeUnit.MILLISECONDS.toHours(video.getDuration()) > 0)
@@ -319,6 +301,9 @@ public class VideoFragment extends Fragment {
 
     @Override
     public void onResume() {
+        alive = true;
+//        if (!videoProgress.getStatus().toString().equals("RUNNING"))
+//            videoProgress.execute();
         btn.setEnabled(false);
         video.seekTo(currentPos);
         btn.setEnabled(true);
@@ -344,6 +329,8 @@ public class VideoFragment extends Fragment {
     void Play() {
         btn.setBackground(getResources().getDrawable(R.drawable.ic_action_pause));
         video.start();
+
+
     }
 
     class VideoProgress extends AsyncTask<Void, Integer, Void> {
@@ -357,7 +344,7 @@ public class VideoFragment extends Fragment {
                     publishProgress(currentPos);
                     lastPos = System.currentTimeMillis();
                 }
-            } while (currentPos <= duration && alive);
+            } while (currentPos <= duration && alive || !prepered);
             return null;
         }
 
@@ -365,9 +352,11 @@ public class VideoFragment extends Fragment {
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
             Log.d("progress", values[0] + " %");
-            video_seek.setProgress(values[0]);
-            currentPos = video.getCurrentPosition();
-            current_time.setText(getFormat(video.getCurrentPosition()));
+            if (video_seek != null) {
+                video_seek.setProgress(values[0]);
+                currentPos = video.getCurrentPosition();
+                current_time.setText(getFormat(video.getCurrentPosition()));
+            }
         }
     }
 }

@@ -28,6 +28,7 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -43,7 +44,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -76,7 +76,7 @@ public class MainFragment extends Fragment implements Serializable {
     private InterstitialAd mInterstitialAd;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setRetainInstance(true);
         if (savedInstanceState != null) {
@@ -109,20 +109,21 @@ public class MainFragment extends Fragment implements Serializable {
 
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-        toolbar = (Toolbar) Objects.requireNonNull(getActivity()).findViewById(R.id.toolbar);
-        toolbar.setTitle("Новинки");
+        toolbar = Objects.requireNonNull(getActivity()).findViewById(R.id.toolbar);
+        String title = !Objects.equals(SeriaName, "") ? SeriaName : "Новинки";
+        toolbar.setTitle(title);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         //Activity v = getActivity();
-        lv = (ListView) v.findViewById(R.id.serFrag);
+        lv = v.findViewById(R.id.serFrag);
         lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        pr = (ProgressBar) v.findViewById(R.id.progressBarFrag);
+        pr = v.findViewById(R.id.progressBarFrag);
         //pr3 = (ProgressBar) v.getRootView().findViewById(R.episodeId.progressBar3);
         pr.setVisibility(View.INVISIBLE);
         //pr3.setVisibility(View.INVISIBLE);
-        swiperef = (SwipeRefreshLayout) v.findViewById(R.id.swipeRefreshLayoutFrag);
+        swiperef = v.findViewById(R.id.swipeRefreshLayoutFrag);
 
-        toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar = getActivity().findViewById(R.id.toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -132,14 +133,18 @@ public class MainFragment extends Fragment implements Serializable {
             }
         });
 
-        if (Series == null && internet()) {
+        if (isNetworkOnline(getContext())) {
             //Log.d("MainFragment", "download series from internet hash: " + this.hashCode());
-            GetSeries gt = new GetSeries();
-            gt.execute();
+            if (Series == null) {
+                GetSeries gt = new GetSeries();
+                gt.execute();
+            } else if (!Series.isEmpty()) {
+                //Series = (ArrayList<Seria>) savedInstanceState.getSerializable("Series");
+                //Log.d("MainFragment", "must fill list!" + Series.size() + " in: " + this.hashCode());
+                fill();
+            }
         } else {
-            //Series = (ArrayList<Seria>) savedInstanceState.getSerializable("Series");
-            //Log.d("MainFragment", "must fill list!" + Series.size() + " in: " + this.hashCode());
-            fill();
+            alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
         }
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -160,16 +165,16 @@ public class MainFragment extends Fragment implements Serializable {
                         mInterstitialAd.show();
                         //Log.d("ADS", "The interstitial show.");
                     } else {
-                        //Log.d("ADS", "The interstitial wasn't loaded yet.");
-                        Intent intent = new Intent(getContext(), Video.class);
-                        intent.putExtra("Seria", Series.get(position));
-                        MainActivity.newActivity = true;
-                        startActivity(intent);
+                    Log.d("ADS", "The interstitial wasn't loaded yet.");
+                    Intent intent = new Intent(getContext(), ExoPlayerActivity.class);
+                    intent.putExtra("Seria", Series.get(position));
+                    MainActivity.newActivity = true;
+                    startActivity(intent);
                     }
                     mInterstitialAd.setAdListener(new AdListener() {
                         @Override
                         public void onAdClosed() {
-                            Intent intent = new Intent(getContext(), Video.class);
+                            Intent intent = new Intent(getContext(), ExoPlayerActivity.class);
                             // Load the next interstitial.
                             mInterstitialAd.loadAd(new AdRequest.Builder()
                                     .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
@@ -194,14 +199,19 @@ public class MainFragment extends Fragment implements Serializable {
                 if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
                         && (lv.getLastVisiblePosition() - lv.getHeaderViewsCount() -
                         lv.getFooterViewsCount()) >= (adap.getCount() - 1)) {
-                    if (!add && !EndList && internet()) {
-                        add = true;
-                        GetSeries gt = new GetSeries();
-                        gt.execute();
+                    if (isNetworkOnline(getContext())) {
+                        if (!add && !EndList) {
+                            add = true;
+                            GetSeries gt = new GetSeries();
+                            gt.execute();
+                        }
+                    } else {
+                        alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
                     }
                     if (EndList) viewpr.setVisibility(View.INVISIBLE);
                 }
             }
+
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -212,10 +222,13 @@ public class MainFragment extends Fragment implements Serializable {
         swiperef.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (internet()) {
+                if (isNetworkOnline(getContext())) {
                     GetSeries gt = new GetSeries();
                     gt.execute();
-                } else swiperef.setRefreshing(false);
+                } else {
+                    alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+                    swiperef.setRefreshing(false);
+                }
             }
         });
 
@@ -232,14 +245,6 @@ public class MainFragment extends Fragment implements Serializable {
         //Log.d("MainFragment", "saved");
     }
 
-    public boolean internet() {
-        if (isNetworkOnline(getContext())) {
-            return true;
-        } else {
-            alarm();
-            return false;
-        }
-    }
 
     public boolean isNetworkOnline(Context context) {
         boolean status = false;
@@ -261,40 +266,41 @@ public class MainFragment extends Fragment implements Serializable {
 
     }
 
-    public void alarm() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Важное сообщение!")
-                .setMessage("Отсутствует доступ к сети!")
-                .setCancelable(false)
-                .setNegativeButton("ОК",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    void fill() {
-        if (Series.size() == 0) {
-            lv.setVisibility(View.INVISIBLE);
+    public void alarm(String Title, String message) {
+        if (getContext() != null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Важное сообщение!")
-                    .setMessage("К сожалению данный сериал недоступен из приложения!")
+            builder.setTitle(Title)
+                    .setMessage(message)
                     .setCancelable(false)
                     .setNegativeButton("ОК",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     dialog.cancel();
-                                    getActivity().finish();
                                 }
                             });
             AlertDialog alert = builder.create();
             alert.show();
+        }
+    }
+
+
+    void fill() {
+        String title = "Не удалось подключиться к сайту!";
+        String message = "Возможно сайт в данный момент недоступен, попробуйте позже.";
+        if (Series == null) {
+            alarm(title, message);
+            return;
+        }
+        if (Series.isEmpty()) {
+            if (getArguments() != null) {
+                title = "К сожалению";
+                message = "\"" + getArguments().getString("Title") + "\" недоступен из приложения!";
+            }
+            lv.setVisibility(View.INVISIBLE);
+            alarm(title, message);
 
         }
-        if (data == null) {
+        if (data == null && Series != null) {
             data = new ArrayList<>(Series.size());
         } else {
             data.clear();
@@ -336,7 +342,7 @@ public class MainFragment extends Fragment implements Serializable {
         add = false;
     }
 
-    class GetSeries extends AsyncTask<Void, Void, Void> {
+    class GetSeries extends AsyncTask<Void, String, Void> {
 
         Boolean newPage = false;
 
@@ -357,13 +363,26 @@ public class MainFragment extends Fragment implements Serializable {
                         Series.addAll(getNewSeries(doc));
                     }
                     //Log.d("MainFragment", "size=" + Series.size());
-                    if (Series.size() % 32 != 0 && !newPage) EndList = true;
+                    if (Series != null)
+                        if (Series.size() % 32 != 0 && !newPage) EndList = true;
                 } else {
                     //Log.d("MainFragment", " Something wrong with connection!");
                     return null;
                 }
             } catch (Exception e) {
+                publishProgress("Внимание", "Превышено время ожидания ответа");
+                try {
+                    Jsoup.connect("https://mrstarostinvlad.000webhostapp.com/fanserials/getstatistic.php")
+                            .data("andv", Build.VERSION.RELEASE)
+                            .data("device", Build.DEVICE)
+                            .data("model", Build.MODEL)
+                            .data("body", e.toString())
+                            .get();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 e.printStackTrace();
+                return null;
             }
             //Log.d("MainFragment", "parse end");
             return null;
@@ -392,92 +411,91 @@ public class MainFragment extends Fragment implements Serializable {
             return Series;
         }
 
-        ArrayList<Seria> getNewSeries(Document doc) {
+        ArrayList<Seria> getNewSeries(Document doc) throws IOException {
             //Log.d("MainFragment", doc.body().html());
             ArrayList<Seria> Series = new ArrayList<>();
             FanserJsonApi fanserJsonApi = null;
-            try {
-                fanserJsonApi = LoganSquare.parse(doc.body().html(), FanserJsonApi.class);
-                if (fanserJsonApi.dataOfSerials.isEmpty()){
-                    Jsoup.connect("")
-                            .data("andv",Build.VERSION.RELEASE)
-                            .data("device",Build.DEVICE )
-                            .data("model",Build.MODEL)
-                            .data("body",doc.body().toString())
-                            .get();
+            fanserJsonApi = LoganSquare.parse(doc.body().html(), FanserJsonApi.class);
+            if (fanserJsonApi.dataOfSerials.isEmpty()) {
+                Jsoup.connect("https://mrstarostinvlad.000webhostapp.com/fanserials/getstatistic.php")
+                        .data("andv", Build.VERSION.RELEASE)
+                        .data("device", Build.DEVICE)
+                        .data("model", Build.MODEL)
+                        .data("body", doc.body().toString())
+                        .get();
+            } else
+                for (FanserJsonApi.DataOfNewSer item : fanserJsonApi.dataOfSerials) {
+                    //Log.d("Name ", item.newSerial.serialName + " : " + item.serialEpisode.episodeName + " : " + item.serialEpisode.episodeUrl + " : " + item.serialEpisode.episodeImages.smallImage);
+                    Seria seria = new Seria(item.newSerial.serialName, item.serialEpisode.episodeUrl,
+                            item.serialEpisode.episodeImages.smallImage, item.serialEpisode.episodeName);
+                    Series.add(seria);
                 }
-                else
-                    for (FanserJsonApi.DataOfNewSer item : fanserJsonApi.dataOfSerials) {
-                        //Log.d("Name ", item.newSerial.serialName + " : " + item.serialEpisode.episodeName + " : " + item.serialEpisode.episodeUrl + " : " + item.serialEpisode.episodeImages.smallImage);
-                        Seria seria = new Seria(item.newSerial.serialName, item.serialEpisode.episodeUrl,
-                                item.serialEpisode.episodeImages.smallImage, item.serialEpisode.episodeName);
-                        Series.add(seria);
-                    }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             return Series;
         }
 
-        Document getDocument() {
+        Document getDocument() throws IOException {
             Document doc = null;
             String queryUrl = "";
             //Boolean newPage = false;
-            try {
-                doc = Jsoup.connect("https://mrstarostinvlad.000webhostapp.com/actual_adres.php").get();
-                //queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("serialHref").substring(2);
-                queryUrl = doc.select("h1").text();
+            doc = Jsoup.connect("https://mrstarostinvlad.000webhostapp.com/actual_adres.php").timeout(10000).get();
+            //queryUrl=doc.select("div div.l-container div.c-header__inner a.c-header__link").attr("serialHref").substring(2);
+            queryUrl = doc.select("h1").text();
 
+            sPref = Objects.requireNonNull(getContext()).getSharedPreferences("URL", MODE_PRIVATE);
+            SharedPreferences.Editor ed = sPref.edit();
+            ed.putString(SAVED_TEXT, "http://" + queryUrl);
+            ed.apply();
+
+
+            if (getArguments() != null) {
                 sPref = getContext().getSharedPreferences("URL", MODE_PRIVATE);
-                SharedPreferences.Editor ed = sPref.edit();
-                ed.putString(SAVED_TEXT, "http://" + queryUrl);
-                ed.commit();
+                queryUrl = sPref.getString(SAVED_TEXT, "");
+                String href = "";
+                if ((href = getArguments().getString("Href")).contains("http"))
+                    queryUrl = href;
+                else
+                    queryUrl += href;
 
+                if (queryUrl.lastIndexOf("/") < queryUrl.length() - 1)
+                    queryUrl += "/";
 
-                if (getArguments() != null) {
-                    sPref = getContext().getSharedPreferences("URL", MODE_PRIVATE);
-                    queryUrl = sPref.getString(SAVED_TEXT, "");
-                    String href = "";
-                    if ((href = getArguments().getString("Href")).contains("http"))
-                        queryUrl = href;
-                    else
-                        queryUrl += href;
+                newPage = false;
 
-                    if (queryUrl.lastIndexOf("/") < queryUrl.length() - 1)
-                        queryUrl += "/";
-
-                    newPage = false;
-
-                } else {
-                    queryUrl = "http://" + queryUrl + "/api/v1/episodes?limit=30&offset=";
-                    newPage = true;
-                }
-                //Log.d("MainFragment", "queryUrl=" + queryUrl);
-
-                //Log.d("MainFragment", "code = 200");
-                if (add) {
-
-                    if (newPage)
-                        queryUrl += (30 * (page - 1));
-                    else
-                        queryUrl += "page/" + page + "/";//Jsoup.connect("http://fanserials.biz/new/page/"+page).userAgent(agent).timeout(10000).get();
-
-                } else {
-                    if (newPage)
-                        queryUrl += "0";
-                    //Log.d("MainFragment", "query if not add: " + queryUrl);
-                }
-                doc = Jsoup.connect(queryUrl).ignoreContentType(true).get();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                queryUrl = "http://" + queryUrl + "/api/v1/episodes?limit=30&offset=";
+                newPage = true;
             }
+            //Log.d("MainFragment", "queryUrl=" + queryUrl);
+
+            //Log.d("MainFragment", "code = 200");
+            if (add) {
+
+                if (newPage)
+                    queryUrl += (30 * (page - 1));
+                else
+                    queryUrl += "page/" + page + "/";
+                //Jsoup.connect("http://fanserials.biz/new/page/"+page).userAgent(agent).timeout(10000).get();
+
+            } else {
+                if (newPage)
+                    queryUrl += "0";
+                //Log.d("MainFragment", "query if not add: " + queryUrl);
+            }
+
+            //                doc = Jsoup.connect(queryUrl).ignoreContentType(true).get();
+
+
+            Log.d("proxy", "port: ");
+            Connection.Response request = Jsoup.connect(queryUrl)
+                    .ignoreContentType(true).method(Connection.Method.GET).execute();
+            if (request.statusCode() == 502 || request.statusCode() == 500) {
+                publishProgress("Сайт недоступен", "Попробуйте позже");
+            } else if (request.statusCode() == 200)
+                doc = request.parse();
+
             return doc;
         }
 
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
 
         @Override
         protected void onPreExecute() {
@@ -496,16 +514,22 @@ public class MainFragment extends Fragment implements Serializable {
                 else fill();
             if (getArguments() != null) {
                 toolbar.setTitle(getArguments().getString("Title"));
-                ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
             }
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            if (values != null)
+                alarm(values[0], values[1]);
+            super.onProgressUpdate(values);
         }
 
     }
 
     class MyAdap extends SimpleAdapter {
-        public MyAdap(Context context,
-                      List<? extends Map<String, Object>> data, int resource,
-                      String[] from, int[] to) {
+        MyAdap(Context context,
+               List<? extends Map<String, Object>> data, int resource,
+               String[] from, int[] to) {
             super(context, data, resource, from, to);
         }
 

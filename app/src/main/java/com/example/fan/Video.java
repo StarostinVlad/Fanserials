@@ -1,5 +1,6 @@
 package com.example.fan;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 
 import com.bluelinelabs.logansquare.LoganSquare;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -33,6 +35,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -41,23 +44,22 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class Video extends AppCompatActivity
-        implements Fragment_Interface {
+public class Video extends AppCompatActivity {
 
     public static final String SaveTime = "SaveTime";
     public static final String CurrentTime = "CurrentTime";
     public static String previusSeria = "", nextSeria = "";
     static String curUri;
+    static Seria currentSeria;
     final String or = "orient";
     public String s2;
     protected String uri;
     ProgressBar pr;
-    ArrayList<String> l, names, vidUri, sound_param;
+    ArrayList<CurrentSeriaInfo> currentSeriaInfo;
     DescriptionFragment annoFrag;
     VideoFragment videoFragment;
     Button play_pause;
     Toolbar toolbar;
-    Seria currentSeria;
     LinearLayout.LayoutParams vidParam, annoParam;
     FrameLayout vidLayout, annoLayout;
     boolean AUTO_HIDE = true;
@@ -65,16 +67,17 @@ public class Video extends AppCompatActivity
     int last_id = -1;
     int i = 0;
     String description = "";
-    String finalySusbtitleRusSource = "", finalySusbtitleEngSource = "";
     String toolbarTit = "";
     TextView duration;
     TextView current_time;
     ImageView top_gradient, bottom_gradient;
+    Map cookie;
     private View decorView;
     private SeekBar seek_video;
     private SharedPreferences mSettings;
     private Button Nextbut, Prevbut;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,7 +87,7 @@ public class Video extends AppCompatActivity
 
         currentSeria = (Seria) in.getSerializableExtra("Seria");
         s2 = currentSeria.getUri();
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(currentSeria.getName());
         toolbar.setSubtitle(currentSeria.getDescription());
         setSupportActionBar(toolbar);
@@ -99,22 +102,22 @@ public class Video extends AppCompatActivity
         annoFrag = new DescriptionFragment();
         getFragmentManager().beginTransaction().replace(R.id.annoFrame, annoFrag).commit();
 
-        seek_video = (SeekBar) findViewById(R.id.seekBar);
+        seek_video = findViewById(R.id.seekBar);
 
-        play_pause = (Button) findViewById(R.id.buttonPlay);
+        play_pause = findViewById(R.id.buttonPlay);
 
-        top_gradient = (ImageView) findViewById(R.id.top_gradient);
-        bottom_gradient = (ImageView) findViewById(R.id.bottom_gradient);
+        top_gradient = findViewById(R.id.top_gradient);
+        bottom_gradient = findViewById(R.id.bottom_gradient);
 
-        Nextbut = (Button) findViewById(R.id.button3);
-        Prevbut = (Button) findViewById(R.id.button2);
+        Nextbut = findViewById(R.id.button3);
+        Prevbut = findViewById(R.id.button2);
 
-        duration = (TextView) findViewById(R.id.duration);
-        current_time = (TextView) findViewById(R.id.current_time);
+        duration = findViewById(R.id.duration);
+        current_time = findViewById(R.id.current_time);
 
-        pr = (ProgressBar) findViewById(R.id.progressBar2);
+        pr = findViewById(R.id.progressBar2);
 
-        vidLayout = (FrameLayout) findViewById(R.id.vidFrame);
+        vidLayout = findViewById(R.id.vidFrame);
         vidLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -129,7 +132,7 @@ public class Video extends AppCompatActivity
                 return false;
             }
         });
-        annoLayout = (FrameLayout) findViewById(R.id.annoFrame);
+        annoLayout = findViewById(R.id.annoFrame);
         vidParam = (LinearLayout.LayoutParams) vidLayout.getLayoutParams();
         annoParam = (LinearLayout.LayoutParams) annoLayout.getLayoutParams();
 
@@ -144,12 +147,12 @@ public class Video extends AppCompatActivity
             currentPos = savedInstanceState.getInt("current position");
             curUri = savedInstanceState.getString("current uri");
             //Log.d("cururi", "cururi: " + curUri);
-            vidUri = savedInstanceState.getStringArrayList("uri's");
-            names = savedInstanceState.getStringArrayList("names");
-            l = savedInstanceState.getStringArrayList("l's");
-            VideoFragment.uri = curUri;
 
-            fillFrag(true, l, vidUri, description);
+            currentSeriaInfo = (ArrayList<CurrentSeriaInfo>) savedInstanceState.getSerializable("SeriaInfo");
+
+            VideoFragment.uri = curUri;
+            if (currentSeriaInfo != null)
+                annoFrag.fill(true, currentSeriaInfo, description);
 
         } else if (internet()) {
             getHref gf = new getHref();
@@ -161,7 +164,6 @@ public class Video extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        finish();
         super.onDestroy();
     }
 
@@ -185,7 +187,7 @@ public class Video extends AppCompatActivity
             //Log.d(or, "land");
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
 //            if (annoFrag == null)
-                //Log.d(or, "port");
+            //Log.d(or, "port");
             vidParam.weight = 0.6f;
             annoParam.weight = 0.4f;
             decorView.setVisibility(View.VISIBLE);
@@ -197,9 +199,8 @@ public class Video extends AppCompatActivity
     public void onSaveInstanceState(Bundle savedInstanceState) {
         //savedInstanceState.putInt("current position",video.getCurrentPosition() );
         savedInstanceState.putString("current uri", curUri);
-        savedInstanceState.putStringArrayList("uri's", vidUri);
-        savedInstanceState.putStringArrayList("l's", l);
-        savedInstanceState.putStringArrayList("names", names);
+        savedInstanceState.putString("description", description);
+        savedInstanceState.putSerializable("SeriaInfo", currentSeriaInfo);
 
         super.onSaveInstanceState(savedInstanceState);
         //Log.d("sa", "saved");
@@ -209,10 +210,9 @@ public class Video extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             curUri = savedInstanceState.getString("current uri");
-            vidUri = savedInstanceState.getStringArrayList("uri's");
-            l = savedInstanceState.getStringArrayList("l's");
-            names = savedInstanceState.getStringArrayList("names");
-
+            description = savedInstanceState.getString("description");
+            currentSeriaInfo = (ArrayList<CurrentSeriaInfo>) savedInstanceState.getSerializable("SeriaInfo");
+            annoFrag.fill(true, currentSeriaInfo, description);
             //Log.d("sa", "restored");
         }
         super.onRestoreInstanceState(savedInstanceState);
@@ -386,14 +386,6 @@ public class Video extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void fillFrag(final boolean rest, ArrayList<String> l,
-                         final ArrayList<String> vidUri, String descript) {
-        annoFrag.fill(rest, l, vidUri, descript);
-    }
-
-    Map cookie;
-
     class getHref extends AsyncTask<Void, String, Void> {
 
         @Override
@@ -415,12 +407,11 @@ public class Video extends AppCompatActivity
                     doc = res.parse();
                     cookie = res.cookies();
                     Log.d("tmp", res.cookies().toString());
-                    //Elements iframe = doc.select("iframe");//doc.select("iframe");
-//                    Elements ulli = doc.select("ul.nav.nav-tabs.tabs-voice.mobile-tabs-scroll.show-for-smallImage-only li a");
+
                     description = doc.select(".well div").text();
-                    names = new ArrayList<String>();
-                    vidUri = new ArrayList<String>();
-                    l = new ArrayList<String>();
+
+                    currentSeriaInfo = new ArrayList<>();
+
                     previusSeria = (doc.select("a.arrow.prev").attr("href"));
                     nextSeria = (doc.select("a.arrow.next").attr("href"));
                     Log.d("tmp", "prev=" + previusSeria);
@@ -428,13 +419,6 @@ public class Video extends AppCompatActivity
                     Seria seria = (Seria) getIntent().getSerializableExtra("Seria");
                     if (seria.getName() == "")
                         toolbarTit = doc.select("h1.page-title").text();
-                    /*
-                    for (Element ss : ulli) {
-                        if (ss.text() != "") {
-                            l.add(ss.text());
-                            Log.d("tmp", "sound" + ss.text());
-                        }
-                    }*/
 
                     Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
                     for (Element ss : iframe) {
@@ -443,65 +427,62 @@ public class Video extends AppCompatActivity
                         str = "{\"uris\":[" + str.substring(0, str.indexOf("]';</script>")).substring(str.indexOf(" = '[") + 5).replace("\\/", "/") + "]}";
                         SeriaJsonClass seriaJsonClass = LoganSquare.parse(str, SeriaJsonClass.class);
                         Log.d("json ", "player: " + seriaJsonClass.uris.get(0).title);
-//                        JSONObject jsonDATA = new JSONObject(str);
-//                        JSONArray jsonUris = jsonDATA.getJSONArray("uris");
+
                         for (int i = 0; i < seriaJsonClass.uris.size(); i++) {
-//                            JSONObject soundURI = jsonUris.getJSONObject(i);
-//                            str = soundURI.getString("player");
-                            str = seriaJsonClass.uris.get(i).player;
-                            Log.d("tmp", "frame=" + str);
-                            names.add(str);
-//                            l.add(soundURI.getString("name"));
-                            l.add(seriaJsonClass.uris.get(i).title);
-                        }
-                    }
 
-                    for (String name : names) {
-                        if (name.contains("limited")) {
-                            publishProgress("Недоступно в данной стране, воспользуйтесь VPN");
-                            break;
-                        } else if (name.contains("fanserials") || name.contains("umovies") || name.contains("seplay") || name.contains("player")) {
-                            try {
-                                Connection.Response sub_res = Jsoup.connect(name).cookies(cookie)
-                                        .method(Connection.Method.GET).referrer(s2).execute();
-//                                if (quick_help.CheckResponceCode(episodeName)) {
-                                if (sub_res.statusCode() == 200) {
-                                    Log.d("con", "serialHref= " + name);
-//                                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(episodeName));
-                                    doc = sub_res.parse();
-                                    Log.d("tmp", sub_res.cookies().toString());
+                            String player = seriaJsonClass.uris.get(i).player;
+                            Log.d("tmp", "frame=" + player);
+                            String title = seriaJsonClass.uris.get(i).title;
+                            String hls;
+                            if ((hls = getSeria(seriaJsonClass.uris.get(i).player)) != null)
+                                currentSeriaInfo.add(
+                                        new CurrentSeriaInfo(
+                                                title,
+                                                player,
+                                                hls
+                                        ));
 
-                                    String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
-                                    Log.d("tmp", tmp);
-                                    JSONObject jsonDATA = new JSONObject(tmp);
-
-                                    Log.d("tmp", "js= " + jsonDATA.get("hls"));
-
-                                    vidUri.add(jsonDATA.get("hls").toString());
-                                }
-                            } catch (Exception e) {
-                                Log.d("tmp", "just not work  " + e);
-                                e.printStackTrace();
-                                vidUri.add("some.mp4");
-                            }
-                        } else {
-                            Log.d("tmp", "alt player");
-                            vidUri.add("some.mp4");
                         }
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return null;
-            }
-            for (int i = 0; i < vidUri.size(); i++) {
-                if (vidUri.get(i).equals("some.mp4")) {
-                    vidUri.remove(i);
-                    l.remove(i);
-                    i--;
-                }
             }
             return null;
+        }
+
+
+        String getSeria(String url) throws IOException, JSONException {
+            Document doc;
+            String hls = "";
+            if (url.contains("limited")) {
+                return null;
+            } else if (url.contains("fanserials") || url.contains("umovies")
+                    || url.contains("seplay") || url.contains("player")
+                    || url.contains("toplay")) {
+
+                Log.d("tmp", "referer: " + s2 + " player url: " + url);
+                Connection.Response sub_res = Jsoup.connect(url).cookies(cookie)
+                        .method(Connection.Method.GET).referrer(s2).execute();
+//                                if (quick_help.CheckResponceCode(episodeName)) {
+                if (sub_res.statusCode() == 200) {
+                    Log.d("con", "serialHref= " + url);
+//                                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(episodeName));
+                    doc = sub_res.parse();
+                    Log.d("tmp", sub_res.cookies().toString());
+
+                    String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
+                    Log.d("tmp", tmp);
+                    JSONObject jsonDATA = new JSONObject(tmp);
+
+                    Log.d("tmp", "js= " + jsonDATA.get("hls"));
+                    hls = jsonDATA.get("hls").toString();
+                }
+
+            } else {
+                return null;
+            }
+            return hls;
         }
 
         @Override
@@ -534,45 +515,47 @@ public class Video extends AppCompatActivity
             super.onPostExecute(result);
             videoFragment.pr.setVisibility(View.INVISIBLE);
             videoFragment.btn.setVisibility(View.VISIBLE);
-            if (!nextSeria.equals("")) {
+            if (!nextSeria.isEmpty()) {
                 videoFragment.Next.setVisibility(View.VISIBLE);
                 Log.d("tmp", "next !null");
             }
-            if (!previusSeria.equals("")) {
+            if (!previusSeria.isEmpty()) {
                 videoFragment.Prev.setVisibility(View.VISIBLE);
                 Log.d("tmp", "prev !null");
             }
-            if (!toolbarTit.equals("")) toolbar.setTitle(toolbarTit);
-            setSupportActionBar(toolbar);
-            if(vidUri.size()>=1)
-                fillFrag(false, l, vidUri, description);
-            else
-            {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Video.this);
-                builder.setTitle("Важное сообщение!")
-                        .setMessage("Что-то пошло не так!")
-                        .setCancelable(false)
-                        .setNegativeButton("ОК",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        finish();
-                                        dialog.cancel();
-                                    }
-                                });
-                AlertDialog alert = builder.create();
-                alert.show();
-            }
+            if (!toolbarTit.isEmpty()) toolbar.setTitle(toolbarTit);
+//            setSupportActionBar(toolbar);
+            if (currentSeriaInfo != null)
+                if (!currentSeriaInfo.isEmpty())
+                    annoFrag.fill(true, currentSeriaInfo, description);
+                else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(Video.this);
+                    builder.setTitle("Важное сообщение!")
+                            .setMessage("Что-то пошло не так!")
+                            .setCancelable(false)
+                            .setNegativeButton("ОК",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            finish();
+                                            dialog.cancel();
+                                        }
+                                    });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
         }
 
 
     }
-    class getVideoUri extends AsyncTask<String,Void,Void>{
+
+
+    class getVideoUri extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... strings) {
-            if(strings.length==0)
-                return  null;
-            if(strings[0].equals(""))
+            if (strings.length == 0)
+                return null;
+            if (strings[0].equals(""))
                 return null;
             if (strings[0].contains("limited")) {
                 publishProgress("Недоступно в данной стране, воспользуйтесь VPN");
@@ -593,8 +576,6 @@ public class Video extends AppCompatActivity
                         JSONObject jsonDATA = new JSONObject(tmp);
 
                         Log.d("tmp", "js= " + jsonDATA.get("hls"));
-
-                        vidUri.add(jsonDATA.get("hls").toString());
                     }
                 } catch (Exception e) {
                     Log.d("tmp", "just not work  " + e);
