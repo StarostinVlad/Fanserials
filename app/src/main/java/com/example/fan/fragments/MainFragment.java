@@ -1,12 +1,10 @@
-package com.example.fan;
+package com.example.fan.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +20,12 @@ import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 
 import com.bluelinelabs.logansquare.LoganSquare;
+import com.example.fan.activities.ExoPlayerActivity;
+import com.example.fan.activities.MainActivity;
+import com.example.fan.R;
+import com.example.fan.utils.Seria;
+import com.example.fan.api.FanserJsonApi;
+import com.example.fan.utils.Utils;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -71,6 +75,8 @@ public class MainFragment extends Fragment implements Serializable {
     Toolbar toolbar;
     boolean EndList = false;
     SharedPreferences sPref;
+
+    Utils quickHelp = new Utils();
 
     String SeriaUrl = "", SeriaName = "";
     private InterstitialAd mInterstitialAd;
@@ -133,7 +139,7 @@ public class MainFragment extends Fragment implements Serializable {
             }
         });
 
-        if (isNetworkOnline(getContext())) {
+        if (quickHelp.isNetworkOnline(getContext())) {
             //Log.d("MainFragment", "download series from internet hash: " + this.hashCode());
             if (Series == null) {
                 GetSeries gt = new GetSeries();
@@ -199,7 +205,7 @@ public class MainFragment extends Fragment implements Serializable {
                 if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
                         && (lv.getLastVisiblePosition() - lv.getHeaderViewsCount() -
                         lv.getFooterViewsCount()) >= (adap.getCount() - 1)) {
-                    if (isNetworkOnline(getContext())) {
+                    if (quickHelp.isNetworkOnline(getContext())) {
                         if (!add && !EndList) {
                             add = true;
                             GetSeries gt = new GetSeries();
@@ -222,7 +228,7 @@ public class MainFragment extends Fragment implements Serializable {
         swiperef.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (isNetworkOnline(getContext())) {
+                if (quickHelp.isNetworkOnline(getContext())) {
                     GetSeries gt = new GetSeries();
                     gt.execute();
                 } else {
@@ -243,27 +249,6 @@ public class MainFragment extends Fragment implements Serializable {
 
         super.onSaveInstanceState(savedInstanceState);
         //Log.d("MainFragment", "saved");
-    }
-
-
-    public boolean isNetworkOnline(Context context) {
-        boolean status = false;
-        try {
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = cm.getNetworkInfo(0);
-            if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
-                status = true;
-            } else {
-                netInfo = cm.getNetworkInfo(1);
-                if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED)
-                    status = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return status;
-
     }
 
     public void alarm(String Title, String message) {
@@ -351,7 +336,7 @@ public class MainFragment extends Fragment implements Serializable {
             Document doc;
             String queryUrl;
             try {
-                if (quick_help.CheckResponceCode("https://mrstarostinvlad.000webhostapp.com/actual_adres.php") && !EndList) {
+                if (Utils.CheckResponceCode("https://mrstarostinvlad.000webhostapp.com/actual_adres.php") && !EndList) {
                     doc = getDocument();
 
                     if (!add) {

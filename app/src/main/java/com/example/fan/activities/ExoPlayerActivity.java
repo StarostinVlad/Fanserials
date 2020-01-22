@@ -1,5 +1,6 @@
-package com.example.fan;
+package com.example.fan.activities;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -19,6 +20,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bluelinelabs.logansquare.LoganSquare;
+import com.example.fan.R;
+import com.example.fan.api.SeriaJsonClass;
+import com.example.fan.utils.CurrentSeriaInfo;
+import com.example.fan.utils.Seria;
+import com.example.fan.utils.Utils;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
@@ -31,6 +37,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Connection;
@@ -41,89 +48,16 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import static com.example.fan.Video.nextSeria;
-import static com.example.fan.Video.previusSeria;
 
 public class ExoPlayerActivity extends AppCompatActivity {
-
-    private static final Map<Character, String> letters = new HashMap<Character, String>();
-
-    static {
-        letters.put('А', "A");
-        letters.put('Б', "B");
-        letters.put('В', "V");
-        letters.put('Г', "G");
-        letters.put('Д', "D");
-        letters.put('Е', "E");
-        letters.put('Ё', "E");
-        letters.put('Ж', "Zh");
-        letters.put('З', "Z");
-        letters.put('И', "I");
-        letters.put('Й', "I");
-        letters.put('К', "K");
-        letters.put('Л', "L");
-        letters.put('М', "M");
-        letters.put('Н', "N");
-        letters.put('О', "O");
-        letters.put('П', "P");
-        letters.put('Р', "R");
-        letters.put('С', "S");
-        letters.put('Т', "T");
-        letters.put('У', "U");
-        letters.put('Ф', "F");
-        letters.put('Х', "Kh");
-        letters.put('Ц', "C");
-        letters.put('Ч', "Ch");
-        letters.put('Ш', "Sh");
-        letters.put('Щ', "Sch");
-        letters.put('Ъ', "");
-        letters.put('Ы', "Y");
-        letters.put('Ь', "");
-        letters.put('Э', "E");
-        letters.put('Ю', "Yu");
-        letters.put('Я', "Ya");
-        letters.put('а', "a");
-        letters.put('б', "b");
-        letters.put('в', "v");
-        letters.put('г', "g");
-        letters.put('д', "d");
-        letters.put('е', "e");
-        letters.put('ё', "e");
-        letters.put('ж', "zh");
-        letters.put('з', "z");
-        letters.put('и', "i");
-        letters.put('й', "i");
-        letters.put('к', "k");
-        letters.put('л', "l");
-        letters.put('м', "m");
-        letters.put('н', "n");
-        letters.put('о', "o");
-        letters.put('п', "p");
-        letters.put('р', "r");
-        letters.put('с', "s");
-        letters.put('т', "t");
-        letters.put('у', "u");
-        letters.put('ф', "f");
-        letters.put('х', "h");
-        letters.put('ц', "c");
-        letters.put('ч', "ch");
-        letters.put('ш', "sh");
-        letters.put('щ', "sch");
-        letters.put('ъ', "");
-        letters.put('ы', "y");
-        letters.put('ь', "");
-        letters.put('э', "e");
-        letters.put('ю', "yu");
-        letters.put('я', "ya");
-    }
 
     PlayerView playerView;
     SimpleExoPlayer player;
@@ -132,8 +66,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
     TextView description;
     Spinner voicesList;
     String topic = "";
-    Button subscribe;
+    Button subscribe, next, prev;
     String title = "";
+    Utils quickHelp = new Utils();
+    Seria seria;
     private long lastPosition;
     private Toolbar toolbar;
     private LinearLayout description_container;
@@ -165,16 +101,20 @@ public class ExoPlayerActivity extends AppCompatActivity {
         voicesList = findViewById(R.id.voicesList);
 
         subscribe = findViewById(R.id.subscribe_button_exo);
+        next = findViewById(R.id.next_seria_btn_id);
+        prev = findViewById(R.id.prev_seria_btn_id);
 
         decorView = getWindow().getDecorView();
 
-        Seria seria = (Seria) getIntent().getSerializableExtra("Seria");
+        seria = (Seria) getIntent().getSerializableExtra("Seria");
 
         title = seria.getName();
 
         toolbar = findViewById(R.id.toolbar_exo);
-        toolbar.setTitle(seria.getName());
-        toolbar.setSubtitle(seria.getDescription());
+        if (StringUtils.isNotEmpty(title)) {
+            toolbar.setTitle(seria.getName());
+            toolbar.setSubtitle(seria.getDescription());
+        }
         setSupportActionBar(toolbar);
 
         seriaData = new SeriaData();
@@ -190,7 +130,8 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
 //                Toast.makeText(getContext(),translit(title),
 //                        Toast.LENGTH_SHORT).show();
-                topic = translit(title + " " + voicesList.getSelectedItem().toString());
+
+                topic = quickHelp.translit(title + " " + voicesList.getSelectedItem().toString());
                 if (!sPref.getBoolean(topic, true) || !sPref.contains(topic)) {
                     FirebaseMessaging.getInstance()
                             .subscribeToTopic(topic)
@@ -203,6 +144,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                                         msg = getString(R.string.msg_subscribe_failed);
                                     } else {
                                         subscribe.setText("Отписаться");
+                                        subscribe.setBackgroundColor(getResources().getColor(R.color.Gray));
                                         sPref.edit().putBoolean(topic, true).apply();
                                     }
                                     Toast.makeText(ExoPlayerActivity.this, msg,
@@ -223,6 +165,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                                         msg = getString(R.string.msg_subscribe_failed);
                                     } else {
                                         subscribe.setText("Подписаться");
+                                        subscribe.setBackgroundColor(getResources().getColor(R.color.colorOrange));
                                         sPref.edit().remove(topic).apply();
 //                                        sPref.edit().putBoolean(topic, false).apply();
                                     }
@@ -232,6 +175,30 @@ public class ExoPlayerActivity extends AppCompatActivity {
                                     subscribe.setEnabled(true);
                                 }
                             });
+                }
+            }
+        });
+
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (StringUtils.isNotEmpty(seriaData.nextSeria)) {
+                    Intent nextSeriaIntent = new Intent(ExoPlayerActivity.this, ExoPlayerActivity.class);
+                    Seria nextSeria = new Seria(seria.getName(), seriaData.nextSeria, "", "");
+                    nextSeriaIntent.putExtra("Seria", nextSeria);
+                    startActivity(nextSeriaIntent);
+                }
+            }
+        });
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (StringUtils.isNotEmpty(seriaData.previusSeria)) {
+                    Intent prevSeriaIntent = new Intent(ExoPlayerActivity.this, ExoPlayerActivity.class);
+                    Seria prevSeria = new Seria(seria.getName(), seriaData.previusSeria, "", "");
+                    prevSeriaIntent.putExtra("Seria", prevSeria);
+                    startActivity(prevSeriaIntent);
                 }
             }
         });
@@ -280,7 +247,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                     startvideo(currentSerias.get(selectedItemPosition).Url);
                     Log.d("currentSeria", "url:" + uri);
 
-                    topic = translit(title + " " + currentSerias.get(selectedItemPosition).Title);
+                    topic = quickHelp.translit(title + " " + currentSerias.get(selectedItemPosition).Title);
                     Log.d("subscribe", "topic:" + topic);
                     startvideo(uri, 0);
                     if (sPref.contains(topic)) {
@@ -348,18 +315,6 @@ public class ExoPlayerActivity extends AppCompatActivity {
         actionBar.show();
     }
 
-    String translit(String input) {
-        input = input.replace(" ", "_");
-        StringBuilder output = new StringBuilder();
-        for (char ch : input.toCharArray()) {
-//            Log.d("translit", "char: "+ch+" / "+letters.get(ch));
-            if (letters.containsKey(ch))
-                output.append(letters.get(ch));
-            else
-                output.append(ch);
-        }
-        return output.toString();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -441,6 +396,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
         String toolbarTit = "";
         String description = "";
         private Map<String, String> cookie;
+        private String previusSeria, nextSeria;
 
         @Override
         protected ArrayList<CurrentSeriaInfo> doInBackground(String... serias) {
@@ -459,8 +415,8 @@ public class ExoPlayerActivity extends AppCompatActivity {
             }
             //Log.d("tmp", "current: " + s2);
             try {
-                if (quick_help.CheckResponceCode(currentPage)) {
-//                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
+                if (Utils.CheckResponceCode(currentPage)) {
+//                    doc = Jsoup.parse(Utils.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
                     Connection.Response res = Jsoup.connect(currentPage).userAgent(agent).timeout(10000).followRedirects(true).method(Connection.Method.GET).execute();
                     doc = res.parse();
                     cookie = res.cookies();
@@ -471,11 +427,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
                     previusSeria = (doc.select("a.arrow.prev").attr("href"));
                     nextSeria = (doc.select("a.arrow.next").attr("href"));
-                    Log.d("tmp", "prev=" + previusSeria);
-                    Log.d("tmp", "next=" + nextSeria);
-                    Seria seria = (Seria) getIntent().getSerializableExtra("Seria");
+//                    Log.d("tmp", "prev=" + previusSeria);
+//                    Log.d("tmp", "next=" + nextSeria);
 
-                    if (seria.getName() == "")
+                    if (StringUtils.isEmpty(seria.getDescription()))
                         toolbarTit = doc.select("h1.page-title").text();
 
                     Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
@@ -522,10 +477,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 Log.d("tmp", "referer: " + referer + " player url: " + url);
                 Connection.Response sub_res = Jsoup.connect(url).cookies(cookie)
                         .method(Connection.Method.GET).referrer(referer).execute();
-//                                if (quick_help.CheckResponceCode(episodeName)) {
+//                                if (Utils.CheckResponceCode(episodeName)) {
                 if (sub_res.statusCode() == 200) {
                     Log.d("con", "serialHref= " + url);
-//                                    doc = Jsoup.parse(quick_help.GiveDocFromUrl(episodeName));
+//                                    doc = Jsoup.parse(Utils.GiveDocFromUrl(episodeName));
                     doc = sub_res.parse();
                     Log.d("tmp", sub_res.cookies().toString());
 
@@ -546,6 +501,8 @@ public class ExoPlayerActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            next.setVisibility(View.INVISIBLE);
+            prev.setVisibility(View.INVISIBLE);
             //videoFragment.pr.setVisibility(View.VISIBLE);
             //annoFrag.prVisible(true);
         }
@@ -554,11 +511,21 @@ public class ExoPlayerActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList<CurrentSeriaInfo> result) {
             super.onPostExecute(result);
 
-            if (!toolbarTit.isEmpty())
-                getSupportActionBar().setTitle(toolbarTit);
+            if (StringUtils.isNotEmpty(toolbarTit)) {
+                String toolbarSubTit = toolbarTit.substring(seria.getName().length());
 
+                Objects.requireNonNull(getSupportActionBar()).setSubtitle(toolbarSubTit);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(seria.getName());
+            }
             if (result != null) {
                 fillSpinner(result, description);
+            }
+
+            if (StringUtils.isNotEmpty(previusSeria)) {
+                prev.setVisibility(View.VISIBLE);
+            }
+            if (StringUtils.isNotEmpty(nextSeria)) {
+                next.setVisibility(View.VISIBLE);
             }
 
 //            videoFragment.pr.setVisibility(View.INVISIBLE);

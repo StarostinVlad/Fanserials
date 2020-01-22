@@ -4,20 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ExoPlayerActivity">
+    android:keepScreenOn="true"
+    tools:context=".activities.ExoPlayerActivity">
 
     <FrameLayout
         android:id="@+id/frame_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="400dp"
+        android:background="@color/colorBlack"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        tools:ignore="MissingConstraints"
-        android:background="@color/colorBlack">
+        tools:ignore="MissingConstraints">
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/exoplayer_view"
@@ -39,17 +39,49 @@
             android:id="@+id/voicesList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-        <Button
+
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/subscribe_button_exo"
-            android:text="Подписаться"
-            />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/prev_seria_btn_id"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:text="@string/previous"
+                android:textAllCaps="true"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/subscribe_button_exo"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:background="@color/colorOrange"
+                android:text="@string/subscribe"
+                android:textAllCaps="true"
+                android:textColor="@color/White" />
+
+            <Button
+                android:id="@+id/next_seria_btn_id"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:text="@string/next"
+                android:textAllCaps="true"
+                android:textSize="12sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/seria_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:text="@string/lorem_ipsum" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

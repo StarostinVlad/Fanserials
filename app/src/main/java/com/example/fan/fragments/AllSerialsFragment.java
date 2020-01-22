@@ -1,4 +1,4 @@
-package com.example.fan;
+package com.example.fan.fragments;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +16,12 @@ import android.widget.ExpandableListView;
 import android.widget.ProgressBar;
 
 import com.bluelinelabs.logansquare.LoganSquare;
+import com.example.fan.utils.LiteralOfSerials;
+import com.example.fan.activities.MainActivity;
+import com.example.fan.utils.MyExpandableAdapter;
+import com.example.fan.R;
+import com.example.fan.utils.Serial;
+import com.example.fan.api.FanserialsAlphabetApi;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -61,7 +67,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
 
         View v = inflater.inflate(R.layout.content_all_serials_activity, container, false);
 
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         String toolbarTittle;
         switch (SerialType) {
             case 1:
@@ -118,18 +124,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
         });
     }
 
-    void saveFile(String string) throws IOException {
-        File path = getContext().getExternalFilesDir(null);
-        File file = new File(path, "my-file-episodeName.txt");
-        //Log.d("AllSerialsFragment", "path=" + path.getAbsolutePath());
-        FileOutputStream stream = new FileOutputStream(file);
-        try {
-            String h = (string);
-            stream.write(h.getBytes("UTF8"));
-        } finally {
-            stream.close();
-        }
-    }
+
 
     private class GetSerials extends AsyncTask<Void, Void, Void> {
 

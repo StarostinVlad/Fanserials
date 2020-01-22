@@ -1,4 +1,4 @@
-package com.example.fan;
+package com.example.fan.fragments;
 
 
 import android.content.Context;
@@ -15,6 +15,9 @@ import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 
 import com.bluelinelabs.logansquare.LoganSquare;
+import com.example.fan.R;
+import com.example.fan.utils.Seria;
+import com.example.fan.api.SearchJsonApi;
 import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;

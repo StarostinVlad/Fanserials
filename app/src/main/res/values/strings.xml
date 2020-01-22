@@ -76,4 +76,8 @@
     </string>
     <string name="msg_subscribe_failed">error</string>
     <string name="msg_subscribed">complete</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean laoreet mauris ut mi aliquet, id ullamcorper ex ullamcorper. Vivamus ac eleifend erat. Donec ac aliquam massa. Vivamus tincidunt dictum dolor. Quisque nulla est, viverra sit amet convallis in, ornare id augue. Aliquam elementum ultrices ante. Suspendisse at commodo nisi. Vivamus eleifend tincidunt lorem ut ornare. Quisque tortor dolor, tincidunt quis vehicula at, fringilla eu tellus. Pellentesque vel pretium libero. Etiam gravida, felis eget elementum molestie, nulla augue aliquam sem, id suscipit eros justo id tellus. Morbi fermentum blandit nibh vel commodo.</string>
+    <string name="subscribe">Подписаться</string>
+    <string name="previous">предыдущая</string>
+    <string name="next">следующая</string>
 </resources>

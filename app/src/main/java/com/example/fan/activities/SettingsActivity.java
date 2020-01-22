@@ -1,9 +1,10 @@
-package com.example.fan;
+package com.example.fan.activities;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.example.fan.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;

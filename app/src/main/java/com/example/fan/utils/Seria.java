@@ -1,4 +1,4 @@
-package com.example.fan;
+package com.example.fan.utils;
 
 import java.io.Serializable;
 
@@ -48,7 +48,7 @@ public class Seria implements Serializable {
     }
 
     String name;
-    String uri;
+    public String uri;
     String img;
     String description;
 }

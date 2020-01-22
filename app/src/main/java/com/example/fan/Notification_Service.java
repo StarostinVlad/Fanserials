@@ -13,12 +13,13 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.bluelinelabs.logansquare.LoganSquare;
+import com.example.fan.activities.MainActivity;
+import com.example.fan.api.FanserJsonApi;
+import com.example.fan.utils.Seria;
 import com.squareup.picasso.Picasso;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
@@ -60,31 +61,6 @@ public class Notification_Service extends Service {
             startService(intent);
         }
         super.onTaskRemoved(rootIntent);
-    }
-
-
-    public boolean internet() {
-        return isNetworkOnline(this);
-    }
-
-    public boolean isNetworkOnline(Context context) {
-        boolean status = false;
-        try {
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = cm.getNetworkInfo(0);
-            if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
-                status = true;
-            } else {
-                netInfo = cm.getNetworkInfo(1);
-                if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED)
-                    status = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return status;
-
     }
 
     @Override

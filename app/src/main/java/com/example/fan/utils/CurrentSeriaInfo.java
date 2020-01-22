@@ -1,4 +1,4 @@
-package com.example.fan;
+package com.example.fan.utils;
 
 import java.io.Serializable;
 

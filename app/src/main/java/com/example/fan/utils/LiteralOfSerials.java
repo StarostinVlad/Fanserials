@@ -1,4 +1,6 @@
-package com.example.fan;
+package com.example.fan.utils;
+
+import com.example.fan.utils.Serial;
 
 import java.util.ArrayList;
 
@@ -11,7 +13,7 @@ public class LiteralOfSerials {
         private String Name;
         private ArrayList<Serial> Items;
 
-    LiteralOfSerials(String name, ArrayList<Serial> items) {
+    public LiteralOfSerials(String name, ArrayList<Serial> items) {
         Name = name;
         Items = items;
     }
@@ -24,7 +26,7 @@ public class LiteralOfSerials {
             this.Name = name;
         }
 
-        ArrayList<Serial> getItems() {
+        public ArrayList<Serial> getItems() {
             return Items;
         }
 

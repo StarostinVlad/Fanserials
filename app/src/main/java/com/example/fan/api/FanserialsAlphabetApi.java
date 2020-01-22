@@ -1,4 +1,4 @@
-package com.example.fan;
+package com.example.fan.api;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;

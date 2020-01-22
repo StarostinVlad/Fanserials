@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import com.example.fan.activities.ExoPlayerActivity;
+import com.example.fan.activities.MainActivity;
+import com.example.fan.utils.Seria;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.squareup.picasso.Picasso;
@@ -35,7 +38,7 @@ public class CloudMessage extends FirebaseMessagingService {
                 "", Objects.requireNonNull(remoteMessage.getData().get("subtitle")));
 
 
-        Intent notificationIntent = new Intent(getApplicationContext(), Video.class);
+        Intent notificationIntent = new Intent(getApplicationContext(), ExoPlayerActivity.class);
         notificationIntent.putExtra("Seria", seria);
 
         RemoteMessage.Notification notification = remoteMessage.getNotification();

@@ -28,6 +28,6 @@
 -keep class com.bluelinelabs.logansquare.** { *; }
 -keep @com.bluelinelabs.logansquare.annotation.JsonObject class *
 -keep class **$$JsonObjectMapper { *; }
--keep public class com.example.fan.FanserJsonApi
+-keep public class com.example.fan.Json.FanserJsonApi
 -keepattributes JsonObject
 -keepattributes JsonField

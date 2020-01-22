@@ -1,13 +1,16 @@
-package com.example.fan;
+package com.example.fan.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.fan.R;
+import com.example.fan.fragments.AllSerialsFragment;
+import com.example.fan.fragments.MainFragment;
+import com.example.fan.fragments.SearchFragment;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
@@ -24,11 +27,11 @@ import androidx.fragment.app.FragmentTransaction;
 public class MainActivity extends AppCompatActivity {
 
 
-    static boolean newActivity = false;
+    public static boolean newActivity = false;
     MainFragment bFragment = new MainFragment();
     AllSerialsFragment bFragment1 = new AllSerialsFragment();
     FragmentTransaction fTrans;
-    static ArrayList<Integer> lastItem = new ArrayList<>();
+    public static ArrayList<Integer> lastItem = new ArrayList<>();
     BottomNavigationView bottomNavigationView;
     Fragment nextFrag = null;
     boolean destroed = false;
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.app_bar_main);
 
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
@@ -187,27 +190,6 @@ public class MainActivity extends AppCompatActivity {
         paused = false;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        //Log.d("MainActivity", "saved: " + lastItem + " !");
-//        if (bFragment != null && bFragment1 != null && lastItem != null) {
-//            if (!newActivity) {
-//                outState.putIntegerArrayList("lastItem", lastItem);
-//                outState.putSerializable("bFragment", bFragment);
-//                outState.putSerializable("bFragment1", bFragment1);
-//            }
-//        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-//        bFragment = (MainFragment) savedInstanceState.getSerializable("bFragment");
-//        bFragment1 = (AllSerialsFragment) savedInstanceState.getSerializable("bFragment1");
-//        lastItem = savedInstanceState.getIntegerArrayList("lastItem");
-        //Log.d("MainActivity", "restore: " + bFragment);
-    }
 
     @Override
     protected void onDestroy() {
@@ -270,39 +252,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-//        MenuItem checkable = menu.findItem(R.id.action_notifications);
-//        checkable.setChecked(isChecked);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-//        if (id == R.id.action_notifications) {
-//            Intent NotifyService = new Intent(this, Notification_Service.class);
-//
-//
-//            item.setChecked(!isChecked);
-//            //NotifyService.putExtra("Series", Series);
-//            if (!isChecked) {
-//                startService(NotifyService);
-//                Log.d("MainActivity", "notify on: " + isChecked);
-//            } else {
-//                stopService(NotifyService);
-//                Log.d("MainActivity", "notify on: " + isChecked);
-//            }
-//            isChecked = !isChecked;
-//
-//            sPref.edit().putBoolean(SAVED_NOTIFI_STATUS, isChecked).apply();
-//
-//
-//            return true;
-//        } else
             if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
         }

@@ -1,4 +1,4 @@
-package com.example.fan;
+package com.example.fan.utils;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,6 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
+import com.example.fan.R;
+import com.example.fan.utils.LiteralOfSerials;
+import com.example.fan.utils.Serial;
 
 import java.util.ArrayList;
 

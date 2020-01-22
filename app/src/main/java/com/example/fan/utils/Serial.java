@@ -1,4 +1,4 @@
-package com.example.fan;
+package com.example.fan.utils;
 
 /**
  * Created by Star on 03.02.2018.

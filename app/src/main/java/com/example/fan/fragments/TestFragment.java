@@ -1,10 +1,12 @@
-package com.example.fan;
+package com.example.fan.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+
+import com.example.fan.R;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
