@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.fan.R;
 import com.example.fan.fragments.AllSerialsFragment;
+import com.example.fan.fragments.AuthorizationFragment;
 import com.example.fan.fragments.MainFragment;
 import com.example.fan.fragments.SearchFragment;
 import com.google.android.gms.ads.MobileAds;
@@ -28,17 +30,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static boolean newActivity = false;
+    public static ArrayList<Integer> lastItem = new ArrayList<>();
     MainFragment bFragment = new MainFragment();
     AllSerialsFragment bFragment1 = new AllSerialsFragment();
+    AuthorizationFragment authorizationFragment = new AuthorizationFragment();
     FragmentTransaction fTrans;
-    public static ArrayList<Integer> lastItem = new ArrayList<>();
     BottomNavigationView bottomNavigationView;
     Fragment nextFrag = null;
     boolean destroed = false;
     boolean paused = false;
     String SAVED_NOTIFI_STATUS = "notification";
     int lastid = 0;
-//    private boolean isChecked;
+    boolean auth;
+    //    private boolean isChecked;
     private SharedPreferences sPref;
     private boolean backward = false;
 
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_bar_main);
+
 
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
@@ -55,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         sPref = getSharedPreferences("URL", MODE_PRIVATE);
+
+
 //        isChecked = sPref.getBoolean(SAVED_NOTIFI_STATUS, false);
 //        Log.d("MainActivity", "ischeck: " + isChecked);
 //        if (isChecked) {
@@ -78,50 +85,45 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
-                //Log.d("MainActivity", "bottom nav id: " + id);
-                if(backward)
-                {
-                   backward = false;
-                   return true;
-                }
-                Bundle args = new Bundle();
-
+                Log.d("MainActivity", "bottom nav id: " + id + " last id: " + lastid);
                 if (id != lastid) {
-                    lastid = id;
-                    if (id == R.id.serials) {
-                        //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
+                    if (backward) {
+                        backward = false;
+                        return true;
+                    }
+                    Bundle args = new Bundle();
+                    auth = sPref.getBoolean("Auth", false);
 
-                        args.putInt("SerialType", 0);
+
+                    lastid = id;
+                    if (id == R.id.profile) {
+                        //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
+                        args.putString("Href", "http://fanserials.network/profile/");
+                        args.putString("Title", "Лента");
+                        nextFrag = authorizationFragment;
+                        //Log.d("MAinActivity", "bottom nav type: " + bFragment1);
+
+                    } else if (id == R.id.serials) {
+                        //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
+                        args.putInt("SerialType", 1);
                         nextFrag = bFragment1;
                         //Log.d("MAinActivity", "bottom nav type: " + bFragment1);
 
                     } else if (id == R.id.cartoon) {
                         //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 1));
 
-                        args.putInt("SerialType", 1);
+                        args.putInt("SerialType", 2);
                         nextFrag = bFragment1;
                         //Log.d("MAinActivity", "bottom nav type: " + 1);
 
                     } else if (id == R.id.anime) {
                         //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 2));
 
-                        args.putInt("SerialType", 2);
+                        args.putInt("SerialType", 3);
                         nextFrag = bFragment1;
                         //Log.d("MAinActivity", "bottom nav type: " + 2);
 
-                    } else if (id == R.id.documental) {
-                        //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 3));
-
-                        args.putInt("SerialType", 3);
-                        nextFrag = bFragment1;
-                        //Log.d("MAinActivity", "bottom nav type: " + 3);
-
-                    }
-//                else if (episodeId == R.episodeId.tv_show) {
-//                    args.putInt("SerialType", 6);
-//                    nextFrag = bFragment1;
-//                }
-                    else if (id == R.id.new_series) {
+                    } else if (id == R.id.new_series) {
                         nextFrag = bFragment;
                     }
 
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                     if (nextFrag != null) {
                         if (nextFrag.equals(bFragment)) {
                             //Log.d("MainActivity", "cur " +
-                                   // nextFrag.getClass().getName() + ": " + args.isEmpty());
+                            // nextFrag.getClass().getName() + ": " + args.isEmpty());
 
                             nextFrag = new MainFragment();
 
@@ -141,18 +143,17 @@ public class MainActivity extends AppCompatActivity {
                             fTrans.commit();
 
                         } else if (nextFrag.equals(bFragment1)) {
-                            //Log.d("MainActivity", "with args " + nextFrag.getClass().getName());
+                            Log.d("MainActivity", "with args " + nextFrag.getClass().getName());
                             Bundle curType = getSupportFragmentManager()
                                     .findFragmentById(R.id.main_act_id)
                                     .getArguments();
+
                             if (curType == null) {
                                 curType = new Bundle();
-                                curType.putInt("SerialType", -1);
+                                curType.putInt("SerialType", 0);
                             }
 
-                            //Log.d("MainActivity", "args: "
-                                   // + args.getInt("SerialType") +
-                                   // ": " + curType.getInt("SerialType"));
+                            Log.d("MainActivity", "args: " + args.getInt("SerialType") + ": " + curType.getInt("SerialType"));
                             if (args.getInt("SerialType") != curType.getInt("SerialType")) {
 
                                 nextFrag = new AllSerialsFragment();
@@ -171,6 +172,24 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             //Log.d("MainActivity", "cur type null: " + (curType == null));
+                        } else if (nextFrag.equals(authorizationFragment)) {
+                            lastItem.add(id);
+                            if (auth) {
+//                                Toast.makeText(MainActivity.this, "Авторизованы!", Toast.LENGTH_SHORT).show();
+
+                                MainFragment bFrag = new MainFragment();
+                                bFrag.setArguments(args);
+                                fTrans = getSupportFragmentManager().beginTransaction();
+                                fTrans.replace(R.id.main_act_id, bFrag);
+                                fTrans.addToBackStack(null);
+                                fTrans.commit();
+                            } else {
+                                getSupportActionBar().setTitle("Авторизация");
+                                fTrans = getSupportFragmentManager().beginTransaction();
+                                fTrans.replace(R.id.main_act_id, nextFrag);
+                                fTrans.addToBackStack(null);
+                                fTrans.commit();
+                            }
                         }
                     }
                     return true;
@@ -207,14 +226,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-            if (lastItem.size() > 1) {
-                lastItem.remove(lastItem.size() - 1);
-            }
-            backward = true;
-            //Log.d("selected last episodeId", "episodeId: " + bottomNavigationView.getSelectedItemId());
-            bottomNavigationView.setSelectedItemId(lastItem.get(lastItem.size() - 1));
-            //Log.d("selected cur episodeId", "episodeId: " + bottomNavigationView.getSelectedItemId());
-            super.onBackPressed();
+        if (lastItem.size() > 1) {
+            lastItem.remove(lastItem.size() - 1);
+        }
+        backward = true;
+        //Log.d("selected last episodeId", "episodeId: " + bottomNavigationView.getSelectedItemId());
+//        lastid = lastItem.get(lastItem.size() - 1);
+        bottomNavigationView.setSelectedItemId(lastItem.get(lastItem.size() - 1));
+        //Log.d("selected cur episodeId", "episodeId: " + bottomNavigationView.getSelectedItemId());
+        super.onBackPressed();
     }
 
     @Override
@@ -258,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-            if (id == R.id.action_settings) {
+        if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
         }
 

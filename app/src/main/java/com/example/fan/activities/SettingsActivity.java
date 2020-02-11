@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.fan.R;
+import com.example.fan.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -18,6 +19,8 @@ import androidx.preference.PreferenceFragmentCompat;
 
 public class SettingsActivity extends AppCompatActivity {
 
+    static boolean auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +33,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -71,7 +75,7 @@ public class SettingsActivity extends AppCompatActivity {
                                         Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
                                     }
                                 });
-                    }else {
+                    } else {
                         FirebaseMessaging.getInstance().unsubscribeFromTopic("news")
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
@@ -85,6 +89,23 @@ public class SettingsActivity extends AppCompatActivity {
                                 });
                     }
                     return true;
+                }
+            });
+            auth = getContext().getSharedPreferences("URL", MODE_PRIVATE)
+                    .getBoolean("Auth", false);
+            findPreference("logout").setEnabled(auth);
+
+
+            findPreference("logout").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    Utils utils = new Utils();
+                    if (auth) {
+                        utils.logout(getContext());
+                        preference.setEnabled(false);
+                    }
+                    return false;
                 }
             });
 

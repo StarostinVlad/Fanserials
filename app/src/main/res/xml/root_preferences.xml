@@ -38,6 +38,10 @@
             app:title="Правообладателям"
             android:fragment="com.example.fan.fragments.TestFragment"
             />
+        <Preference
+            android:key="logout"
+            android:title="Выйти из учетной записи"
+            />
 
     </PreferenceCategory>
 

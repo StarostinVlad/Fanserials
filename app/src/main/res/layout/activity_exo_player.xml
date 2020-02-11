@@ -19,12 +19,12 @@
         app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingConstraints">
 
-        <com.google.android.exoplayer2.ui.PlayerView
+        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
             android:id="@+id/exoplayer_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        </com.google.android.exoplayer2.ui.PlayerView>
+        </com.google.android.exoplayer2.ui.SimpleExoPlayerView>
     </FrameLayout>
 
     <LinearLayout
@@ -47,16 +47,6 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/prev_seria_btn_id"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.4"
-                android:text="@string/previous"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
-
-            <Button
                 android:id="@+id/subscribe_button_exo"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
@@ -66,16 +56,6 @@
                 android:text="@string/subscribe"
                 android:textAllCaps="true"
                 android:textColor="@color/White" />
-
-            <Button
-                android:id="@+id/next_seria_btn_id"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.4"
-                android:text="@string/next"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
         </LinearLayout>
 
         <TextView

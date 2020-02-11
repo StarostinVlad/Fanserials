@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/new_series"
         android:icon="@drawable/ic_action_new"
         android:title="Новинки" />
+    <item
+        android:id="@+id/profile"
+        android:icon="@drawable/ic_action_profile"
+        android:title="Лента" />
     <item
         android:id="@+id/serials"
         android:icon="@drawable/ic_action_all"
@@ -17,8 +20,4 @@
         android:id="@+id/anime"
         android:icon="@drawable/ic_action_anime"
         android:title="Аниме" />
-    <item
-        android:id="@+id/documental"
-        android:icon="@drawable/ic_menu_gallery"
-        android:title="Документальные" />
 </menu>

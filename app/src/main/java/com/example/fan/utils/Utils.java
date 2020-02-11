@@ -1,10 +1,18 @@
 package com.example.fan.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
+import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,12 +23,17 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by Star on 03.02.2018.
  */
 
 public class Utils {
+
     private static final Map<Character, String> letters = new HashMap<Character, String>();
+    public static String cookie;
+    public static Map<String, String> cookies;
 
     static {
         letters.put('А', "A");
@@ -91,7 +104,49 @@ public class Utils {
         letters.put('я', "ya");
     }
 
-    public static boolean CheckResponceCode(String url) throws IOException {
+    SharedPreferences sPref;
+    private String domain;
+
+    public static void setCookies(Map<String, String> cookies) {
+        Utils.cookies = cookies;
+    }
+
+    public static String getCookie() {
+        return cookie;
+    }
+
+    public static void setCookie(String cookie) {
+        Utils.cookie = cookie;
+    }
+
+    public static String decode(String decodeString) throws UnsupportedEncodingException {
+        String Encode = "";
+        //Log.d("tnp_cartoon", "dec: "+decodeString);
+        decodeString = StringEscapeUtils.unescapeJava(decodeString);
+        //Log.d("tnp_cartoon", "enc: "+decodeString);
+        return decodeString;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void clearCookies(Context context) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            Log.d("clearCookie", "Using clearCookies code for API >=" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+            CookieManager.getInstance().removeAllCookies(null);
+            CookieManager.getInstance().flush();
+        } else {
+            Log.d("clearCookie", "Using clearCookies code for API <" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+            CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(context);
+            cookieSyncMngr.startSync();
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.removeAllCookie();
+            cookieManager.removeSessionCookie();
+            cookieSyncMngr.stopSync();
+            cookieSyncMngr.sync();
+        }
+    }
+
+    public boolean CheckResponceCode(String url) throws IOException {
 
         boolean connected = true;
         //Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("188.40.141.216", 3128));
@@ -106,12 +161,28 @@ public class Utils {
 
     }
 
-    public static String decode(String decodeString) throws UnsupportedEncodingException {
-        String Encode = "";
-        //Log.d("tnp_cartoon", "dec: "+decodeString);
-        decodeString = StringEscapeUtils.unescapeJava(decodeString);
-        //Log.d("tnp_cartoon", "enc: "+decodeString);
-        return decodeString;
+    public void setCookie(String cookie, Context context) {
+        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
+        sPref.edit().putString("Cookie", cookie).apply();
+        sPref.edit().putBoolean("Auth", true).apply();
+        Utils.cookie = cookie;
+    }
+
+    public Map<String, String> getCookies(Context context) {
+        Map<String, String> cookies = new HashMap<>();
+        if (cookie == null) {
+            sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
+            cookie = sPref.getString("Cookie", "");
+        }
+        Log.d("Utils", "cookie: " + cookie);
+        if (StringUtils.isNotEmpty(cookie))
+            for (String str : cookie.split(";")) {
+                String[] kv = str.split("=");
+                cookies.put(kv[0], kv[1]);
+            }
+        else
+            cookies.put("a", "a");
+        return cookies;
     }
 
     public boolean isNetworkOnline(Context context) {
@@ -134,7 +205,7 @@ public class Utils {
 
     }
 
-    void saveFile(String string, Context context) throws IOException {
+    public void saveFile(String string, Context context) throws IOException {
         File path = context.getExternalFilesDir(null);
         File file = new File(path, "my-file-episodeName.txt");
         //Log.d("AllSerialsFragment", "path=" + path.getAbsolutePath());
@@ -160,4 +231,63 @@ public class Utils {
         return output.toString();
     }
 
+    public String getDomainFromPreference(Context context) {
+        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
+        return sPref.getString("domain", "events");
+    }
+
+    public String getActualDomain(Context context) throws IOException {
+        Document doc = Jsoup.connect("https://mrstarostinvlad.000webhostapp.com/actual_adres.php").get();
+        domain = "http://" + doc.getElementById("domain").text();
+        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
+        sPref.edit().putString("domain", domain).apply();
+        return domain;
+    }
+
+    public void logout(Context context) {
+        Thread th = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Jsoup.connect("http://" + domain + "/logout/").get();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        th.start();
+
+        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
+        cookie = "";
+        sPref.edit().putString("Cookie", cookie).putBoolean("Auth", false).apply();
+
+    }
+
+    public void mass_subscribe() {
+
+
+    }
+
+    public void subscibe(final int id, final int on_off, final Context context) {
+        sPref = context.getSharedPreferences("URl", MODE_PRIVATE);
+        boolean auth = sPref.getBoolean("Auth", false);
+        if (auth) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Jsoup.connect("http://" + domain + "/profile/subscriptions/" + id + "/?checked=" + on_off)
+                                .cookies(getCookies(context))
+                                .ignoreContentType(true)
+                                .post();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+            thread.start();
+        }
+    }
 }

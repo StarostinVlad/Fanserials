@@ -16,15 +16,15 @@ import android.widget.SimpleAdapter;
 
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.example.fan.R;
-import com.example.fan.utils.Seria;
 import com.example.fan.api.SearchJsonApi;
+import com.example.fan.utils.Seria;
+import com.example.fan.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,15 +134,17 @@ public class SearchFragment extends Fragment {
         }
 
 
-        ArrayList<Seria> searchSerials(String query) throws UnsupportedEncodingException {
+        ArrayList<Seria> searchSerials(String query) throws IOException {
             ArrayList<Seria> Serials = new ArrayList<>();
             String SAVED_TEXT = "saved_text";
             SharedPreferences sPref = getActivity().getSharedPreferences("URL", 0);
             String queryUrl = sPref.getString(SAVED_TEXT, "");
+            Utils utils = new Utils();
+            String domain = utils.getActualDomain(getContext());
 //            query = URLEncoder.encode(query,"UTF-8");
 //            Log.d("SearchFrag", query);
             try {
-                Document doc = Jsoup.connect(queryUrl + "/api/v1/serials").ignoreContentType(true).data("query", query).get();
+                Document doc = Jsoup.connect(domain + "/api/v1/serials").ignoreContentType(true).data("query", query).get();
 //                Log.d("SearchFrag", doc.body().html());
 
                 SearchJsonApi fanserJsonApi = null;

@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    tools:background="@android:drawable/dialog_holo_light_frame">
+    android:orientation="horizontal">
 
     <ImageView
-        android:id="@+id/imgV"
+        android:id="@+id/seria_image"
         android:layout_width="180dp"
         android:layout_height="120dp"
         android:layout_marginLeft="10dp"
@@ -25,22 +22,22 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textV"
+            android:id="@+id/seria_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="TextView"
+            android:text="Title"
             android:textAlignment="center"
             android:textColor="@color/colorBlack"
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/seria_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="5dp"
-            android:text="TextView"
+            android:text="Subtitle"
             android:textAlignment="center"
             android:textColor="@color/Gray"
             android:textSize="12sp" />

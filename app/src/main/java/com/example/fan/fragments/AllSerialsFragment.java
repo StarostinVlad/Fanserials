@@ -2,12 +2,6 @@ package com.example.fan.fragments;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,21 +10,22 @@ import android.widget.ExpandableListView;
 import android.widget.ProgressBar;
 
 import com.bluelinelabs.logansquare.LoganSquare;
-import com.example.fan.utils.LiteralOfSerials;
-import com.example.fan.activities.MainActivity;
-import com.example.fan.utils.MyExpandableAdapter;
 import com.example.fan.R;
-import com.example.fan.utils.Serial;
+import com.example.fan.activities.MainActivity;
 import com.example.fan.api.FanserialsAlphabetApi;
+import com.example.fan.utils.LiteralOfSerials;
+import com.example.fan.utils.MyExpandableAdapter;
+import com.example.fan.utils.Serial;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 
 
 public class AllSerialsFragment extends Fragment implements Serializable {
@@ -52,7 +47,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setRetainInstance(true);
-        SerialType = getArguments().getInt("SerialType", 0);
+        SerialType = getArguments().getInt("SerialType", 1);
 
 //        if (savedInstanceState != null) {
 //            Log.d("AllSerialsFragment", "onCreate: "+!savedInstanceState.isEmpty());
@@ -70,13 +65,13 @@ public class AllSerialsFragment extends Fragment implements Serializable {
         Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         String toolbarTittle;
         switch (SerialType) {
-            case 1:
+            case 2:
                 toolbarTittle = "Мультсериалы";
                 break;
-            case 2:
+            case 3:
                 toolbarTittle = "Аниме";
                 break;
-            case 3:
+            case 4:
                 toolbarTittle = "Документальные";
                 break;
             default:
@@ -125,7 +120,6 @@ public class AllSerialsFragment extends Fragment implements Serializable {
     }
 
 
-
     private class GetSerials extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -133,7 +127,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
             Document doc;
             list = new ArrayList<>();
 
-            String queryUrl = "https://mrstarostinvlad.000webhostapp.com/fanka"+SerialType+".json";
+            String queryUrl = "https://mrstarostinvlad.000webhostapp.com/fanka" + (SerialType - 1) + ".json";
             //Log.d("AllSerialsFragment", "queryUrl " + queryUrl);
 
             String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";
@@ -143,19 +137,19 @@ public class AllSerialsFragment extends Fragment implements Serializable {
                 FanserialsAlphabetApi fanserialsAlphabetApi =
                         LoganSquare.parse(doc.body().html(), FanserialsAlphabetApi.class);
 
-                if(fanserialsAlphabetApi.dataOfSerials !=null)
-                for(FanserialsAlphabetApi.DataOfSerial dataOfSerial : fanserialsAlphabetApi.dataOfSerials){
-                    ArrayList<Serial> Serials = new ArrayList<>();
-                    for (FanserialsAlphabetApi.DataOfSerial.Serial serial : dataOfSerial.serialsList){
-                        //Log.d("AllSerialsFragment", "ser: "+serial.serialTitle +" : "+serial.serialHref);
-                        Serial Serial = new Serial();
-                        Serial.setName(serial.serialTitle);
-                        Serial.setUri(serial.serialHref);
-                        Serials.add(Serial);
+                if (fanserialsAlphabetApi.dataOfSerials != null)
+                    for (FanserialsAlphabetApi.DataOfSerial dataOfSerial : fanserialsAlphabetApi.dataOfSerials) {
+                        ArrayList<Serial> Serials = new ArrayList<>();
+                        for (FanserialsAlphabetApi.DataOfSerial.Serial serial : dataOfSerial.serialsList) {
+                            //Log.d("AllSerialsFragment", "ser: "+serial.serialTitle +" : "+serial.serialHref);
+                            Serial Serial = new Serial();
+                            Serial.setName(serial.serialTitle);
+                            Serial.setUri(serial.serialHref);
+                            Serials.add(Serial);
+                        }
+                        LiteralOfSerials group = new LiteralOfSerials(dataOfSerial.literalOfSerial, Serials);
+                        list.add(group);
                     }
-                    LiteralOfSerials group = new LiteralOfSerials(dataOfSerial.literalOfSerial, Serials);
-                    list.add(group);
-                }
             } catch (Exception e) {
                 Log.e("AllSerialsFragment", "error: " + e);
             }
