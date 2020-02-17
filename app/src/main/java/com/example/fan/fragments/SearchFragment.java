@@ -1,49 +1,40 @@
 package com.example.fan.fragments;
 
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
-import com.bluelinelabs.logansquare.LoganSquare;
 import com.example.fan.R;
-import com.example.fan.api.SearchJsonApi;
-import com.example.fan.utils.Seria;
+import com.example.fan.api.retro.NetworkService;
+import com.example.fan.api.retro.SearchResult;
+import com.example.fan.utils.SearchListAdapter;
 import com.example.fan.utils.Utils;
-import com.squareup.picasso.Picasso;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SearchFragment extends Fragment {
 
-    protected ListView lv;
-    protected ProgressBar pr;//, pr3;
-    protected MyAdap adap;
     protected ArrayList<HashMap<String, Object>> data;
-    protected HashMap<String, Object> map;
-    ArrayList<Seria> Series;
-    int[] to = {R.id.textV, R.id.imgV, R.id.textView2};
-    String[] from = {"Name", "Icon", "Anno"};
     String queryString = "";
+    TextView message;
+    private ListView lv;
+    private SearchListAdapter searchListAdapter;
+    private List<SearchResult> list;
 
     public void setQueryString(String queryString) {
         this.queryString = queryString;
@@ -52,39 +43,46 @@ public class SearchFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        list = new ArrayList<>();
 
     }
 
     public void search(String query) {
-        GetSeries gt = new GetSeries();
-        gt.execute(query);
+        if (Utils.isNetworkOnline(getContext())) {
+            if (query.length() > 3) {
+                list.clear();
+                Log.d("refresh", "refresh");
+                fillList(query);
+            } else {
+                lv.setVisibility(View.GONE);
+                message.setVisibility(View.VISIBLE);
+                message.setText("введите не менее 3х символов");
+            }
+        } else {
+            Utils.alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+        }
     }
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.main_fragment, container, false);
+        View v = inflater.inflate(R.layout.search_fragment, container, false);
 
-        lv = v.findViewById(R.id.serFrag);
+        lv = v.findViewById(R.id.search_serial_list);
         lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lv.setVisibility(View.VISIBLE);
-        pr = v.findViewById(R.id.progressBarFrag);
-        pr.setVisibility(View.INVISIBLE);
 
+        message = v.findViewById(R.id.search_message);
 
-        GetSeries gt = new GetSeries();
-        gt.execute(queryString);
+        message.setText("введите не менее 3х символов");
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Bundle args = new Bundle();
-                args.putString("Href", Series.get(position).getUri());
-                args.putString("Title", Series.get(position).getName());
-                MainFragment bFragment = new MainFragment();
+                args.putString("Href", list.get(position).getUrl());
+                args.putString("Title", list.get(position).getName());
+                FragmentOfSerial bFragment = new FragmentOfSerial();
                 bFragment.setArguments(args);
-                getFragmentManager().beginTransaction().replace(R.id.main_act_id, bFragment)
-                        .addToBackStack(null).commit();
+                getFragmentManager().beginTransaction().replace(R.id.main_act_id, bFragment).addToBackStack(null).commit();
                 //Log.d("MainFragment", "size= " + Series.size() + "/" + (lv.getCount() - 1) + " pos= " + position + " " + Series.get(position).getName() + " " + Series.get(position).getDescription());
 
             }
@@ -93,103 +91,37 @@ public class SearchFragment extends Fragment {
         return v;
     }
 
-    void fill() {
-        if (data == null) {
-            data = new ArrayList<>(Series.size());
-        } else {
-            data.clear();
-            lv.refreshDrawableState();
-            adap.notifyDataSetChanged();
-        }
+    private void fillList(final String query) {
+        NetworkService.getInstance()
+                .getSerials()
+                .getSearch(query).enqueue(new Callback<List<SearchResult>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<SearchResult>> call, @NonNull Response<List<SearchResult>> response) {
+                List<SearchResult> post = response.body();
+                Log.d("retrofit search", String.valueOf(response.code()));
+                assert post != null;
+                if (post.size() == 0) {
+                    lv.setVisibility(View.GONE);
+                    message.setVisibility(View.VISIBLE);
+                    message.setText("По вашему запросу\nничего не найдено");
+                } else {
+                    message.setVisibility(View.GONE);
+                    lv.setVisibility(View.VISIBLE);
 
-        for (Seria seria : Series) {
-            map = new HashMap<>();
-            map.put("Name", "" + seria.getName());
-            map.put("Icon", "" + seria.getImage());
-            map.put("Anno", "" + seria.getDescription());
-            data.add(map);
-        }
-        if (data != null) {
-            adap = new MyAdap(getActivity(), data, R.layout.search_ser_list_item, from, to);
-            lv.setAdapter(adap);
-        }
-
-    }
-
-    class GetSeries extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            if (strings.length > 0) {
-                String query = strings[0];
-                try {
-                    Series = searchSerials(query);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
-                //Log.d("SearchFrag", "parse end");
+                list.addAll(post);
+
+                if (searchListAdapter == null) {
+                    searchListAdapter = new SearchListAdapter(list, getContext());
+                    lv.setAdapter(searchListAdapter);
+                } else
+                    searchListAdapter.notifyDataSetChanged();
             }
-            return null;
-        }
 
-
-        ArrayList<Seria> searchSerials(String query) throws IOException {
-            ArrayList<Seria> Serials = new ArrayList<>();
-            String SAVED_TEXT = "saved_text";
-            SharedPreferences sPref = getActivity().getSharedPreferences("URL", 0);
-            String queryUrl = sPref.getString(SAVED_TEXT, "");
-            Utils utils = new Utils();
-            String domain = utils.getActualDomain(getContext());
-//            query = URLEncoder.encode(query,"UTF-8");
-//            Log.d("SearchFrag", query);
-            try {
-                Document doc = Jsoup.connect(domain + "/api/v1/serials").ignoreContentType(true).data("query", query).get();
-//                Log.d("SearchFrag", doc.body().html());
-
-                SearchJsonApi fanserJsonApi = null;
-                fanserJsonApi = LoganSquare.parse(doc.body().html(), SearchJsonApi.class);
-                for (SearchJsonApi.FoundSerials item : fanserJsonApi.foundSerialData) {
-                    //Log.d("Name ", item.foundSerialName + " : " + item.foundSerialUrl + " : " + item.serialDescription + " : " + item.foundSerialPoster.smallImage);
-                    Seria seria = new Seria(item.foundSerialName, item.foundSerialUrl, item.foundSerialPoster.smallImage, item.serialDescription);
-                    Serials.add(seria);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            @Override
+            public void onFailure(Call<List<SearchResult>> call, Throwable t) {
+                t.printStackTrace();
             }
-            return Serials;
-        }
-
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
-
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            fill();
-        }
-
-    }
-
-    class MyAdap extends SimpleAdapter {
-        public MyAdap(Context context,
-                      List<? extends Map<String, Object>> data, int resource,
-                      String[] from, int[] to) {
-            super(context, data, resource, from, to);
-        }
-
-        @Override
-        public void setViewImage(ImageView v, String val) {
-            Picasso.with(getActivity()).load(val).error(R.drawable.noimage_port).placeholder(R.drawable.noimage_port).into(v);
-        }
+        });
     }
 }

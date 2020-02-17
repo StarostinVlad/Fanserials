@@ -1,7 +1,6 @@
 package com.example.fan.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -25,7 +24,8 @@ import com.example.fan.R;
 import com.example.fan.api.SearchJsonApi;
 import com.example.fan.api.SeriaJsonClass;
 import com.example.fan.utils.CurrentSeriaInfo;
-import com.example.fan.utils.Seria;
+import com.example.fan.utils.RemoteConfig;
+import com.example.fan.utils.SharedPref;
 import com.example.fan.utils.Utils;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -70,23 +70,21 @@ public class ExoPlayerActivity extends AppCompatActivity {
     String topic = "";
     Button subscribe, next, prev, fullscreen_btn;
     String title = "";
-    Utils quickHelp = new Utils();
-    Seria seria;
     boolean fullscreen = false;
     private long lastPosition;
     private Toolbar toolbar;
     private LinearLayout description_container;
     private View decorView;
     private int last_id;
-    private SharedPreferences sPref;
     private int id;
+    private String subTitle;
+    private String url;
+    private String seria_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_bar_video);
-
-        sPref = this.getSharedPreferences("SUBSCRIBES", MODE_PRIVATE);
 
         playerView = findViewById(R.id.exoplayer_view);
         playerView.setControllerVisibilityListener(new PlayerControlView.VisibilityListener() {
@@ -113,19 +111,19 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         decorView = getWindow().getDecorView();
 
-        seria = (Seria) getIntent().getSerializableExtra("Seria");
-
-        title = seria.getName();
+        title = getIntent().getStringExtra("Title");
+        subTitle = getIntent().getStringExtra("SubTitle");
+        url = getIntent().getStringExtra("URL");
 
         toolbar = findViewById(R.id.toolbar_exo);
         if (StringUtils.isNotEmpty(title)) {
-            toolbar.setTitle(seria.getName());
-            toolbar.setSubtitle(seria.getDescription());
+            toolbar.setTitle(title);
+            toolbar.setSubtitle(subTitle);
         }
         setSupportActionBar(toolbar);
 
         seriaData = new SeriaData();
-        seriaData.execute(seria.uri);
+        seriaData.execute(url);
 
         description_container = findViewById(R.id.description_container);
 
@@ -142,6 +140,16 @@ public class ExoPlayerActivity extends AppCompatActivity {
         });
 
 
+        topic = Utils.translit(title);
+        Log.d("subscribe", "topic:" + topic);
+        if (SharedPref.containsSubscribe(topic)) {
+            subscribe.setBackgroundColor(getResources().getColor(R.color.Gray));
+            subscribe.setText("Отписаться");
+        } else {
+            subscribe.setBackgroundColor(getResources().getColor(R.color.colorOrange));
+            subscribe.setText("Подписаться");
+        }
+
         subscribe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -149,10 +157,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
 //                Toast.makeText(getContext(),translit(title),
 //                        Toast.LENGTH_SHORT).show();
-                if (quickHelp.isNetworkOnline(ExoPlayerActivity.this))
+                if (Utils.isNetworkOnline(ExoPlayerActivity.this))
                     try {
-                        topic = quickHelp.translit(title + " " + voicesList.getSelectedItem().toString());
-                        if (!sPref.getBoolean(topic, true) || !sPref.contains(topic)) {
+                        topic = Utils.translit(title);
+                        if (!SharedPref.containsSubscribe(topic)) {
                             subscribe();
                         } else {
                             unsubscribe();
@@ -168,10 +176,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (StringUtils.isNotEmpty(seriaData.nextSeria)) {
-                    Intent nextSeriaIntent = new Intent(ExoPlayerActivity.this, ExoPlayerActivity.class);
-                    Seria nextSeria = new Seria(seria.getName(), seriaData.nextSeria, "", "");
-                    nextSeriaIntent.putExtra("Seria", nextSeria);
-                    startActivity(nextSeriaIntent);
+                    openSeria(title, seriaData.nextSeria);
                 }
             }
         });
@@ -179,10 +184,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (StringUtils.isNotEmpty(seriaData.previusSeria)) {
-                    Intent prevSeriaIntent = new Intent(ExoPlayerActivity.this, ExoPlayerActivity.class);
-                    Seria prevSeria = new Seria(seria.getName(), seriaData.previusSeria, "", "");
-                    prevSeriaIntent.putExtra("Seria", prevSeria);
-                    startActivity(prevSeriaIntent);
+                    openSeria(title, seriaData.previusSeria);
                 }
             }
         });
@@ -190,21 +192,29 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     }
 
+    void openSeria(String title, String url) {
+        Intent nextSeriaIntent = new Intent(ExoPlayerActivity.this, ExoPlayerActivity.class);
+        nextSeriaIntent.putExtra("Title", title);
+        nextSeriaIntent.putExtra("URL", url);
+        nextSeriaIntent.putExtra("SubTitle", "");
+        startActivity(nextSeriaIntent);
+    }
+
     void subscribe() {
-        quickHelp.subscibe(id, 1, ExoPlayerActivity.this);
+        Utils.subscibe(id, 1);
         FirebaseMessaging.getInstance()
                 .subscribeToTopic(topic)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         String msg = "Вы подписались на: " +
-                                title + " " + voicesList.getSelectedItem().toString();
+                                title;
                         if (!task.isSuccessful()) {
                             msg = getString(R.string.msg_subscribe_failed);
                         } else {
                             subscribe.setText("Отписаться");
                             subscribe.setBackgroundColor(getResources().getColor(R.color.Gray));
-                            sPref.edit().putBoolean(topic, true).apply();
+                            SharedPref.addSubscribes(topic);
                         }
                         Toast.makeText(ExoPlayerActivity.this, msg,
                                 Toast.LENGTH_SHORT).show();
@@ -215,20 +225,20 @@ public class ExoPlayerActivity extends AppCompatActivity {
     }
 
     void unsubscribe() {
-        quickHelp.subscibe(id, 0, ExoPlayerActivity.this);
+        Utils.subscibe(id, 0);
         FirebaseMessaging.getInstance()
                 .unsubscribeFromTopic(topic)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         String msg = "Подписка на " +
-                                title + " " + voicesList.getSelectedItem().toString() + " отменена";
+                                title + " отменена";
                         if (!task.isSuccessful()) {
                             msg = getString(R.string.msg_subscribe_failed);
                         } else {
                             subscribe.setText("Подписаться");
                             subscribe.setBackgroundColor(getResources().getColor(R.color.colorOrange));
-                            sPref.edit().remove(topic).apply();
+                            SharedPref.removeSubscribe(topic);
 //                                        sPref.edit().putBoolean(topic, false).apply();
                         }
                         Toast.makeText(ExoPlayerActivity.this, msg,
@@ -241,9 +251,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     void onFullscreen() {
         fullscreen = true;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         fullscreen_btn.setBackgroundResource(R.drawable.exo_controls_fullscreen_exit);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -260,8 +271,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     void offFullscreen() {
         fullscreen = false;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+
         fullscreen_btn.setBackgroundResource(R.drawable.exo_controls_fullscreen_enter);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         description_container.setVisibility(View.VISIBLE);
         decorView.setVisibility(View.VISIBLE);
     }
@@ -295,21 +307,6 @@ public class ExoPlayerActivity extends AppCompatActivity {
                                            View itemSelected, int selectedItemPosition, long selectedId) {
                     startvideo(currentSerias.get(selectedItemPosition).Url);
                     Log.d("currentSeria", "url:" + uri);
-
-                    topic = quickHelp.translit(title + " " + currentSerias.get(selectedItemPosition).Title);
-                    Log.d("subscribe", "topic:" + topic);
-                    startvideo(uri, 0);
-                    if (sPref.contains(topic)) {
-                        Log.d("subscribe", "on: " + sPref.getBoolean(topic, false));
-                        if (sPref.getBoolean(topic, false)) {
-                            subscribe.setText("Отписаться");
-                        } else {
-                            subscribe.setText("Подписаться");
-                        }
-                    } else {
-                        subscribe.setText("Подписаться");
-                    }
-
                 }
 
                 public void onNothingSelected(AdapterView<?> parent) {
@@ -430,8 +427,11 @@ public class ExoPlayerActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
         if (player != null)
             lastPosition = player.getCurrentPosition();
+        if (StringUtils.isNotEmpty(seria_id) && lastPosition > ((player != null ? player.getDuration() : 0) / 2))
+            Utils.putToViewed(seria_id, 1);
     }
 
     @Override
@@ -448,40 +448,36 @@ public class ExoPlayerActivity extends AppCompatActivity {
         String description = "";
         private Map<String, String> cookie;
         private String previusSeria, nextSeria;
+        private boolean limited = false;
 
         @Override
         protected ArrayList<CurrentSeriaInfo> doInBackground(String... serias) {
             Document doc;
-            Utils utils = new Utils();
             String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Mobile Safari/537.36";
             if (serias == null)
                 return null;
             ArrayList<CurrentSeriaInfo> currentSeriaInfo = new ArrayList<>();
             String currentPage = serias[0];
             if (!currentPage.contains("fanserials")) {
-                try {
-                    String domain = null;
-                    domain = utils.getActualDomain(ExoPlayerActivity.this);
-                    currentPage = domain + currentPage;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                String domain = null;
+                domain = RemoteConfig.read(RemoteConfig.DOMAIN);
+                currentPage = domain + currentPage;
             }
             //Log.d("tmp", "current: " + s2);
             try {
 
-                if (utils.CheckResponceCode(currentPage)) {
+                if (Utils.CheckResponceCode(currentPage)) {
 //                    doc = Jsoup.parse(Utils.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
                     Connection.Response res = Jsoup.connect(currentPage).userAgent(agent).timeout(10000).followRedirects(true).method(Connection.Method.GET).execute();
                     doc = res.parse();
                     cookie = res.cookies();
                     Log.d("tmp", res.cookies().toString());
 
-                    utils.saveFile(doc.html(), ExoPlayerActivity.this);
+                    Utils.saveFile(doc.html(), ExoPlayerActivity.this);
 
-                    String domain = utils.getActualDomain(ExoPlayerActivity.this);
+                    String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
 
-                    Document document = Jsoup.connect(domain+"/api/v1/serials")
+                    Document document = Jsoup.connect(domain + "/api/v1/serials")
                             .data("query", title).ignoreContentType(true).get();
 
                     SearchJsonApi fanserJsonApi = null;
@@ -491,19 +487,28 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
                     description = doc.select(".well div").text();
 
+                    seria_id = (doc.select("#complain").attr("data-id"));
+
 
                     previusSeria = (doc.select("a.arrow.prev").attr("href"));
                     nextSeria = (doc.select("a.arrow.next").attr("href"));
 //                    Log.d("tmp", "prev=" + previusSeria);
 //                    Log.d("tmp", "next=" + nextSeria);
 
-                    if (StringUtils.isEmpty(seria.getDescription()))
+                    if (StringUtils.isEmpty(subTitle))
                         toolbarTit = doc.select("h1.page-title").text();
 
                     Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
                     for (Element ss : iframe) {
                         String str = ss.toString();
                         Log.d("tmp", "json= " + str);
+                        if (str.contains("/limited/")) {
+                            limited = true;
+                            return null;
+                        }
+//                        if(str.contains("/limited/")){
+//
+//                        }
                         str = "{\"uris\":[" + str.substring(0, str.indexOf("]';</script>")).substring(str.indexOf(" = '[") + 5).replace("\\/", "/") + "]}";
                         SeriaJsonClass seriaJsonClass = LoganSquare.parse(str, SeriaJsonClass.class);
                         Log.d("json ", "player: " + seriaJsonClass.uris.get(0).title);
@@ -578,11 +583,16 @@ public class ExoPlayerActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList<CurrentSeriaInfo> result) {
             super.onPostExecute(result);
 
+            if (limited) {
+                Utils.alarm("Внимание!", "Данный сериал недосутпен в вашей стране(попробуйте использовать VPN)");
+                finish();
+            }
+
             if (StringUtils.isNotEmpty(toolbarTit)) {
-                String toolbarSubTit = toolbarTit.substring(seria.getName().length());
+                String toolbarSubTit = toolbarTit.substring(subTitle.length());
 
                 Objects.requireNonNull(getSupportActionBar()).setSubtitle(toolbarSubTit);
-                Objects.requireNonNull(getSupportActionBar()).setTitle(seria.getName());
+                Objects.requireNonNull(getSupportActionBar()).setTitle(title);
             }
             if (result != null) {
                 fillSpinner(result, description);

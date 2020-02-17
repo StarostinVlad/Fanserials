@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class SeriasGetter {
     public int items = 0;
-    public String domain = "";
+    public String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
     public Context context;
     int page = 1;
     private ArrayList<Seria> serias;
@@ -93,10 +93,9 @@ public class SeriasGetter {
             queryUrl += "/";
         Log.d(getClass().getSimpleName(), "query: " + queryUrl);
         Document doc = null;
-        Utils utils = new Utils();
         Connection.Response request = Jsoup.connect(queryUrl)
                 .ignoreContentType(true)
-                .cookies(utils.getCookies(context))
+                .cookies(Utils.getCookies())
                 .method(Connection.Method.GET)
                 .execute();
         Log.d(getClass().getSimpleName(), "code: " + request.statusCode());
@@ -110,7 +109,7 @@ public class SeriasGetter {
             return null;
         }
 
-        serias = serialParser(doc);
+        this.serias = serialParser(doc);
         return this.serias;
     }
 
@@ -118,20 +117,17 @@ public class SeriasGetter {
 
         String queryUrl = uri.contains("http") ? uri : (domain + uri);
 
+
         if (queryUrl.lastIndexOf("/") < queryUrl.length() - 1)
             queryUrl += "/";
-        if (queryUrl.contains("profile")) {
-            queryUrl += "?page=" + (++page);
-            items = 12;
-        } else {
-            queryUrl += "page/" + (++page) + "/";
-            items = 32;
-        }
-        Utils utils = new Utils();
+
+        queryUrl += "page/" + (++page) + "/";
+        Log.d("query", "url: " + queryUrl);
+        items = 32;
         Document doc = null;
         Connection.Response request = Jsoup.connect(queryUrl)
                 .ignoreContentType(true)
-                .cookies(utils.getCookies(context))
+                .cookies(Utils.getCookies())
                 .method(Connection.Method.GET)
                 .execute();
 

@@ -2,15 +2,12 @@ package com.example.fan.activities;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.example.fan.R;
+import com.example.fan.utils.SharedPref;
 import com.example.fan.utils.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -64,35 +61,16 @@ public class SettingsActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     if (newValue.equals(true)) {
-                        FirebaseMessaging.getInstance().subscribeToTopic("news")
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        String msg = getString(R.string.msg_subscribed);
-                                        if (!task.isSuccessful()) {
-                                            msg = getString(R.string.msg_subscribe_failed);
-                                        }
-                                        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                        for (String topic : SharedPref.readSubscribes())
+                            FirebaseMessaging.getInstance().subscribeToTopic(topic);
                     } else {
-                        FirebaseMessaging.getInstance().unsubscribeFromTopic("news")
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        String msg = getString(R.string.msg_subscribed);
-                                        if (!task.isSuccessful()) {
-                                            msg = getString(R.string.msg_subscribe_failed);
-                                        }
-                                        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                        for (String topic : SharedPref.readSubscribes())
+                            FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
                     }
                     return true;
                 }
             });
-            auth = getContext().getSharedPreferences("URL", MODE_PRIVATE)
-                    .getBoolean("Auth", false);
+            auth = SharedPref.read(SharedPref.AUTH, false);
             findPreference("logout").setEnabled(auth);
 
 
@@ -100,9 +78,9 @@ public class SettingsActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    Utils utils = new Utils();
+
                     if (auth) {
-                        utils.logout(getContext());
+                        Utils.logout();
                         preference.setEnabled(false);
                     }
                     return false;

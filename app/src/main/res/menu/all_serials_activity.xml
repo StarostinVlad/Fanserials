@@ -9,15 +9,12 @@
         android:icon="@drawable/ic_action_profile"
         android:title="Лента" />
     <item
+        android:id="@+id/viewed"
+        android:icon="@drawable/ic_action_anime"
+        android:title="Следующее" />
+    <item
         android:id="@+id/serials"
         android:icon="@drawable/ic_action_all"
         android:title="Сериалы" />
-    <item
-        android:id="@+id/cartoon"
-        android:icon="@drawable/ic_menu_slideshow"
-        android:title="Мультсериалы" />
-    <item
-        android:id="@+id/anime"
-        android:icon="@drawable/ic_action_anime"
-        android:title="Аниме" />
+
 </menu>

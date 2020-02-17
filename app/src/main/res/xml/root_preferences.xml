@@ -14,16 +14,16 @@
   ~ limitations under the License.
   -->
 
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="Основные">
         <SwitchPreference
+            android:defaultValue="false"
             android:key="switchNotification"
             android:title="Уведомления"
             app:summaryOff="Включить уведомления"
-            app:summaryOn="Выключить уведомления"
-            android:defaultValue="true"/>
+            app:summaryOn="Выключить уведомления" />
 
     </PreferenceCategory>
 
@@ -34,14 +34,12 @@
             android:key="about_us"
             app:title="О нас" />
         <Preference
-            android:key="dialog"
-            app:title="Правообладателям"
             android:fragment="com.example.fan.fragments.TestFragment"
-            />
+            android:key="dialog"
+            app:title="Правообладателям" />
         <Preference
             android:key="logout"
-            android:title="Выйти из учетной записи"
-            />
+            android:title="Выйти из учетной записи" />
 
     </PreferenceCategory>
 

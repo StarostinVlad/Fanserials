@@ -1,7 +1,7 @@
 package com.example.fan.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static android.content.Context.MODE_PRIVATE;
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Created by Star on 03.02.2018.
@@ -31,9 +31,13 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class Utils {
 
+    private static final Utils INSTANCE = new Utils();
     private static final Map<Character, String> letters = new HashMap<Character, String>();
     public static String cookie;
     public static Map<String, String> cookies;
+    public static String domain;
+    public static String token;
+    private static Context context;
 
     static {
         letters.put('А', "A");
@@ -43,7 +47,7 @@ public class Utils {
         letters.put('Д', "D");
         letters.put('Е', "E");
         letters.put('Ё', "E");
-        letters.put('Ж', "Zh");
+        letters.put('Ж', "ZH");
         letters.put('З', "Z");
         letters.put('И', "I");
         letters.put('Й', "I");
@@ -58,57 +62,31 @@ public class Utils {
         letters.put('Т', "T");
         letters.put('У', "U");
         letters.put('Ф', "F");
-        letters.put('Х', "Kh");
+        letters.put('Х', "KH");
         letters.put('Ц', "C");
-        letters.put('Ч', "Ch");
-        letters.put('Ш', "Sh");
-        letters.put('Щ', "Sch");
+        letters.put('Ч', "CH");
+        letters.put('Ш', "SH");
+        letters.put('Щ', "SCH");
         letters.put('Ъ', "");
         letters.put('Ы', "Y");
         letters.put('Ь', "");
         letters.put('Э', "E");
-        letters.put('Ю', "Yu");
-        letters.put('Я', "Ya");
-        letters.put('а', "a");
-        letters.put('б', "b");
-        letters.put('в', "v");
-        letters.put('г', "g");
-        letters.put('д', "d");
-        letters.put('е', "e");
-        letters.put('ё', "e");
-        letters.put('ж', "zh");
-        letters.put('з', "z");
-        letters.put('и', "i");
-        letters.put('й', "i");
-        letters.put('к', "k");
-        letters.put('л', "l");
-        letters.put('м', "m");
-        letters.put('н', "n");
-        letters.put('о', "o");
-        letters.put('п', "p");
-        letters.put('р', "r");
-        letters.put('с', "s");
-        letters.put('т', "t");
-        letters.put('у', "u");
-        letters.put('ф', "f");
-        letters.put('х', "h");
-        letters.put('ц', "c");
-        letters.put('ч', "ch");
-        letters.put('ш', "sh");
-        letters.put('щ', "sch");
-        letters.put('ъ', "");
-        letters.put('ы', "y");
-        letters.put('ь', "");
-        letters.put('э', "e");
-        letters.put('ю', "yu");
-        letters.put('я', "ya");
+        letters.put('Ю', "YU");
+        letters.put('Я', "YA");
     }
 
-    SharedPreferences sPref;
-    private String domain;
+    private Utils() {
+    }
 
-    public static void setCookies(Map<String, String> cookies) {
-        Utils.cookies = cookies;
+    public static void init(Context context) {
+        domain = RemoteConfig.read(RemoteConfig.DOMAIN);
+        Utils.context = context;
+
+    }
+
+    public synchronized static Utils getInstance() {
+
+        return INSTANCE;
     }
 
     public static String getCookie() {
@@ -146,7 +124,7 @@ public class Utils {
         }
     }
 
-    public boolean CheckResponceCode(String url) throws IOException {
+    public static boolean CheckResponceCode(String url) throws IOException {
 
         boolean connected = true;
         //Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("188.40.141.216", 3128));
@@ -161,18 +139,10 @@ public class Utils {
 
     }
 
-    public void setCookie(String cookie, Context context) {
-        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
-        sPref.edit().putString("Cookie", cookie).apply();
-        sPref.edit().putBoolean("Auth", true).apply();
-        Utils.cookie = cookie;
-    }
-
-    public Map<String, String> getCookies(Context context) {
+    public static Map<String, String> getCookies() {
         Map<String, String> cookies = new HashMap<>();
         if (cookie == null) {
-            sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
-            cookie = sPref.getString("Cookie", "");
+            cookie = SharedPref.read(SharedPref.COOKIE);
         }
         Log.d("Utils", "cookie: " + cookie);
         if (StringUtils.isNotEmpty(cookie))
@@ -185,7 +155,11 @@ public class Utils {
         return cookies;
     }
 
-    public boolean isNetworkOnline(Context context) {
+    public static void setCookies(Map<String, String> cookies) {
+        Utils.cookies = cookies;
+    }
+
+    public static boolean isNetworkOnline(Context context) {
         boolean status = false;
         try {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -205,7 +179,24 @@ public class Utils {
 
     }
 
-    public void saveFile(String string, Context context) throws IOException {
+    public static void alarm(String Title, String message) {
+        if (context != null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(Title)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setNegativeButton("ОК",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+    }
+
+    public static void saveFile(String string, Context context) throws IOException {
         File path = context.getExternalFilesDir(null);
         File file = new File(path, "my-file-episodeName.txt");
         //Log.d("AllSerialsFragment", "path=" + path.getAbsolutePath());
@@ -218,38 +209,53 @@ public class Utils {
         }
     }
 
-    public String translit(String input) {
-        input = input.replace(" ", "_");
+    public static String translit(String input) {
         StringBuilder output = new StringBuilder();
-        for (char ch : input.toCharArray()) {
+        for (char ch : input.toUpperCase().toCharArray()) {
 //            Log.d("translit", "char: "+ch+" / "+letters.get(ch));
             if (letters.containsKey(ch))
                 output.append(letters.get(ch));
             else
                 output.append(ch);
         }
-        return output.toString();
+        return output.toString().replaceAll("[^a-zA-Z0-9-_.~%]", "");
     }
 
-    public String getDomainFromPreference(Context context) {
-        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
-        return sPref.getString("domain", "events");
-    }
-
-    public String getActualDomain(Context context) throws IOException {
-        Document doc = Jsoup.connect("https://mrstarostinvlad.000webhostapp.com/actual_adres.php").get();
-        domain = "http://" + doc.getElementById("domain").text();
-        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
-        sPref.edit().putString("domain", domain).apply();
+    public static String getDomainFromPreference() {
+        domain = SharedPref.read(SharedPref.DOMAIN, "events");
         return domain;
     }
 
-    public void logout(Context context) {
+    public static String getActualDomain() throws IOException {
+        Document doc = Jsoup.connect("https://mrstarostinvlad.000webhostapp.com/actual_adres.php").get();
+        domain = "http://" + doc.getElementById("domain").text();
+        SharedPref.write(SharedPref.DOMAIN, domain);
+        return domain;
+    }
+
+    public static void alarm(String Title, String message, Context context) {
+        if (context != null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(Title)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setNegativeButton("ОК",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+    }
+
+    public static void logout() {
         Thread th = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Jsoup.connect("http://" + domain + "/logout/").get();
+                    Jsoup.connect(domain + "/logout/").get();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -257,28 +263,22 @@ public class Utils {
         });
 
         th.start();
-
-        sPref = context.getSharedPreferences("URL", MODE_PRIVATE);
         cookie = "";
-        sPref.edit().putString("Cookie", cookie).putBoolean("Auth", false).apply();
+        SharedPref.write(SharedPref.COOKIE, cookie);
+        SharedPref.write(SharedPref.AUTH, false);
 
     }
 
-    public void mass_subscribe() {
-
-
-    }
-
-    public void subscibe(final int id, final int on_off, final Context context) {
-        sPref = context.getSharedPreferences("URl", MODE_PRIVATE);
-        boolean auth = sPref.getBoolean("Auth", false);
+    public static void subscibe(final int id, final int on_off) {
+        boolean auth = SharedPref.read(SharedPref.AUTH, false);
+        Log.d("unsubscribe", domain + "/profile/subscriptions/" + id + "/?checked=" + on_off);
         if (auth) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        Jsoup.connect("http://" + domain + "/profile/subscriptions/" + id + "/?checked=" + on_off)
-                                .cookies(getCookies(context))
+                        Jsoup.connect(domain + "/profile/subscriptions/" + id + "/?checked=" + on_off)
+                                .cookies(getCookies())
                                 .ignoreContentType(true)
                                 .post();
                     } catch (IOException e) {
@@ -289,5 +289,56 @@ public class Utils {
             });
             thread.start();
         }
+    }
+
+    public static void putToViewed(final String id, final int check) {
+//        NetworkService.getInstance()
+//                .getSerials()
+//                .putViewed(id, check).enqueue(new Callback<PutViewed>() {
+//            @Override
+//            public void onResponse(@NonNull Call<PutViewed> call, @NonNull Response<PutViewed> response) {
+//                PutViewed post = response.body();
+//                Log.d("retrofit", "viewed " + response.code());
+//                if (post != null)
+//                    Toast.makeText(context, post.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onFailure(Call<PutViewed> call, Throwable t) {
+//                t.printStackTrace();
+//            }
+//        });
+
+        boolean auth = SharedPref.read(SharedPref.AUTH, false);
+        Log.d("unsubscribe", domain + "/profile/viewed/" + id + "/?checked=" + check);
+        if (auth) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Jsoup.connect(domain + "/profile/viewed/" + id + "/?checked=" + check)
+                                .cookies(getCookies())
+                                .ignoreContentType(true)
+                                .post();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+            thread.start();
+        }
+
+    }
+
+    public void setCookie(String cookie, Context context) {
+        SharedPref.write(SharedPref.COOKIE, cookie);
+        SharedPref.write(SharedPref.AUTH, true);
+        Utils.cookie = cookie;
+    }
+
+    public void mass_subscribe() {
+
+
     }
 }

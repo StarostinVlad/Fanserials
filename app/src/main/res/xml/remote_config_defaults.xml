@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>DOMAIN</key>
+        <value>http://fanserials.come</value>
+    </entry>
+    <entry>
+        <key>ALL_SERIAL_JSON</key>
+        <value>http://fanserials.come</value>
+    </entry>
+</defaultsMap>

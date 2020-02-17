@@ -15,6 +15,7 @@ import com.example.fan.activities.MainActivity;
 import com.example.fan.api.FanserialsAlphabetApi;
 import com.example.fan.utils.LiteralOfSerials;
 import com.example.fan.utils.MyExpandableAdapter;
+import com.example.fan.utils.RemoteConfig;
 import com.example.fan.utils.Serial;
 
 import org.jsoup.Jsoup;
@@ -80,9 +81,9 @@ public class AllSerialsFragment extends Fragment implements Serializable {
         }
         toolbar.setTitle(toolbarTittle);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        pr = (ProgressBar) v.findViewById(R.id.progressBar4);
+        pr = v.findViewById(R.id.progressBar4);
 
-        elvMain = (ExpandableListView) v.findViewById(R.id.ExpandableListOfAllSerials);
+        elvMain = v.findViewById(R.id.ExpandableListOfAllSerials);
 
 
         if (list == null) {
@@ -108,7 +109,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
                 Bundle args = new Bundle();
                 args.putString("Href", list.get(groupPosition).getItems().get(childPosition).getUri());
                 args.putString("Title", list.get(groupPosition).getItems().get(childPosition).getName());
-                MainFragment bFragment = new MainFragment();
+                FragmentOfSerial bFragment = new FragmentOfSerial();
                 bFragment.setArguments(args);
                 getFragmentManager().beginTransaction().replace(R.id.main_act_id, bFragment)
                         .addToBackStack(null).commit();
@@ -127,7 +128,7 @@ public class AllSerialsFragment extends Fragment implements Serializable {
             Document doc;
             list = new ArrayList<>();
 
-            String queryUrl = "https://mrstarostinvlad.000webhostapp.com/fanka" + (SerialType - 1) + ".json";
+            String queryUrl = RemoteConfig.read(RemoteConfig.ALL_SERIAL_JSON) + (SerialType - 1) + ".json";
             //Log.d("AllSerialsFragment", "queryUrl " + queryUrl);
 
             String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";

@@ -1,7 +1,6 @@
 package com.example.fan.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,6 +12,8 @@ import com.example.fan.fragments.AllSerialsFragment;
 import com.example.fan.fragments.AuthorizationFragment;
 import com.example.fan.fragments.MainFragment;
 import com.example.fan.fragments.SearchFragment;
+import com.example.fan.utils.SharedPref;
+import com.example.fan.utils.Utils;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
@@ -43,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     int lastid = 0;
     boolean auth;
     //    private boolean isChecked;
-    private SharedPreferences sPref;
     private boolean backward = false;
 
     @Override
@@ -57,23 +57,16 @@ public class MainActivity extends AppCompatActivity {
             public void onInitializationComplete(InitializationStatus initializationStatus) {
             }
         });
+        Utils.init(this);
 
+        SharedPref.init(this);
 
-        sPref = getSharedPreferences("URL", MODE_PRIVATE);
-
-
-//        isChecked = sPref.getBoolean(SAVED_NOTIFI_STATUS, false);
-//        Log.d("MainActivity", "ischeck: " + isChecked);
-//        if (isChecked) {
-//            Intent service_intent = new Intent(this, Notification_Service.class);
-//            startService(service_intent);
-//        }
 
         if (savedInstanceState == null) {
             fTrans = getSupportFragmentManager().beginTransaction();
             fTrans.replace(R.id.main_act_id, bFragment);
             fTrans.commit();
-            //Log.d("MainActivity", "recreate");
+            Log.d("MainActivity", "recreate");
             lastItem.add(R.id.new_series);
             lastid = R.id.new_series;
         }
@@ -92,36 +85,30 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                     Bundle args = new Bundle();
-                    auth = sPref.getBoolean("Auth", false);
-
+                    auth = SharedPref.read(SharedPref.AUTH, false);
+                    Log.d("MAinActivity", "Auth : " + auth);
 
                     lastid = id;
                     if (id == R.id.profile) {
                         //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
-                        args.putString("Href", "http://fanserials.network/profile/");
-                        args.putString("Title", "Лента");
+                        args.putBoolean("PROFILE", true);
+                        nextFrag = authorizationFragment;
+                        //Log.d("MAinActivity", "bottom nav type: " + bFragment1);
+
+                    } else if (id == R.id.viewed) {
+                        //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
+//                        args.putInt("SerialType", 1);
+//                        nextFrag = bFragment1;
+                        args.putBoolean("VIEWED", true);
                         nextFrag = authorizationFragment;
                         //Log.d("MAinActivity", "bottom nav type: " + bFragment1);
 
                     } else if (id == R.id.serials) {
-                        //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 0));
-                        args.putInt("SerialType", 1);
-                        nextFrag = bFragment1;
-                        //Log.d("MAinActivity", "bottom nav type: " + bFragment1);
-
-                    } else if (id == R.id.cartoon) {
                         //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 1));
 
-                        args.putInt("SerialType", 2);
+                        args.putInt("SerialType", 1);
                         nextFrag = bFragment1;
                         //Log.d("MAinActivity", "bottom nav type: " + 1);
-
-                    } else if (id == R.id.anime) {
-                        //startActivity(new Intent(this, All_serials_activity.class).putExtra("param", 2));
-
-                        args.putInt("SerialType", 3);
-                        nextFrag = bFragment1;
-                        //Log.d("MAinActivity", "bottom nav type: " + 2);
 
                     } else if (id == R.id.new_series) {
                         nextFrag = bFragment;
@@ -135,11 +122,11 @@ public class MainActivity extends AppCompatActivity {
 
                             nextFrag = new MainFragment();
 
-                            lastItem.add(id);
+//                            lastItem.add(id);
 
                             fTrans = getSupportFragmentManager().beginTransaction();
                             fTrans.replace(R.id.main_act_id, nextFrag);
-                            fTrans.addToBackStack(null);
+//                            fTrans.addToBackStack(null);
                             fTrans.commit();
 
                         } else if (nextFrag.equals(bFragment1)) {
@@ -159,11 +146,11 @@ public class MainActivity extends AppCompatActivity {
                                 nextFrag = new AllSerialsFragment();
                                 nextFrag.setArguments(args);
 
-                                lastItem.add(id);
+//                                lastItem.add(id);
 
                                 fTrans = getSupportFragmentManager().beginTransaction();
                                 fTrans.replace(R.id.main_act_id, nextFrag);
-                                fTrans.addToBackStack(null);
+//                                fTrans.addToBackStack(null);
                                 fTrans.setCustomAnimations(
                                         R.anim.enter_to_right, R.anim.exit_to_right,
                                         R.anim.enter_to_right, R.anim.exit_to_right
@@ -173,21 +160,21 @@ public class MainActivity extends AppCompatActivity {
 
                             //Log.d("MainActivity", "cur type null: " + (curType == null));
                         } else if (nextFrag.equals(authorizationFragment)) {
-                            lastItem.add(id);
+//                            lastItem.add(id);
                             if (auth) {
 //                                Toast.makeText(MainActivity.this, "Авторизованы!", Toast.LENGTH_SHORT).show();
-
+                                getSupportActionBar().setTitle("Лента");
                                 MainFragment bFrag = new MainFragment();
                                 bFrag.setArguments(args);
                                 fTrans = getSupportFragmentManager().beginTransaction();
                                 fTrans.replace(R.id.main_act_id, bFrag);
-                                fTrans.addToBackStack(null);
+//                                fTrans.addToBackStack(null);
                                 fTrans.commit();
                             } else {
                                 getSupportActionBar().setTitle("Авторизация");
                                 fTrans = getSupportFragmentManager().beginTransaction();
                                 fTrans.replace(R.id.main_act_id, nextFrag);
-                                fTrans.addToBackStack(null);
+//                                fTrans.addToBackStack(null);
                                 fTrans.commit();
                             }
                         }
@@ -226,13 +213,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (lastItem.size() > 1) {
-            lastItem.remove(lastItem.size() - 1);
-        }
-        backward = true;
-        //Log.d("selected last episodeId", "episodeId: " + bottomNavigationView.getSelectedItemId());
-//        lastid = lastItem.get(lastItem.size() - 1);
-        bottomNavigationView.setSelectedItemId(lastItem.get(lastItem.size() - 1));
+//        if (lastItem.size() > 1) {
+//            lastItem.remove(lastItem.size() - 1);
+//        }
+//        backward = true;
+//        //Log.d("selected last episodeId", "episodeId: " + bottomNavigationView.getSelectedItemId());
+////        lastid = lastItem.get(lastItem.size() - 1);
+//        bottomNavigationView.setSelectedItemId(lastItem.get(lastItem.size() - 1));
         //Log.d("selected cur episodeId", "episodeId: " + bottomNavigationView.getSelectedItemId());
         super.onBackPressed();
     }
@@ -254,12 +241,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String s) {
                 if (!TextUtils.isEmpty(s)) {
-                    if (s.length() > 3)
+                    if (s.length() > 0)
                         if (!getSupportFragmentManager().findFragmentById(R.id.main_act_id)
                                 .getClass().getSimpleName().equals(sFr.getClass().getSimpleName())) {
+                            Log.d("retrofit", getSupportFragmentManager().findFragmentById(R.id.main_act_id)
+                                    .getClass().getSimpleName() + " current");
                             sFr.setQueryString(s);
-                            fTrans = getSupportFragmentManager().beginTransaction().addToBackStack(null);
-                            fTrans.replace(R.id.main_act_id, sFr);
+                            fTrans = getSupportFragmentManager().beginTransaction();
+                            fTrans.replace(R.id.main_act_id, sFr).addToBackStack(null);
                             fTrans.commit();
                         } else {
                             sFr.search(s);
