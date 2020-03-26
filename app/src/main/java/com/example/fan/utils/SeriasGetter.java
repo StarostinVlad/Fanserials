@@ -71,7 +71,7 @@ public class SeriasGetter {
 
     public ArrayList<Seria> seriesParser(Document doc) throws IOException {
         FanserJsonApi fanserJsonApi = LoganSquare.parse(doc.body().html(), FanserJsonApi.class);
-        Log.d("SeriaGetter", fanserJsonApi.toString());
+//        Log.d("SeriaGetter", fanserJsonApi.toString());
         ArrayList<Seria> serias = new ArrayList<>();
         if (fanserJsonApi.dataOfSerials.isEmpty()) {
             return null;
@@ -91,14 +91,14 @@ public class SeriasGetter {
 
         if (queryUrl.lastIndexOf("/") < queryUrl.length() - 1)
             queryUrl += "/";
-        Log.d(getClass().getSimpleName(), "query: " + queryUrl);
+//        Log.d(getClass().getSimpleName(), "query: " + queryUrl);
         Document doc = null;
         Connection.Response request = Jsoup.connect(queryUrl)
                 .ignoreContentType(true)
                 .cookies(Utils.getCookies())
                 .method(Connection.Method.GET)
                 .execute();
-        Log.d(getClass().getSimpleName(), "code: " + request.statusCode());
+//        Log.d(getClass().getSimpleName(), "code: " + request.statusCode());
 //        if (!request.cookies().isEmpty()) {
 //            utils.setCookie(request.cookies().toString(), context);
 //            Log.d(getClass().getSimpleName(), "cookies: " + request.cookies().toString());
@@ -122,7 +122,7 @@ public class SeriasGetter {
             queryUrl += "/";
 
         queryUrl += "page/" + (++page) + "/";
-        Log.d("query", "url: " + queryUrl);
+//        Log.d("query", "url: " + queryUrl);
         items = 32;
         Document doc = null;
         Connection.Response request = Jsoup.connect(queryUrl)

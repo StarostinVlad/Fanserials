@@ -14,6 +14,7 @@ import android.widget.ProgressBar;
 import com.example.fan.R;
 import com.example.fan.api.retro.NetworkService;
 import com.example.fan.api.retro.Token;
+import com.example.fan.utils.RemoteConfig;
 import com.example.fan.utils.SharedPref;
 import com.example.fan.utils.Utils;
 
@@ -48,7 +49,7 @@ public class AuthorizationFragment extends Fragment {
 
         vkAuthView = view.findViewById(R.id.vk_auth_form);
 //        String url = "https://oauth.vk.com/authorize?client_id=6031373&scope=offline,email&redirect_uri=http://oauth.vk.com/blank.html&display=touch&response_type=code";
-        String url = "http://oauth.vk.com/authorize?client_id=6031373&redirect_uri=http%3A%2F%2Ffanserials.events%2Flogin%2F%3Fprovider%3Dvk&scope=offline%2Cwall%2Cemail&response_type=code";
+        String url = "http://oauth.vk.com/authorize?client_id=6031373&redirect_uri="+ RemoteConfig.read(SharedPref.DOMAIN).replace("://","%3A%2F%2F")+"%2Flogin%2F%3Fprovider%3Dvk&scope=offline%2Cwall%2Cemail&response_type=code";
         Log.d("Auth", "domain: " + url);
         vkAuthView.loadUrl(url);
         vkAuthView.getSettings().setJavaScriptEnabled(true);
@@ -60,7 +61,7 @@ public class AuthorizationFragment extends Fragment {
                 String headers = "";
                 headers = request.getUrl().toString();
 
-                Log.d("Auth", "cookie: " + cookie + "  ///  " + headers);
+//                Log.d("Auth", "cookie: " + cookie + "  ///  " + headers);
 
                 if (headers.contains("profile")) {
                     cookie = CookieManager.getInstance().getCookie(String.valueOf(request.getUrl()));
@@ -76,7 +77,7 @@ public class AuthorizationFragment extends Fragment {
                                     Token token = response.body();
                                     assert token != null;
                                     Utils.token = token.getToken();
-                                    Log.d("retrofit", "token: " + Utils.token);
+//                                    Log.d("retrofit", "token: " + Utils.token);
                                     SharedPref.write(SharedPref.TOKEN, Utils.token);
                                 }
 

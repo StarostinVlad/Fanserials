@@ -51,7 +51,7 @@ public class FragmentOfSerial extends Fragment {
         if (getArguments() != null) {
             SeriaUrl = getArguments().getString("Href");
             SeriaName = getArguments().getString("Title");
-            Log.d("fragment of serial", SeriaUrl);
+//            Log.d("fragment of serial", SeriaUrl);
         }
         seriasGetter = new SeriasGetter();
     }
@@ -120,7 +120,7 @@ public class FragmentOfSerial extends Fragment {
 //                        mInterstitialAd.show();
 //                        //Log.d("ADS", "The interstitial show.");
 //                    } else {
-                        Log.d("ADS", "The interstitial wasn't loaded yet.");
+//                        Log.d("ADS", "The interstitial wasn't loaded yet.");
                         if (Series != null) {
                             Intent intent = new Intent(getContext(), ExoPlayerActivity.class);
                             intent.putExtra("Title", Series.get(position).getName());
@@ -233,12 +233,12 @@ public class FragmentOfSerial extends Fragment {
             // adapter.add("");
             pr.setVisibility(View.INVISIBLE);
             if (adap == null && result != null) {
-                Log.d("post", "adap null");
+//                Log.d("post", "adap null");
                 adap = new MyAdap(result, getContext());
                 mainAdap = adap;
                 lv.setAdapter(adap);
             }
-            Log.d("post", "changed");
+//            Log.d("post", "changed");
             adap.notifyDataSetChanged();
             Series = result;
             if (getArguments() != null) {

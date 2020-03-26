@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             fTrans = getSupportFragmentManager().beginTransaction();
             fTrans.replace(R.id.main_act_id, bFragment);
             fTrans.commit();
-            Log.d("MainActivity", "recreate");
+//            Log.d("MainActivity", "recreate");
             lastItem.add(R.id.new_series);
             lastid = R.id.new_series;
         }
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
-                Log.d("MainActivity", "bottom nav id: " + id + " last id: " + lastid);
+//                Log.d("MainActivity", "bottom nav id: " + id + " last id: " + lastid);
                 if (id != lastid) {
                     if (backward) {
                         backward = false;
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Bundle args = new Bundle();
                     auth = SharedPref.read(SharedPref.AUTH, false);
-                    Log.d("MAinActivity", "Auth : " + auth);
+//                    Log.d("MAinActivity", "Auth : " + auth);
 
                     lastid = id;
                     if (id == R.id.profile) {
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                             fTrans.commit();
 
                         } else if (nextFrag.equals(bFragment1)) {
-                            Log.d("MainActivity", "with args " + nextFrag.getClass().getName());
+//                            Log.d("MainActivity", "with args " + nextFrag.getClass().getName());
                             Bundle curType = getSupportFragmentManager()
                                     .findFragmentById(R.id.main_act_id)
                                     .getArguments();
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                                 curType.putInt("SerialType", 0);
                             }
 
-                            Log.d("MainActivity", "args: " + args.getInt("SerialType") + ": " + curType.getInt("SerialType"));
+//                            Log.d("MainActivity", "args: " + args.getInt("SerialType") + ": " + curType.getInt("SerialType"));
                             if (args.getInt("SerialType") != curType.getInt("SerialType")) {
 
                                 nextFrag = new AllSerialsFragment();
@@ -244,8 +244,8 @@ public class MainActivity extends AppCompatActivity {
                     if (s.length() > 0)
                         if (!getSupportFragmentManager().findFragmentById(R.id.main_act_id)
                                 .getClass().getSimpleName().equals(sFr.getClass().getSimpleName())) {
-                            Log.d("retrofit", getSupportFragmentManager().findFragmentById(R.id.main_act_id)
-                                    .getClass().getSimpleName() + " current");
+//                            Log.d("retrofit", getSupportFragmentManager().findFragmentById(R.id.main_act_id)
+//                                    .getClass().getSimpleName() + " current");
                             sFr.setQueryString(s);
                             fTrans = getSupportFragmentManager().beginTransaction();
                             fTrans.replace(R.id.main_act_id, sFr).addToBackStack(null);

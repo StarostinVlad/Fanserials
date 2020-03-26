@@ -7,6 +7,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 import com.example.fan.activities.ExoPlayerActivity;
 import com.example.fan.activities.MainActivity;
@@ -33,6 +34,8 @@ public class CloudMessage extends FirebaseMessagingService {
     }
 
     void NotifySend(RemoteMessage remoteMessage) {
+
+        Log.d("notification",remoteMessage.getData().toString());
 
         Seria seria = new Seria(Objects.requireNonNull(remoteMessage.getData().get("title")), Objects.requireNonNull(remoteMessage.getData().get("url")),
                 "", Objects.requireNonNull(remoteMessage.getData().get("subtitle")));

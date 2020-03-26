@@ -99,7 +99,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
         });
         playerView.setShowBuffering(true);
 
-        Log.d("currentSeria", "started!");
+//        Log.d("currentSeria", "started!");
 
         description = findViewById(R.id.seria_description);
         voicesList = findViewById(R.id.voicesList);
@@ -141,7 +141,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
 
         topic = Utils.translit(title);
-        Log.d("subscribe", "topic:" + topic);
+//        Log.d("subscribe", "topic:" + topic);
         if (SharedPref.containsSubscribe(topic)) {
             subscribe.setBackgroundColor(getResources().getColor(R.color.Gray));
             subscribe.setText("Отписаться");
@@ -155,8 +155,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             public void onClick(View v) {
                 v.setEnabled(false);
 
-//                Toast.makeText(getContext(),translit(title),
-//                        Toast.LENGTH_SHORT).show();
+                Log.d("topic",topic);
                 if (Utils.isNetworkOnline(ExoPlayerActivity.this))
                     try {
                         topic = Utils.translit(title);
@@ -306,7 +305,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 public void onItemSelected(AdapterView<?> parent,
                                            View itemSelected, int selectedItemPosition, long selectedId) {
                     startvideo(currentSerias.get(selectedItemPosition).Url);
-                    Log.d("currentSeria", "url:" + uri);
+//                    Log.d("currentSeria", "url:" + uri);
                 }
 
                 public void onNothingSelected(AdapterView<?> parent) {
@@ -471,7 +470,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                     Connection.Response res = Jsoup.connect(currentPage).userAgent(agent).timeout(10000).followRedirects(true).method(Connection.Method.GET).execute();
                     doc = res.parse();
                     cookie = res.cookies();
-                    Log.d("tmp", res.cookies().toString());
+//                    Log.d("tmp", res.cookies().toString());
 
                     Utils.saveFile(doc.html(), ExoPlayerActivity.this);
 
@@ -501,7 +500,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                     Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
                     for (Element ss : iframe) {
                         String str = ss.toString();
-                        Log.d("tmp", "json= " + str);
+//                        Log.d("tmp", "json= " + str);
                         if (str.contains("/limited/")) {
                             limited = true;
                             return null;
@@ -511,12 +510,12 @@ public class ExoPlayerActivity extends AppCompatActivity {
 //                        }
                         str = "{\"uris\":[" + str.substring(0, str.indexOf("]';</script>")).substring(str.indexOf(" = '[") + 5).replace("\\/", "/") + "]}";
                         SeriaJsonClass seriaJsonClass = LoganSquare.parse(str, SeriaJsonClass.class);
-                        Log.d("json ", "player: " + seriaJsonClass.uris.get(0).title);
+//                        Log.d("json ", "player: " + seriaJsonClass.uris.get(0).title);
 
                         for (int i = 0; i < seriaJsonClass.uris.size(); i++) {
 
                             String player = seriaJsonClass.uris.get(i).player;
-                            Log.d("tmp", "frame=" + player);
+//                            Log.d("tmp", "frame=" + player);
                             String title = seriaJsonClass.uris.get(i).title;
                             String hls;
                             if ((hls = getSeria(seriaJsonClass.uris.get(i).player, currentPage)) != null)
@@ -546,21 +545,21 @@ public class ExoPlayerActivity extends AppCompatActivity {
                     || url.contains("seplay") || url.contains("player")
                     || url.contains("toplay")) {
 
-                Log.d("tmp", "referer: " + referer + " player url: " + url);
+//                Log.d("tmp", "referer: " + referer + " player url: " + url);
                 Connection.Response sub_res = Jsoup.connect(url).cookies(cookie)
                         .method(Connection.Method.GET).referrer(referer).execute();
 //                                if (Utils.CheckResponceCode(episodeName)) {
                 if (sub_res.statusCode() == 200) {
-                    Log.d("con", "serialHref= " + url);
+//                    Log.d("con", "serialHref= " + url);
 //                                    doc = Jsoup.parse(Utils.GiveDocFromUrl(episodeName));
                     doc = sub_res.parse();
-                    Log.d("tmp", sub_res.cookies().toString());
+//                    Log.d("tmp", sub_res.cookies().toString());
 
                     String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
-                    Log.d("tmp", tmp);
+//                    Log.d("tmp", tmp);
                     JSONObject jsonDATA = new JSONObject(tmp);
 
-                    Log.d("tmp", "js= " + jsonDATA.get("hls"));
+//                    Log.d("tmp", "js= " + jsonDATA.get("hls"));
                     hls = jsonDATA.get("hls").toString();
                 }
 

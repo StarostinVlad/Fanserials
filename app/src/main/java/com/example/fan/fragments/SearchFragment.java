@@ -51,7 +51,7 @@ public class SearchFragment extends Fragment {
         if (Utils.isNetworkOnline(getContext())) {
             if (query.length() > 3) {
                 list.clear();
-                Log.d("refresh", "refresh");
+//                Log.d("refresh", "refresh");
                 fillList(query);
             } else {
                 lv.setVisibility(View.GONE);
@@ -98,7 +98,7 @@ public class SearchFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<List<SearchResult>> call, @NonNull Response<List<SearchResult>> response) {
                 List<SearchResult> post = response.body();
-                Log.d("retrofit search", String.valueOf(response.code()));
+//                Log.d("retrofit search", String.valueOf(response.code()));
                 assert post != null;
                 if (post.size() == 0) {
                     lv.setVisibility(View.GONE);

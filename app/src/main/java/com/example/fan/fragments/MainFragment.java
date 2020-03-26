@@ -84,7 +84,7 @@ public class MainFragment extends Fragment implements Serializable {
 
 
         list = new ArrayList<>();
-        Log.d("domain main", "domain: " + RemoteConfig.read(RemoteConfig.DOMAIN));
+//        Log.d("domain main", "domain: " + RemoteConfig.read(RemoteConfig.DOMAIN));
         if (Utils.isNetworkOnline(getContext())) {
 
             if (getArguments() != null) {
@@ -102,7 +102,7 @@ public class MainFragment extends Fragment implements Serializable {
             Utils.alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
         }
 
-        Log.d("retrofit", getClass().getSimpleName() + " : " + list.size());
+//        Log.d("retrofit", getClass().getSimpleName() + " : " + list.size());
 
 
         FloatingActionButton fab = v.findViewById(R.id.fab);
@@ -131,7 +131,7 @@ public class MainFragment extends Fragment implements Serializable {
                         mInterstitialAd.show();
                         //Log.d("ADS", "The interstitial show.");
                     } else {
-                        Log.d("ADS", "The interstitial wasn't loaded yet.");
+//                        Log.d("ADS", "The interstitial wasn't loaded yet.");
                         Intent intent = new Intent(getContext(), ExoPlayerActivity.class);
                         intent.putExtra("Title", list.get(position).getSerial().getName());
                         intent.putExtra("SubTitle", list.get(position).getEpisode().getName());
@@ -165,7 +165,7 @@ public class MainFragment extends Fragment implements Serializable {
             public void onRefresh() {
                 if (Utils.isNetworkOnline(getContext())) {
                     list.clear();
-                    Log.d("refresh", "refresh");
+//                    Log.d("refresh", "refresh");
                     if (getArguments() != null) {
                         if (getArguments().getBoolean("PROFILE"))
                             fillProfile(0, token);
@@ -227,7 +227,7 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onResponse(@NonNull Call<List<Viewed>> call, @NonNull Response<List<Viewed>> response) {
                 List<Viewed> post = response.body();
-                Log.d("retrofit", String.valueOf(response.code()));
+//                Log.d("retrofit", String.valueOf(response.code()));
 
                 assert post != null;
                 int code;
@@ -238,7 +238,7 @@ public class MainFragment extends Fragment implements Serializable {
                         String topic = Utils.translit(viewed.getNext() != null ? viewed.getNext().getSerial().getName() :
                                 viewed.getCurrent().getSerial().getName());
                         if (!SharedPref.containsSubscribe(topic)) {
-                            Log.d("retrofit", "subscribe to: " + topic);
+//                            Log.d("retrofit", "subscribe to: " + topic);
                             SharedPref.addSubscribes(topic);
                             FirebaseMessaging.getInstance().subscribeToTopic(topic);
                         }
@@ -266,7 +266,7 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onResponse(@NonNull Call<FANAPI> call, @NonNull Response<FANAPI> response) {
                 FANAPI post = response.body();
-                Log.d("retrofit", String.valueOf(response.code()));
+//                Log.d("retrofit", String.valueOf(response.code()));
                 assert post != null;
                 int code;
                 if ((code = response.code()) == 200) {
@@ -290,7 +290,7 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onResponse(@NonNull Call<FANAPI> call, @NonNull Response<FANAPI> response) {
                 FANAPI post = response.body();
-                Log.d("retrofit", String.valueOf(response.code()));
+//                Log.d("retrofit", String.valueOf(response.code()));
                 assert post != null;
                 int code;
                 if ((code = response.code()) == 200) {
@@ -319,7 +319,7 @@ public class MainFragment extends Fragment implements Serializable {
         if (lv.getAdapter() == null)
             lv.setAdapter(seriaListAdapter);
 
-        Log.d("retrofit", "size: " + list.size() + " : " + lv.getAdapter());
+//        Log.d("retrofit", "size: " + list.size() + " : " + lv.getAdapter());
         swiperef.setRefreshing(false);
         pr.setVisibility(View.GONE);
     }

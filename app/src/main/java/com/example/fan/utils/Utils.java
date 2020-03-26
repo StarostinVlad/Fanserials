@@ -109,11 +109,11 @@ public class Utils {
     public static void clearCookies(Context context) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            Log.d("clearCookie", "Using clearCookies code for API >=" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+//            Log.d("clearCookie", "Using clearCookies code for API >=" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
             CookieManager.getInstance().removeAllCookies(null);
             CookieManager.getInstance().flush();
         } else {
-            Log.d("clearCookie", "Using clearCookies code for API <" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+//            Log.d("clearCookie", "Using clearCookies code for API <" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
             CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(context);
             cookieSyncMngr.startSync();
             CookieManager cookieManager = CookieManager.getInstance();
@@ -144,7 +144,7 @@ public class Utils {
         if (cookie == null) {
             cookie = SharedPref.read(SharedPref.COOKIE);
         }
-        Log.d("Utils", "cookie: " + cookie);
+//        Log.d("Utils", "cookie: " + cookie);
         if (StringUtils.isNotEmpty(cookie))
             for (String str : cookie.split(";")) {
                 String[] kv = str.split("=");
@@ -271,7 +271,7 @@ public class Utils {
 
     public static void subscibe(final int id, final int on_off) {
         boolean auth = SharedPref.read(SharedPref.AUTH, false);
-        Log.d("unsubscribe", domain + "/profile/subscriptions/" + id + "/?checked=" + on_off);
+//        Log.d("unsubscribe", domain + "/profile/subscriptions/" + id + "/?checked=" + on_off);
         if (auth) {
             Thread thread = new Thread(new Runnable() {
                 @Override
@@ -310,7 +310,7 @@ public class Utils {
 //        });
 
         boolean auth = SharedPref.read(SharedPref.AUTH, false);
-        Log.d("unsubscribe", domain + "/profile/viewed/" + id + "/?checked=" + check);
+//        Log.d("unsubscribe", domain + "/profile/viewed/" + id + "/?checked=" + check);
         if (auth) {
             Thread thread = new Thread(new Runnable() {
                 @Override
