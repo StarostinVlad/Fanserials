@@ -28,6 +28,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import static com.example.fan.utils.Utils.ALL_SERIAL;
+
 
 public class AllSerialsFragment extends Fragment implements Serializable {
 
@@ -128,7 +130,8 @@ public class AllSerialsFragment extends Fragment implements Serializable {
             Document doc;
             list = new ArrayList<>();
 
-            String queryUrl = RemoteConfig.read(RemoteConfig.ALL_SERIAL_JSON) + (SerialType - 1) + ".json";
+//            String queryUrl = RemoteConfig.read(RemoteConfig.ALL_SERIAL_JSON) + (SerialType - 1) + ".json";
+            String queryUrl = ALL_SERIAL + (SerialType - 1) + ".json";
             //Log.d("AllSerialsFragment", "queryUrl " + queryUrl);
 
             String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Mobile Safari/537.36";

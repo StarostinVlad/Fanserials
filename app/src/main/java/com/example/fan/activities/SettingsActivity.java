@@ -1,7 +1,9 @@
 package com.example.fan.activities;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
 
 import com.example.fan.R;
 import com.example.fan.utils.SharedPref;
@@ -40,22 +42,36 @@ public class SettingsActivity extends AppCompatActivity {
             findPreference("about_us").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//                    builder.setTitle("Не официальное приложение FanSerials!")
+//                            .setIcon(R.mipmap.ic_launcher)
+//                            .setMessage("copyright 2019")
+//                            .setCancelable(false)
+//                            .setNegativeButton("ОК",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                        }
+//                                    });
+//                    AlertDialog alert = builder.create();
+//                    alert.show();
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Не официальное приложение FanSerials!")
-                            .setIcon(R.drawable.logo1)
-                            .setMessage("copyright 2019")
-                            .setCancelable(false)
-                            .setNegativeButton("ОК",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    });
+                    View dialogView = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.copyright_dialog, null);
+                    builder.setView(dialogView);
                     AlertDialog alert = builder.create();
                     alert.show();
+
                     return false;
                 }
             });
+
+            if (SharedPref.readSubscribes().size() == 0) {
+                findPreference("switchNotification").callChangeListener(true);
+                findPreference("switchNotification").setEnabled(false);
+            } else {
+                findPreference("switchNotification").setEnabled(true);
+            }
 
             findPreference("switchNotification").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -70,8 +86,7 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
-            auth = SharedPref.read(SharedPref.AUTH, false);
-            findPreference("logout").setEnabled(auth);
+            findPreference("logout").setEnabled(Utils.AUTH);
 
 
             findPreference("logout").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -79,7 +94,7 @@ public class SettingsActivity extends AppCompatActivity {
                 public boolean onPreferenceClick(Preference preference) {
 
 
-                    if (auth) {
+                    if (Utils.AUTH) {
                         Utils.logout();
                         preference.setEnabled(false);
                     }

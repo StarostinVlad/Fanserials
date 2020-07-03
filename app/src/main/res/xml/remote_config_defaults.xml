@@ -2,10 +2,10 @@
 <defaultsMap>
     <entry>
         <key>DOMAIN</key>
-        <value>http://fanserials.come</value>
+        <value>http://fanserials.house</value>
     </entry>
     <entry>
         <key>ALL_SERIAL_JSON</key>
-        <value>http://fanserials.come</value>
+        <value>https://fanser.000webhostapp.com/fanka</value>
     </entry>
 </defaultsMap>

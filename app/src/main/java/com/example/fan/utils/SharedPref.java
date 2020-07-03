@@ -3,8 +3,13 @@ package com.example.fan.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
+import org.apache.commons.lang.StringUtils;
+
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class SharedPref {
@@ -57,10 +62,32 @@ public class SharedPref {
     }
 
     public static String read(String key) {
-        return mSharedPref.getString(key, "");
+        return mSharedPref.getString(key, "nothing");
     }
 
     public static void write(String key, String value) {
+        switch (key){
+            case COOKIE:
+                Log.d("SharedPref", "Cookie before parse: " + value);
+                if (StringUtils.isNotEmpty(value)) {
+                    value = value.substring(1,value.length()-1);
+                    Map<String, String> cookies = new HashMap<>();
+                    for (String str : value.split(",")) {
+                        String[] kv = str.split("=");
+                        cookies.put(kv[0].trim(), kv[1].trim());
+                    }
+                    Log.d("SharedPref", "Cookie after parse: " + cookies);
+                    Utils.COOKIE = cookies;
+                }
+                break;
+            case TOKEN:
+                Utils.TOKEN = value;
+                break;
+            case DOMAIN:
+                Utils.DOMAIN = value;
+                break;
+        }
+        Log.d("SharedPref", "key: "+key+", value: "+value);
         SharedPreferences.Editor prefsEditor = mSharedPref.edit();
         prefsEditor.putString(key, value).apply();
     }
@@ -71,6 +98,9 @@ public class SharedPref {
 
 
     public static void write(String key, boolean value) {
+        if (AUTH.equals(key)) {
+            Utils.AUTH = value;
+        }
         SharedPreferences.Editor prefsEditor = mSharedPref.edit();
         prefsEditor.putBoolean(key, value).apply();
     }
@@ -92,5 +122,4 @@ public class SharedPref {
         SharedPreferences.Editor prefsEditor = mSharedPref.edit();
         prefsEditor.remove(key).apply();
     }
-
 }

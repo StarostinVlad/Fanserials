@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 
 import com.example.fan.R;
 import com.example.fan.activities.ExoPlayerActivity;
+import com.example.fan.activities.MainActivity;
 import com.example.fan.api.retro.Datum;
 import com.example.fan.api.retro.FANAPI;
 import com.example.fan.api.retro.NetworkService;
@@ -43,21 +44,21 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.example.fan.utils.Utils.TOKEN;
+
 public class MainFragment extends Fragment implements Serializable {
 
-    String token;
     private ListView lv;
     private ProgressBar pr;
     private SeriaListAdapter seriaListAdapter;
     private SwipeRefreshLayout swiperef;
     private List<Datum> list;
-    private InterstitialAd mInterstitialAd;
+//    private InterstitialAd mInterstitialAd;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setRetainInstance(true);
-        token = SharedPref.read(SharedPref.TOKEN);
     }
 
     @Override
@@ -65,11 +66,11 @@ public class MainFragment extends Fragment implements Serializable {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
 
-        mInterstitialAd = new InterstitialAd(Objects.requireNonNull(getContext()));
-
-        mInterstitialAd.setAdUnitId(getString(R.string.ad_screen));
-
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+//        mInterstitialAd = new InterstitialAd(Objects.requireNonNull(getContext()));
+//
+//        mInterstitialAd.setAdUnitId(getString(R.string.ad_screen));
+//
+//        mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
         Toolbar toolbar = Objects.requireNonNull(getActivity()).findViewById(R.id.toolbar);
         String title = "Новинки";
@@ -90,16 +91,16 @@ public class MainFragment extends Fragment implements Serializable {
             if (getArguments() != null) {
                 if (getArguments().getBoolean("PROFILE")) {
                     toolbar.setTitle("Лента");
-                    fillProfile(0, token);
+                    fillProfile(0, TOKEN);
                 }
                 if (getArguments().getBoolean("VIEWED")) {
                     toolbar.setTitle("Следующие серии");
-                    fillViewed(token);
+                    fillViewed(TOKEN);
                 }
             } else
                 fillNew(0);
         } else {
-            Utils.alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+            Utils.alarm(getContext(),"Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
         }
 
 //        Log.d("retrofit", getClass().getSimpleName() + " : " + list.size());
@@ -114,70 +115,27 @@ public class MainFragment extends Fragment implements Serializable {
         });
 
 
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                if (position < lv.getCount() - 1) {
-
-                    mInterstitialAd.setAdListener(new AdListener() {
-
-                        @Override
-                        public void onAdFailedToLoad(int i) {
-                            super.onAdFailedToLoad(i);
-                            //Log.d("ADS", "The interstitial failed");
-                        }
-                    });
-                    if (mInterstitialAd.isLoaded()) {
-                        mInterstitialAd.show();
-                        //Log.d("ADS", "The interstitial show.");
-                    } else {
-//                        Log.d("ADS", "The interstitial wasn't loaded yet.");
-                        Intent intent = new Intent(getContext(), ExoPlayerActivity.class);
-                        intent.putExtra("Title", list.get(position).getSerial().getName());
-                        intent.putExtra("SubTitle", list.get(position).getEpisode().getName());
-                        intent.putExtra("URL", list.get(position).getEpisode().getUrl());
-                        startActivity(intent);
-                    }
-                    mInterstitialAd.setAdListener(new AdListener() {
-                        @Override
-                        public void onAdClosed() {
-                            Intent intent = new Intent(getContext(), ExoPlayerActivity.class);
-                            intent.putExtra("Title", list.get(position).getSerial().getName());
-                            intent.putExtra("SubTitle", list.get(position).getEpisode().getName());
-                            intent.putExtra("URL", list.get(position).getEpisode().getUrl());
-                            startActivity(intent);
-                            // Load the next interstitial.
-                            mInterstitialAd.loadAd(new AdRequest.Builder()
-                                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                                    .addTestDevice("0AE50CA39585DAB4D218A0C9516422A1").build());
-
-
-                        }
-                    });
-                }
-            }
-        });
-
-
         swiperef.setColorSchemeColors(Color.RED, Color.YELLOW);
         swiperef.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 if (Utils.isNetworkOnline(getContext())) {
                     list.clear();
+                    seriaListAdapter.notifyDataSetChanged();
 //                    Log.d("refresh", "refresh");
                     if (getArguments() != null) {
                         if (getArguments().getBoolean("PROFILE"))
-                            fillProfile(0, token);
+                            fillProfile(0, TOKEN);
 
                         if (getArguments().getBoolean("VIEWED"))
-                            fillViewed(token);
+                            fillViewed(TOKEN);
                     } else
                         fillNew(0);
                 } else {
-                    Utils.alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+                    Utils.alarm(getContext(),"Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
                     swiperef.setRefreshing(false);
                 }
+
             }
         });
 
@@ -195,14 +153,14 @@ public class MainFragment extends Fragment implements Serializable {
 
                         if (getArguments() != null) {
                             if (getArguments().getBoolean("PROFILE"))
-                                fillProfile(view.getCount(), token);
+                                fillProfile(view.getCount() - 1, TOKEN);
 
                             if (getArguments().getBoolean("VIEWED"))
                                 viewpr.setVisibility(View.INVISIBLE);
                         } else
-                            fillNew(view.getCount());
+                            fillNew(view.getCount()-1);
                     } else {
-                        Utils.alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+                        Utils.alarm(getContext(),"Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
                     }
 //                    if (list.size() % seriasGetter.items != 0)
                     viewpr.setVisibility(View.INVISIBLE);
@@ -235,13 +193,13 @@ public class MainFragment extends Fragment implements Serializable {
                     List<Datum> datumList = new ArrayList<>();
 
                     for (Viewed viewed : post) {
-                        String topic = Utils.translit(viewed.getNext() != null ? viewed.getNext().getSerial().getName() :
-                                viewed.getCurrent().getSerial().getName());
-                        if (!SharedPref.containsSubscribe(topic)) {
-//                            Log.d("retrofit", "subscribe to: " + topic);
-                            SharedPref.addSubscribes(topic);
-                            FirebaseMessaging.getInstance().subscribeToTopic(topic);
-                        }
+//                        String topic = Utils.translit(viewed.getNext() != null ? viewed.getNext().getSerial().getName() :
+//                                viewed.getCurrent().getSerial().getName());
+//                        if (!SharedPref.containsSubscribe(topic)) {
+////                            Log.d("retrofit", "subscribe to: " + topic);
+//                            SharedPref.addSubscribes(topic);
+//                            FirebaseMessaging.getInstance().subscribeToTopic(topic);
+//                        }
                         if (viewed.getNext() != null)
                             datumList.add(viewed.getNext());
                     }
@@ -260,6 +218,7 @@ public class MainFragment extends Fragment implements Serializable {
     }
 
     private void fillProfile(int offset, String token) {
+        Utils.massSubscribe();
         NetworkService.getInstance()
                 .getSerials()
                 .getProfile(offset, token).enqueue(new Callback<FANAPI>() {
@@ -308,6 +267,7 @@ public class MainFragment extends Fragment implements Serializable {
     }
 
     void fill(List<Datum> data) {
+        list.add(null);
         list.addAll(data);
 
         if (seriaListAdapter == null) {
@@ -334,6 +294,6 @@ public class MainFragment extends Fragment implements Serializable {
                 message = "Возможно изменился домен, попробуйте позже";
                 break;
         }
-        Utils.alarm("Что-то пошло не так!", message);
+        Utils.alarm(getContext(),"Что-то пошло не так!", message);
     }
 }

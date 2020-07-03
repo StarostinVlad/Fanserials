@@ -130,7 +130,7 @@ public class Notification_Service extends Service {
                 notification = new Notification.Builder(this, channelId)
                         .setContentIntent(contentIntent)
                         // обязательные настройки
-                        .setSmallIcon(R.drawable.play)
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
                         .setContentTitle(new_serie)
                         //.setContentText(res.getString(R.string.notifytext))
@@ -161,7 +161,7 @@ public class Notification_Service extends Service {
                 notification = new Notification.Builder(this)
                         .setContentIntent(contentIntent)
                         // обязательные настройки
-                        .setSmallIcon(R.drawable.play)
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
                         .setContentTitle(new_serie)
                         //.setContentText(res.getString(R.string.notifytext))

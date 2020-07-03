@@ -4,9 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 
+import com.example.fan.BuildConfig;
 import com.example.fan.R;
+import com.example.fan.activities.ExoPlayerActivity;
 import com.example.fan.activities.MainActivity;
+import com.example.fan.activities.SplashScreenActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -26,6 +31,7 @@ public class RemoteConfig {
     }
 
     public static void init() {
+        Log.d("RemoteConfig","RemoteConfig init");
         if (mFirebaseRemoteConfig == null) {
             mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
             mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config_defaults);
@@ -50,6 +56,8 @@ public class RemoteConfig {
                     @Override
                     public void onComplete(@NonNull Task<Boolean> task) {
                         if (task.isSuccessful()) {
+                            SharedPref.init(context);
+                            Utils.init(context);
                             context.startActivity(new Intent(context, MainActivity.class));
                             ((Activity) context).finish();
                         } else {
@@ -75,4 +83,47 @@ public class RemoteConfig {
                 });
     }
 
+    public static void update(final Context context, final Uri data) {
+        mFirebaseRemoteConfig.fetchAndActivate()
+                .addOnCompleteListener(new OnCompleteListener<Boolean>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Boolean> task) {
+                        if (task.isSuccessful()) {
+                            SharedPref.init(context);
+                            Utils.init(context);
+
+                            String uri = data.toString();
+                            Log.i("MyApp", "Deep link clicked " + uri);
+                            if (uri.substring(uri.length() - 4).equals("html")) {
+                                Intent intent = new Intent(context, ExoPlayerActivity.class);
+                                intent.putExtra("Title", "");
+                                intent.putExtra("SubTitle", "");
+                                intent.putExtra("URL", uri);
+                                context.startActivity(intent);
+                            } else {
+                                context.startActivity(new Intent(context, MainActivity.class));
+                            }
+                            ((Activity) context).finish();
+                        } else {
+                            if (context != null) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                builder.setTitle("Ошибка!")
+                                        .setMessage("Не удалось получить актуальный домен")
+                                        .setCancelable(false)
+                                        .setNegativeButton("ОК",
+                                                new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        dialog.cancel();
+                                                        android.os.Process.killProcess(android.os.Process.myPid());
+                                                        System.exit(1);
+                                                    }
+                                                });
+                                AlertDialog alert = builder.create();
+                                alert.show();
+                            }
+
+                        }
+                    }
+                });
+    }
 }

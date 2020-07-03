@@ -5,118 +5,116 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.CookieManager;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.fan.R;
 import com.example.fan.api.retro.NetworkService;
 import com.example.fan.api.retro.Token;
-import com.example.fan.utils.RemoteConfig;
 import com.example.fan.utils.SharedPref;
 import com.example.fan.utils.Utils;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.apache.commons.lang.StringUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 public class AuthorizationFragment extends Fragment {
 
-    WebView vkAuthView;
-    String cookie;
-    ProgressBar progressBar;
+    EditText email;
+    EditText pass;
+    Button vkAuthBtn;
 
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_plus_one, container, false);
-
-        progressBar = view.findViewById(R.id.auth_progress);
-
-        progressBar.setVisibility(View.VISIBLE);
-
-        vkAuthView = view.findViewById(R.id.vk_auth_form);
-//        String url = "https://oauth.vk.com/authorize?client_id=6031373&scope=offline,email&redirect_uri=http://oauth.vk.com/blank.html&display=touch&response_type=code";
-        String url = "http://oauth.vk.com/authorize?client_id=6031373&redirect_uri="+ RemoteConfig.read(SharedPref.DOMAIN).replace("://","%3A%2F%2F")+"%2Flogin%2F%3Fprovider%3Dvk&scope=offline%2Cwall%2Cemail&response_type=code";
-        Log.d("Auth", "domain: " + url);
-        vkAuthView.loadUrl(url);
-        vkAuthView.getSettings().setJavaScriptEnabled(true);
-        vkAuthView.setWebViewClient(new WebViewClient() {
-
-
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.auth_fragment, container, false);
+        vkAuthBtn = view.findViewById(R.id.vk_auth_btn);
+        email = view.findViewById(R.id.email_field);
+        pass = view.findViewById(R.id.pass_field);
+        vkAuthBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, final WebResourceRequest request) {
-                String headers = "";
-                headers = request.getUrl().toString();
+            public void onClick(View view) {
+                VKAuthorizationFragment vkAuthFragment = new VKAuthorizationFragment();
+                getFragmentManager()
+                        .beginTransaction().addToBackStack(null)
+                        .replace(R.id.main_act_id, vkAuthFragment).commit();
+            }
+        });
 
-//                Log.d("Auth", "cookie: " + cookie + "  ///  " + headers);
+        Button login = view.findViewById(R.id.login_btn);
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (StringUtils.isEmpty(email.getText().toString())) {
+                    Toast.makeText(getContext(), "Поле email не полжно быть пустым", Toast.LENGTH_LONG).show();
+                } else if (StringUtils.isEmpty(pass.getText().toString())) {
+                    Toast.makeText(getContext(), "Поле пароль не должно быть пустым", Toast.LENGTH_LONG).show();
+                } else {
 
-                if (headers.contains("profile")) {
-                    cookie = CookieManager.getInstance().getCookie(String.valueOf(request.getUrl()));
-                    view.loadUrl("https://oauth.vk.com/authorize?client_id=6031373&scope=offline,email&redirect_uri=http://oauth.vk.com/blank.html&display=touch&response_type=code");
-                } else if (headers.contains("#code")) {
-                    final String data = headers.split("=")[1];
+                    Utils.login(email.getText().toString(), pass.getText().toString());
+
                     NetworkService.getInstance()
                             .getSerials()
-                            .getToken(data)
-                            .enqueue(new Callback<Token>() {
+                            .getToken(email.getText().toString(), pass.getText().toString())
+                            .enqueue(new Callback<ResponseBody>() {
                                 @Override
-                                public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
-                                    Token token = response.body();
-                                    assert token != null;
-                                    Utils.token = token.getToken();
-//                                    Log.d("retrofit", "token: " + Utils.token);
-                                    SharedPref.write(SharedPref.TOKEN, Utils.token);
+                                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                                    Log.d("retrofit", "res: " + response);
+                                    String res = null;
+                                    try {
+                                        if (response.isSuccessful()) {
+                                            res = response.body().string(); // do something with that
+                                            String cookie = response.headers().get("Set-Cookie");
+                                            Log.d("retrofit", "res: " + cookie);
+                                            assert res != null;
+                                            GsonBuilder builder = new GsonBuilder();
+                                            Gson gson = builder.create();
+                                            Token token = gson.fromJson(res, Token.class);
+                                            Log.d("retrofit", "token: " + Utils.TOKEN);
+                                            SharedPref.write(SharedPref.TOKEN, token.getToken());
+                                            SharedPref.write(SharedPref.AUTH, true);
+                                            Bundle args = new Bundle();
+                                            args.putBoolean("PROFILE", true);
+                                            MainFragment bFragment = new MainFragment();
+                                            bFragment.setArguments(args);
+                                            getFragmentManager()
+                                                    .beginTransaction()
+                                                    .replace(R.id.main_act_id, bFragment)
+                                                    .commit();
+                                        } else {
+                                            res = response.errorBody().string(); // do something with that
+                                            if (res.contains("Bad password")) {
+                                                Toast.makeText(getContext(), "Неверный пароль!", Toast.LENGTH_LONG).show();
+                                            }else if(res.contains("User not found")){
+                                                Toast.makeText(getContext(), "Пользователь не найден!", Toast.LENGTH_LONG).show();
+                                            }
+                                            else if(res.contains("Bad email format")){
+                                                Toast.makeText(getContext(), "Неправильный формат email!", Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
 
                                 @Override
-                                public void onFailure(Call<Token> call, Throwable t) {
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
                                     t.printStackTrace();
                                 }
                             });
-
-                    vkAuthView.clearCache(true);
-//                    Utils.setCookie(cookie);
-                    vkAuthView.destroy();
-
-
-                    SharedPref.write(SharedPref.COOKIE, cookie);
-
-                    SharedPref.write(SharedPref.AUTH, true);
-
-                    Bundle args = new Bundle();
-                    args.putBoolean("PROFILE", true);
-                    MainFragment bFragment = new MainFragment();
-                    bFragment.setArguments(args);
-
-                    CookieManager.getInstance().removeAllCookies(null);
-                    CookieManager.getInstance().flush();
-
-                    FragmentManager fragmentManager = getFragmentManager();
-                    assert fragmentManager != null;
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.main_act_id, bFragment);
-                    fragmentTransaction.commitAllowingStateLoss();
-                } else {
-                    view.loadUrl(String.valueOf(request.getUrl()));
                 }
-                progressBar.setVisibility(View.GONE);
-                return super.shouldOverrideUrlLoading(view, request);
             }
         });
+
         return view;
     }
-
 }

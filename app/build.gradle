@@ -12,6 +12,20 @@ apply plugin: 'io.fabric'
 
 android {
 
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\Star\\AndroidStudioProjects\\keystore_for_fan.jks')
+            storePassword 'Jisus131097'
+            keyAlias = 'KeyForFan'
+            keyPassword 'Fuckit97'
+        }
+        debug {
+            storeFile file('C:\\Users\\Star\\AndroidStudioProjects\\keystore_for_fan.jks')
+            storePassword 'Jisus131097'
+            keyAlias = 'KeyForFan'
+            keyPassword 'Fuckit97'
+        }
+    }
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
     defaultConfig {
@@ -27,6 +41,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     productFlavors {
@@ -38,6 +53,10 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
     }
 }
 
@@ -80,6 +99,7 @@ dependencies {
 
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+
 
 
 }

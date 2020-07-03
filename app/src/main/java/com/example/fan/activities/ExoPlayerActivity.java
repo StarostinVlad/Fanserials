@@ -1,5 +1,6 @@
 package com.example.fan.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -7,13 +8,19 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,10 +28,8 @@ import android.widget.Toast;
 
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.example.fan.R;
-import com.example.fan.api.SearchJsonApi;
 import com.example.fan.api.SeriaJsonClass;
 import com.example.fan.utils.CurrentSeriaInfo;
-import com.example.fan.utils.RemoteConfig;
 import com.example.fan.utils.SharedPref;
 import com.example.fan.utils.Utils;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -35,6 +40,9 @@ import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -58,6 +66,9 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import static com.example.fan.utils.Utils.COOKIE;
+import static com.example.fan.utils.Utils.DOMAIN;
+
 
 public class ExoPlayerActivity extends AppCompatActivity {
 
@@ -80,12 +91,50 @@ public class ExoPlayerActivity extends AppCompatActivity {
     private String subTitle;
     private String url;
     private String seria_id;
+    private String TAG = "ExoPlayerActivity";
+    private int oldWidth;
+    private int oldHeight;
+    private FrameLayout layout;
+    private InterstitialAd mInterstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_bar_video);
+        mInterstitialAd = new InterstitialAd(this);
 
+        mInterstitialAd.setAdUnitId(getString(R.string.ad_screen));
+        mInterstitialAd.loadAd(new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("DFDC84BFD22F6F12CEFBDB0880FA290B")
+                .addTestDevice("0AE50CA39585DAB4D218A0C9516422A1")
+                .build());
+        mInterstitialAd.setAdListener(new AdListener() {
+
+            @Override
+            public void onAdLoaded() {
+                Log.d("ADS", "The interstitial loaded");
+                super.onAdLoaded();
+            }
+        });
+        if (mInterstitialAd.isLoaded()) {
+            Log.d("ADS", "AD should shown");
+            mInterstitialAd.show();
+        }
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                // Load the next interstitial.
+                mInterstitialAd.loadAd(new AdRequest.Builder()
+                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                        .addTestDevice("DFDC84BFD22F6F12CEFBDB0880FA290B")
+                        .addTestDevice("0AE50CA39585DAB4D218A0C9516422A1")
+                        .build());
+
+
+            }
+        });
+        layout = findViewById(R.id.frame_container);
         playerView = findViewById(R.id.exoplayer_view);
         playerView.setControllerVisibilityListener(new PlayerControlView.VisibilityListener() {
             @Override
@@ -131,60 +180,93 @@ public class ExoPlayerActivity extends AppCompatActivity {
         fullscreen_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (fullscreen) {
-                    offFullscreen();
-                } else {
-                    onFullscreen();
-                }
+                fullscreen(fullscreen, false);
             }
         });
 
 
-        topic = Utils.translit(title);
-//        Log.d("subscribe", "topic:" + topic);
-        if (SharedPref.containsSubscribe(topic)) {
-            subscribe.setBackgroundColor(getResources().getColor(R.color.Gray));
-            subscribe.setText("Отписаться");
-        } else {
-            subscribe.setBackgroundColor(getResources().getColor(R.color.colorOrange));
-            subscribe.setText("Подписаться");
-        }
+        Button rewind = findViewById(R.id.rewind);
+        Button forward = findViewById(R.id.forward);
 
-        subscribe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.setEnabled(false);
+        rewind.setOnTouchListener(new View.OnTouchListener() {
+            private GestureDetector gestureDetector = new GestureDetector(ExoPlayerActivity.this, new GestureDetector.SimpleOnGestureListener()
+            {
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    if(player!=null) {
+                        long next_position = player.getCurrentPosition()-10000;
+                        if(next_position > 0)
+                            player.seekTo(next_position);
+                        Animation animation = AnimationUtils.loadAnimation(ExoPlayerActivity.this, R.anim.alpha_anim);
+                        rewind.startAnimation(animation);
+                        animation.setAnimationListener(new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) {
+                                rewind.setText("-10сек.");
+                                rewind.setBackgroundResource(R.drawable.rewind_background);
+                            }
 
-                Log.d("topic",topic);
-                if (Utils.isNetworkOnline(ExoPlayerActivity.this))
-                    try {
-                        topic = Utils.translit(title);
-                        if (!SharedPref.containsSubscribe(topic)) {
-                            subscribe();
-                        } else {
-                            unsubscribe();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                rewind.setText("");
+                                rewind.setBackgroundResource(R.drawable.rewind_button);
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animation animation) {
+
+                            }
+                        });
                     }
+                    Log.d("TEST", "Double tap rewind");
+                    return super.onDoubleTap(e);
+                }
+            });
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                gestureDetector.onTouchEvent(event);
+                return true;
             }
         });
 
+        forward.setOnTouchListener(new View.OnTouchListener() {
+            private GestureDetector gestureDetector = new GestureDetector(ExoPlayerActivity.this, new GestureDetector.SimpleOnGestureListener()
+            {
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    if(player!=null) {
+                        long next_position = player.getCurrentPosition()+10000;
+                        if(next_position < player.getDuration())
+                        player.seekTo(next_position);
+                        Animation animation = AnimationUtils.loadAnimation(ExoPlayerActivity.this, R.anim.alpha_anim);
+                        forward.startAnimation(animation);
+                        animation.setAnimationListener(new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) {
+                                forward.setText("+10сек.");
+                                forward.setBackgroundResource(R.drawable.forward_background);
+                            }
 
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (StringUtils.isNotEmpty(seriaData.nextSeria)) {
-                    openSeria(title, seriaData.nextSeria);
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                forward.setText("");
+                                forward.setBackgroundResource(R.drawable.forward_button);
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animation animation) {
+
+                            }
+                        });
+                    }
+                    Log.d("TEST", "Double tap forward");
+                    return super.onDoubleTap(e);
                 }
-            }
-        });
-        prev.setOnClickListener(new View.OnClickListener() {
+            });
             @Override
-            public void onClick(View v) {
-                if (StringUtils.isNotEmpty(seriaData.previusSeria)) {
-                    openSeria(title, seriaData.previusSeria);
-                }
+            public boolean onTouch(View view, MotionEvent event) {
+                gestureDetector.onTouchEvent(event);
+                return true;
             }
         });
 
@@ -200,7 +282,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
     }
 
     void subscribe() {
-        Utils.subscibe(id, 1);
+        Utils.subscribe(id, 1);
         FirebaseMessaging.getInstance()
                 .subscribeToTopic(topic)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -224,7 +306,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
     }
 
     void unsubscribe() {
-        Utils.subscibe(id, 0);
+        Utils.subscribe(id, 0);
         FirebaseMessaging.getInstance()
                 .unsubscribeFromTopic(topic)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -248,33 +330,30 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 });
     }
 
-    void onFullscreen() {
-        fullscreen = true;
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        fullscreen_btn.setBackgroundResource(R.drawable.exo_controls_fullscreen_exit);
-
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow()
-                .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        description_container.setVisibility(View.GONE);
-    }
-
-    void offFullscreen() {
-        fullscreen = false;
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
-
-        fullscreen_btn.setBackgroundResource(R.drawable.exo_controls_fullscreen_enter);
-        description_container.setVisibility(View.VISIBLE);
-        decorView.setVisibility(View.VISIBLE);
+    @SuppressLint("SourceLockedOrientationActivity")
+    private void fullscreen(boolean b, boolean src) {
+        ViewGroup.LayoutParams params = layout.getLayoutParams();
+        if (!b) {
+            fullscreen_btn.setBackgroundResource(R.drawable.exo_controls_fullscreen_exit);
+            if (params.height != ViewGroup.LayoutParams.MATCH_PARENT) {
+                oldHeight = params.height;
+                oldWidth = params.width;
+            }
+            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            if (!src)
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        } else {
+            fullscreen_btn.setBackgroundResource(R.drawable.exo_controls_fullscreen_enter);
+            if (!src)
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            else
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+            params.height = oldHeight;
+            params.width = oldWidth;
+        }
+        fullscreen = !b;
+        layout.setLayoutParams(params);
     }
 
     @Override
@@ -282,12 +361,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
 
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            onFullscreen();
-            //Log.d(or, "land");
+            fullscreen(false, true);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            offFullscreen();
+            fullscreen(true, true);
         }
-        //Log.d(or, "change config");
     }
 
     void fillSpinner(final ArrayList<CurrentSeriaInfo> currentSerias, String descript) {
@@ -378,29 +455,46 @@ public class ExoPlayerActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.low && last_id != id) {
-            String tmp = "";
-            tmp = uri.substring(0, uri.indexOf("hls/") + 4);
-            uri = tmp + "360/index.m3u8";
-            startvideo(uri, player.getCurrentPosition());
-            last_id = id;
-            return true;
-        }
-        if (id == R.id.medium && last_id != id) {
-            String tmp = "";
-            tmp = uri.substring(0, uri.indexOf("hls/") + 4);
-            uri = tmp + "480/index.m3u8";
-            startvideo(uri, player.getCurrentPosition());
-            last_id = id;
-            return true;
-        }
-        if (id == R.id.high && last_id != id) {
-            String tmp = "";
-            tmp = uri.substring(0, uri.indexOf("hls/") + 4);
-            uri = tmp + "720/index.m3u8";
-            startvideo(uri, player.getCurrentPosition());
-            last_id = id;
-            return true;
+        if (StringUtils.isNotEmpty(uri)) {
+            if (id == R.id.low && last_id != id) {
+                String tmp = "";
+                tmp = uri.substring(0, uri.indexOf("hls/") + 4);
+                uri = tmp + "360/index.m3u8";
+                startvideo(uri, player.getCurrentPosition());
+                last_id = id;
+                return true;
+            }
+            if (id == R.id.medium && last_id != id) {
+                String tmp = "";
+                tmp = uri.substring(0, uri.indexOf("hls/") + 4);
+                uri = tmp + "480/index.m3u8";
+                startvideo(uri, player.getCurrentPosition());
+                last_id = id;
+                return true;
+            }
+            if (id == R.id.high && last_id != id) {
+                String tmp = "";
+                tmp = uri.substring(0, uri.indexOf("hls/") + 4);
+                uri = tmp + "720/index.m3u8";
+                startvideo(uri, player.getCurrentPosition());
+                last_id = id;
+                return true;
+            }
+            if (id == R.id.share_btn) {
+                // Create the text message with a string
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                String targetUrl = url;
+                if(!url.contains("http://"))
+                    targetUrl = DOMAIN + url;
+                String textMessage = "Смотри сериал " + title + " " + subTitle + " по ссылке: " + targetUrl;
+                sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+                sendIntent.setType("text/plain");
+                if (sendIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(sendIntent);
+                }
+                return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -452,37 +546,56 @@ public class ExoPlayerActivity extends AppCompatActivity {
         @Override
         protected ArrayList<CurrentSeriaInfo> doInBackground(String... serias) {
             Document doc;
-            String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Mobile Safari/537.36";
+//            String agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Mobile Safari/537.36";
             if (serias == null)
                 return null;
             ArrayList<CurrentSeriaInfo> currentSeriaInfo = new ArrayList<>();
             String currentPage = serias[0];
             if (!currentPage.contains("fanserials")) {
-                String domain = null;
-                domain = RemoteConfig.read(RemoteConfig.DOMAIN);
-                currentPage = domain + currentPage;
+//                String domain = null;
+//                domain = RemoteConfig.read(RemoteConfig.DOMAIN);
+                currentPage = DOMAIN + currentPage;
             }
             //Log.d("tmp", "current: " + s2);
             try {
-
-                if (Utils.CheckResponceCode(currentPage)) {
+                Connection.Response res = Jsoup.connect(currentPage)
+//                            .userAgent(agent)
+                        .cookies(COOKIE)
+//                            .header("host", DOMAIN)
+//                            .header("Upgrade-Insecure-Requests"," 1")
+                        .timeout(10000)
+                        .followRedirects(true)
+                        .method(Connection.Method.GET)
+                        .execute();
+                if (res.statusCode() == 200) {
 //                    doc = Jsoup.parse(Utils.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
-                    Connection.Response res = Jsoup.connect(currentPage).userAgent(agent).timeout(10000).followRedirects(true).method(Connection.Method.GET).execute();
+//                    Connection.Response res = Jsoup.connect("https://fanser.000webhostapp.com/anti_block.php?url="
+//                            +currentPage)
                     doc = res.parse();
                     cookie = res.cookies();
 //                    Log.d("tmp", res.cookies().toString());
 
                     Utils.saveFile(doc.html(), ExoPlayerActivity.this);
 
-                    String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
+//                    String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
 
-                    Document document = Jsoup.connect(domain + "/api/v1/serials")
-                            .data("query", title).ignoreContentType(true).get();
 
-                    SearchJsonApi fanserJsonApi = null;
-                    fanserJsonApi = LoganSquare.parse(document.body().html(), SearchJsonApi.class);
+                    title = doc.select("body > div.wrapper > main > div > div.row > div > div > section > ul > li:nth-child(2) > a > span").text();
 
-                    id = fanserJsonApi.foundSerialData.get(0).foundSerialId;
+//                    Document document = Jsoup.connect(DOMAIN + "/api/v1/serials")
+//                            .data("query", title).ignoreContentType(true).get();
+
+//                    SearchJsonApi fanserJsonApi = null;
+//                    fanserJsonApi = LoganSquare.parse(document.body().html(), SearchJsonApi.class);
+
+//                    id = fanserJsonApi.foundSerialData.get(0).foundSerialId;
+//                    String st_id = doc.select(".subscribe-link ul li a").attr("data-id");
+                    String st_id = doc.select("ul.subscribe-link li a").attr("data-id");
+                    if (st_id != "")
+                        id = Integer.parseInt(st_id);
+                    else
+                        id = 2410;
+                    Log.d("ExoPlayerActivity", "id= " + st_id);
 
                     description = doc.select(".well div").text();
 
@@ -501,7 +614,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                     for (Element ss : iframe) {
                         String str = ss.toString();
 //                        Log.d("tmp", "json= " + str);
-                        if (str.contains("/limited/")) {
+                        if (str.contains("\\/limited\\/")) {
                             limited = true;
                             return null;
                         }
@@ -539,9 +652,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
         String getSeria(String url, String referer) throws IOException, JSONException {
             Document doc;
             String hls = "";
-            if (url.contains("limited")) {
-                return null;
-            } else if (url.contains("fanserials") || url.contains("umovies")
+            if (url.contains("fanserials") || url.contains("umovies")
                     || url.contains("seplay") || url.contains("player")
                     || url.contains("toplay")) {
 
@@ -583,8 +694,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             if (limited) {
-                Utils.alarm("Внимание!", "Данный сериал недосутпен в вашей стране(попробуйте использовать VPN)");
-                finish();
+                Utils.alarm(ExoPlayerActivity.this,"Внимание!", "Данный сериал недосутпен в вашей стране(попробуйте использовать VPN)");
             }
 
             if (StringUtils.isNotEmpty(toolbarTit)) {
@@ -603,6 +713,53 @@ public class ExoPlayerActivity extends AppCompatActivity {
             if (StringUtils.isNotEmpty(nextSeria)) {
                 next.setVisibility(View.VISIBLE);
             }
+            topic = Utils.translit(title);
+//        Log.d("subscribe", "topic:" + topic);
+            if (SharedPref.containsSubscribe(topic)) {
+                subscribe.setBackgroundColor(getResources().getColor(R.color.Gray));
+                subscribe.setText("Отписаться");
+            } else {
+                subscribe.setBackgroundColor(getResources().getColor(R.color.colorOrange));
+                subscribe.setText("Подписаться");
+            }
+
+            subscribe.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.setEnabled(false);
+
+                    Log.d("topic", topic);
+                    if (Utils.isNetworkOnline(ExoPlayerActivity.this))
+                        try {
+                            topic = Utils.translit(title);
+                            if (!SharedPref.containsSubscribe(topic)) {
+                                subscribe();
+                            } else {
+                                unsubscribe();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                }
+            });
+
+
+            next.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (StringUtils.isNotEmpty(seriaData.nextSeria)) {
+                        openSeria(title, seriaData.nextSeria);
+                    }
+                }
+            });
+            prev.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (StringUtils.isNotEmpty(seriaData.previusSeria)) {
+                        openSeria(title, seriaData.previusSeria);
+                    }
+                }
+            });
 
 //            videoFragment.pr.setVisibility(View.INVISIBLE);
 //            videoFragment.btn.setVisibility(View.VISIBLE);

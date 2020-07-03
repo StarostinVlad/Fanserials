@@ -59,7 +59,7 @@ public class SearchFragment extends Fragment {
                 message.setText("введите не менее 3х символов");
             }
         } else {
-            Utils.alarm("Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+            Utils.alarm(getContext(),"Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
         }
     }
 
@@ -82,7 +82,7 @@ public class SearchFragment extends Fragment {
                 args.putString("Title", list.get(position).getName());
                 FragmentOfSerial bFragment = new FragmentOfSerial();
                 bFragment.setArguments(args);
-                getFragmentManager().beginTransaction().replace(R.id.main_act_id, bFragment).addToBackStack(null).commit();
+                getFragmentManager().beginTransaction().replace(R.id.main_act_id, bFragment).commit();
                 //Log.d("MainFragment", "size= " + Series.size() + "/" + (lv.getCount() - 1) + " pos= " + position + " " + Series.get(position).getName() + " " + Series.get(position).getDescription());
 
             }

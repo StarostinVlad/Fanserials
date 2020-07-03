@@ -3,13 +3,13 @@ package com.example.fan.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.fan.R;
 import com.example.fan.fragments.AllSerialsFragment;
 import com.example.fan.fragments.AuthorizationFragment;
+import com.example.fan.fragments.VKAuthorizationFragment;
 import com.example.fan.fragments.MainFragment;
 import com.example.fan.fragments.SearchFragment;
 import com.example.fan.utils.SharedPref;
@@ -20,12 +20,15 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
+import static com.example.fan.utils.Utils.AUTH;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     boolean paused = false;
     String SAVED_NOTIFI_STATUS = "notification";
     int lastid = 0;
-    boolean auth;
     //    private boolean isChecked;
     private boolean backward = false;
 
@@ -51,15 +53,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_bar_main);
 
-
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-        Utils.init(this);
-
-        SharedPref.init(this);
 
 
         if (savedInstanceState == null) {
@@ -78,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+                    getSupportFragmentManager().popBackStack();
 //                Log.d("MainActivity", "bottom nav id: " + id + " last id: " + lastid);
                 if (id != lastid) {
                     if (backward) {
@@ -85,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                     Bundle args = new Bundle();
-                    auth = SharedPref.read(SharedPref.AUTH, false);
 //                    Log.d("MAinActivity", "Auth : " + auth);
 
                     lastid = id;
@@ -161,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                             //Log.d("MainActivity", "cur type null: " + (curType == null));
                         } else if (nextFrag.equals(authorizationFragment)) {
 //                            lastItem.add(id);
-                            if (auth) {
+                            if (AUTH) {
 //                                Toast.makeText(MainActivity.this, "Авторизованы!", Toast.LENGTH_SHORT).show();
                                 getSupportActionBar().setTitle("Лента");
                                 MainFragment bFrag = new MainFragment();
@@ -242,13 +236,13 @@ public class MainActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String s) {
                 if (!TextUtils.isEmpty(s)) {
                     if (s.length() > 0)
-                        if (!getSupportFragmentManager().findFragmentById(R.id.main_act_id)
-                                .getClass().getSimpleName().equals(sFr.getClass().getSimpleName())) {
+                        if (!Objects.equals(getSupportFragmentManager().findFragmentById(R.id.main_act_id), sFr)) {
 //                            Log.d("retrofit", getSupportFragmentManager().findFragmentById(R.id.main_act_id)
 //                                    .getClass().getSimpleName() + " current");
                             sFr.setQueryString(s);
                             fTrans = getSupportFragmentManager().beginTransaction();
-                            fTrans.replace(R.id.main_act_id, sFr).addToBackStack(null);
+//                            fTrans.replace(R.id.main_act_id, sFr).addToBackStack(null);
+                            fTrans.replace(R.id.main_act_id, sFr);
                             fTrans.commit();
                         } else {
                             sFr.search(s);

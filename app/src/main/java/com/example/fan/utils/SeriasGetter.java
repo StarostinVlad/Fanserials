@@ -1,7 +1,6 @@
 package com.example.fan.utils;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.bluelinelabs.logansquare.LoganSquare;
 import com.example.fan.api.FanserJsonApi;
@@ -17,9 +16,11 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.example.fan.utils.Utils.DOMAIN;
+
 public class SeriasGetter {
     public int items = 0;
-    public String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
+//    public String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
     public Context context;
     int page = 1;
     private ArrayList<Seria> serias;
@@ -35,7 +36,7 @@ public class SeriasGetter {
     public ArrayList<Seria> getNewSeries() throws IOException {
         items = 30;
         Document doc = null;
-        String queryUrl = domain + "/api/v1/episodes";
+        String queryUrl = DOMAIN + "/api/v1/episodes";
         Connection.Response request = Jsoup.connect(queryUrl)
                 .data("limit", "30")
                 .data("offset", "0")
@@ -54,7 +55,7 @@ public class SeriasGetter {
     public ArrayList<Seria> addNewSeries() throws IOException {
         items = 30;
         Document doc = null;
-        String queryUrl = domain + "/api/v1/episodes";
+        String queryUrl = DOMAIN + "/api/v1/episodes";
         Connection.Response request = Jsoup.connect(queryUrl)
                 .data("limit", "30")
                 .data("offset", "" + (page += 30))
@@ -85,7 +86,7 @@ public class SeriasGetter {
     }
 
     public ArrayList<Seria> getSeriesOfSerial(String uri) throws IOException {
-        String queryUrl = uri.contains("http") ? uri : (domain + uri);
+        String queryUrl = uri.contains("http") ? uri : (DOMAIN + uri);
 
         items = queryUrl.contains("profile") ? 12 : 32;
 
@@ -95,7 +96,7 @@ public class SeriasGetter {
         Document doc = null;
         Connection.Response request = Jsoup.connect(queryUrl)
                 .ignoreContentType(true)
-                .cookies(Utils.getCookies())
+                .cookies(Utils.COOKIE)
                 .method(Connection.Method.GET)
                 .execute();
 //        Log.d(getClass().getSimpleName(), "code: " + request.statusCode());
@@ -115,7 +116,7 @@ public class SeriasGetter {
 
     public ArrayList<Seria> addSeriesOfSerial(String uri) throws IOException {
 
-        String queryUrl = uri.contains("http") ? uri : (domain + uri);
+        String queryUrl = uri.contains("http") ? uri : (DOMAIN + uri);
 
 
         if (queryUrl.lastIndexOf("/") < queryUrl.length() - 1)
@@ -127,7 +128,7 @@ public class SeriasGetter {
         Document doc = null;
         Connection.Response request = Jsoup.connect(queryUrl)
                 .ignoreContentType(true)
-                .cookies(Utils.getCookies())
+                .cookies(Utils.COOKIE)
                 .method(Connection.Method.GET)
                 .execute();
 

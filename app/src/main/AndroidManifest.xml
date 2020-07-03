@@ -2,30 +2,1716 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.fan">
-    <!-- To access Google+ APIs: -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".App"
         android:allowBackup="true"
-        android:icon="@drawable/logo1"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/logo1"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".DeepLinkActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="fanserial.net"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.house"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.academy"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.accountant"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.accountants"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.active"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.actor"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.adult"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.aero"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.agency"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.airforce"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.apartments"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.app "
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.archi"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.army"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.associates"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.asia"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.attorney"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.auction"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.audio"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.autos"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.biz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cat"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.com"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.coop"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dance"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.edu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.eus"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gov"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.info"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.int"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.jobs"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mil"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mobi"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.museum"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.name"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.net"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.one"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ong"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.onl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.online"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ooo"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.org"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.organic"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.partners"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.parts"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.party"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pharmacy"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.photo"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.photography"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.photos"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.physio"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pics"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pictures"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.feedback"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pink"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pizza"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.place"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.plumbing"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.plus"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.poker"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.porn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.post"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.press"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pro"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.productions"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.prof"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.properties"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.property"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.qpon"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.racing"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.recipes"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.red"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rehab"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ren"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rent"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rentals"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.repair"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.report"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.republican"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rest"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.review"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.reviews"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rich"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.site"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tel"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.trade"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.travel"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.xxx"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.xyz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.yoga"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.zone"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ninja"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.art"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.moe"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dev"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ac"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ad"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ae"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.af"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ag"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ai"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.al"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.am"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.an"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ao"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.aq"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ar"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.as"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.at"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.au"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.aw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ax"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.az"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ba"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bb"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bd"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.be"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bf"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bh"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bi"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bj"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bo"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.br"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bs"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bt"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bv"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.by"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.бел"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ca"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cc"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cd"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cf"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ch"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ci"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ck"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.co"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cv"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cx"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cy"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dd"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.de"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dj"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.do"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ec"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ee"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.eg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.er"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.es"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.et"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.eu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.fi"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.fj"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.fk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.fm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.fo"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.fr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ga"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gb"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.uk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gd"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ge"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gf"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gh"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gi"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gp"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gq"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gs"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gt"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gy"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.hk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.hm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.hn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.hr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ht"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.hu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.id"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ie"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.il"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.im"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.io"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.iq"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ir"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.is"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.it"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.je"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.jm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.jo"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.jp"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ke"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kh"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ki"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.km"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kp"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kd"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.la"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lb"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lc"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.li"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ls"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lt"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lv"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ly"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ma"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mc"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.md"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.me"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mh"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ml"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.мон"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mo"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mp"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mq"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ms"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mt"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mv"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mx"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.my"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.mz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.na"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.nc"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ne"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.nf"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ng"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ni"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.nl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.no"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.np"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.nr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.nu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.nz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.om"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pa"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pe"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pf"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ph"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ps"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pt"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.py"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.qa"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.re"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ro"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rs"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.срб"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ru"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.su"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.рф"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.su"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sa"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sb"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sc"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sd"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.se"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sh"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.si"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sj"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.so"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.st"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.su"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sv"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sy"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tc"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.td"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tf"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.th"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tj"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tp"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.to"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tp"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tl"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tt"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tv"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ua"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.укр"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ug"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.uk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.us"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.gov"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.uy"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.uz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.va"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.vc"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ve"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.vg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.vi"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.vn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.vu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.wf"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ws"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ye"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.yt"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.yu"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.za"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.zm"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.zw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.dz"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.бел"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.by"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.中国"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.中國"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.cn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.eg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.香港"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.hk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.भारत"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.భారత్"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ભારત"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ਭਾਰਤ"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.இந்தியா"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ভারত"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.in"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ir"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.jo"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ma"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ps"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.qa"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.рф"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ru"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sa"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.срб"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.rs"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.新加坡"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.சிங்கப்பூர்"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.한국"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.kr"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ලංකා"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.இலங்கை"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.lk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.sy"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.台湾"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.台灣"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tw"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ไทย"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.th"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.tn"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.укр"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ua"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ae"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.বাংলা"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bd"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.бг"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.bg"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.გე"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ge"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.il"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.om"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.pk"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.ye"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.arpa"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+                <data
+                    android:host="fanserials.yandex"
+                    android:pathPattern=".*"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activities.SplashScreenActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -35,11 +1721,16 @@
             android:theme="@style/AppTheme.NoActionBar.Fullscreen" />
         <activity
             android:name=".activities.SettingsActivity"
-            android:label="@string/title_activity_settings" />
+            android:label="@string/action_settings" />
         <activity
             android:name=".activities.MainActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9409630953625719~5336580212" />
 
         <receiver
             android:name=".Notification_Broadcast"
@@ -61,15 +1752,13 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <activity
-            android:name=".MainActivityFrag"
-            android:label="@string/title_activity_all_serials_activity"
-            android:theme="@style/AppTheme" />
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-9409630953625719~5336580212" />
     </application>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
 </manifest>

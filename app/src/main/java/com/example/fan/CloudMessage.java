@@ -70,7 +70,7 @@ public class CloudMessage extends FirebaseMessagingService {
                 Notification customNotification = new Notification.Builder(this, channelId)
                         .setContentIntent(resultPendingIntent)
                         // обязательные настройки
-                        .setSmallIcon(R.drawable.play)
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
                         .setContentTitle(notification.getTitle())
                         //.setContentText(res.getString(R.string.notifytext))
@@ -100,7 +100,7 @@ public class CloudMessage extends FirebaseMessagingService {
                 Notification customNotification = new Notification.Builder(this)
                         .setContentIntent(resultPendingIntent)
                         // обязательные настройки
-                        .setSmallIcon(R.drawable.play)
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
                         .setContentTitle(notification.getTitle())
                         //.setContentText(res.getString(R.string.notifytext))

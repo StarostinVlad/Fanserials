@@ -18,7 +18,7 @@ public class App extends Application {
     private void createNotificationChannels() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(
-              channelId,"Fanserials", NotificationManager.IMPORTANCE_HIGH
+              channelId,"noFanserials", NotificationManager.IMPORTANCE_HIGH
             );
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(notificationChannel);
