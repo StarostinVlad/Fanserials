@@ -28,8 +28,8 @@
 -keep class com.bluelinelabs.logansquare.** { *; }
 -keep @com.bluelinelabs.logansquare.annotation.JsonObject class *
 -keep class **$$JsonObjectMapper { *; }
--keep public class com.example.fan.Json.FanserJsonApi
--keep public class com.example.fan.fragments.TestFragment
+-keep public class com.starostinvlad.fan.Json.FanserJsonApi
+-keep public class com.starostinvlad.fan.fragments.TestFragment
 -keepattributes JsonObject
 -keepattributes JsonField
 
@@ -81,4 +81,4 @@
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 
--keep class com.example.fan.api.retro.** { *; }
+-keep class com.starostinvlad.fan.api.retro.** { *; }

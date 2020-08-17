@@ -161,7 +161,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/image/ic_portrait_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_skip_next_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -171,7 +171,9 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_action_profile" />
+                            <entry key="color" value="c4c4c4" />
+                            <entry key="opacityPercent" value="70" />
+                            <entry key="outputName" value="ic_skip_next" />
                             <entry key="sourceFile" value="C:\Users\admin" />
                           </map>
                         </option>

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "690560640266-l41oteamoedh41e70uvg91brb3jps28u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fan",
+            "certificate_hash": "d8503e4b0b9521f1ca61bc506b427fd81d216a5d"
+          }
+        },
+        {
           "client_id": "690560640266-ch1iuklikisnv63e9d9a6v52on2udp2q.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -42,6 +50,44 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690560640266:android:6d6243ad6986f25dadc6f3",
+        "android_client_info": {
+          "package_name": "com.starostinvlad.fan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690560640266-an79jn1n07ft7q0gu3vgrfqnk94pp2e0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.starostinvlad.fan",
+            "certificate_hash": "d8503e4b0b9521f1ca61bc506b427fd81d216a5d"
+          }
+        },
+        {
+          "client_id": "690560640266-3fenq8dc8nbtqpqnirjrk6160i0cdhqb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJkq_evpRPSLtE1GrkzWbEoPgAm47kr8A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690560640266-3fenq8dc8nbtqpqnirjrk6160i0cdhqb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-9409630953625719~5336580212"
     }
   ],
   "configuration_version": "1"

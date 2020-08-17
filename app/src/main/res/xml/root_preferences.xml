@@ -34,7 +34,7 @@
             android:key="about_us"
             app:title="О нас" />
         <Preference
-            android:fragment="com.example.fan.fragments.TestFragment"
+            android:fragment="com.starostinvlad.fan.fragments.TestFragment"
             android:key="dialog"
             app:title="Правообладателям" />
         <Preference
