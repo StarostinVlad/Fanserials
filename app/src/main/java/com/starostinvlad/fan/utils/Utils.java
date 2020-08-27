@@ -9,6 +9,9 @@ import android.os.Build;
 import android.util.Log;
 import android.view.View;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.api.retro.SubscribeSerial;
 import com.starostinvlad.fan.api.retro.Subscribes;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -49,6 +52,7 @@ public class Utils {
     public static String ALL_SERIAL;
     public static boolean AUTH;
     public static String IS_REVIEW;
+    public static InterstitialAd INTERTESTIAL_AD;
 
     static {
         letters.put('А', "A");
@@ -104,6 +108,12 @@ public class Utils {
             AUTH = SharedPref.read(SharedPref.AUTH, false);
         if (SharedPref.contains(SharedPref.TOKEN))
             TOKEN = SharedPref.read(SharedPref.TOKEN);
+
+        INTERTESTIAL_AD = new InterstitialAd(context);
+
+        INTERTESTIAL_AD.setAdUnitId(context.getString(R.string.ad_screen));
+        INTERTESTIAL_AD.loadAd(new AdRequest.Builder()
+                .build());
 
     }
 
@@ -346,21 +356,24 @@ public class Utils {
                                 .header("X-Requested-With", "XMLHttpRequest")
                                 .ignoreContentType(true)
                                 .get();
-                        GsonBuilder builder = new GsonBuilder();
-                        Gson gson = builder.create();
-                        Subscribes subscribes = gson.fromJson(doc.body().text(), Subscribes.class);
-                        for (int id : subscribes.getSubscribes()) {
-                            SubscribeSerial found = subscribes.getSerials().stream().filter(u -> u.getId().equals(id)).collect(Collectors.toList()).get(0);
-                            if (found != null) {
-                                String topic = translit(found.getName());
-                                SharedPref.addSubscribes(topic);
-                                subscribe(id, 1);
-                                FirebaseMessaging.getInstance()
-                                        .subscribeToTopic(topic);
+                        String res = doc.body().html();
+                        if(!res.isEmpty()) {
+                            GsonBuilder builder = new GsonBuilder();
+                            Gson gson = builder.create();
+                            Subscribes subscribes = gson.fromJson(res, Subscribes.class);
+                            for (int id : subscribes.getSubscribes()) {
+                                SubscribeSerial found = subscribes.getSerials().stream().filter(u -> u.getId().equals(id)).collect(Collectors.toList()).get(0);
+                                if (found != null) {
+                                    String topic = translit(found.getName());
+                                    SharedPref.addSubscribes(topic);
+                                    subscribe(id, 1);
+                                    FirebaseMessaging.getInstance()
+                                            .subscribeToTopic(topic);
+                                }
                             }
-                        }
 
-                        Log.d("Utils", "body: " + doc.body());
+                            Log.d("Utils", "body: " + res);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -406,10 +419,5 @@ public class Utils {
             }
         });
         thread.start();
-    }
-
-    public void mass_subscribe() {
-
-
     }
 }

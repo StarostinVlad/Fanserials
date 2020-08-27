@@ -14,26 +14,26 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\Star\\AndroidStudioProjects\\keystore_for_fan.jks')
+            storeFile file('..\\keystore_for_fan.jks')
             storePassword 'Jisus131097'
             keyAlias = 'KeyForFan'
             keyPassword 'Fuckit97'
         }
         debug {
-            storeFile file('C:\\Users\\Star\\AndroidStudioProjects\\keystore_for_fan.jks')
+            storeFile file('..\\keystore_for_fan.jks')
             storePassword 'Jisus131097'
             keyAlias = 'KeyForFan'
             keyPassword 'Fuckit97'
         }
     }
-    compileSdkVersion 28
+    compileSdkVersion 29
     buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "com.starostinvlad.fan"
         minSdkVersion 23
-        targetSdkVersion 28
-        versionCode 3
-        versionName "1.0.3.2"
+        targetSdkVersion 29
+        versionCode 4
+        versionName "1.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

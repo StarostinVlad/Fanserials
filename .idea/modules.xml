@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="fan/app" />
-      <module fileurl="file://$PROJECT_DIR$/fan.iml" filepath="$PROJECT_DIR$/fan.iml" group="fan" />
       <module fileurl="file://$PROJECT_DIR$/fanserials.iml" filepath="$PROJECT_DIR$/fanserials.iml" />
     </modules>
   </component>

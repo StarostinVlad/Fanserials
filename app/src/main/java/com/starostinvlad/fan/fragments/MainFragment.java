@@ -10,6 +10,9 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.RequestConfiguration;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.api.retro.Datum;
 import com.starostinvlad.fan.api.retro.FANAPI;
@@ -21,6 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -256,12 +260,18 @@ public class MainFragment extends Fragment implements Serializable {
     }
 
     void fill(List<Datum> data) {
-        list.add(null);
         list.addAll(data);
 
         if (seriaListAdapter == null) {
             seriaListAdapter = new SeriaListAdapter(list, getContext());
             lv.setAdapter(seriaListAdapter);
+            View view_with_ad = LayoutInflater.from(getContext()).inflate(R.layout.ad_in_listview, null);
+            AdView ad_view = view_with_ad.findViewById(R.id.in_list_ad);
+            lv.addHeaderView(ad_view);
+            AdRequest adRequest = new AdRequest.Builder()
+                    .build();
+            ad_view.loadAd(adRequest);
+
         } else
             seriaListAdapter.notifyDataSetChanged();
 

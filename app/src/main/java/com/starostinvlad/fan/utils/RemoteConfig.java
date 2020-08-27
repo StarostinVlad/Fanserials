@@ -20,7 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 
 public class RemoteConfig {
     public static final String DOMAIN = "DOMAIN";
-    public static final String IS_REVIEW = "IS_REVIEW";
+    public static final String IS_REVIEW = "REVIEW";
     public static final String ALL_SERIAL_JSON = "ALL_SERIAL_JSON";
 
     private static FirebaseRemoteConfig mFirebaseRemoteConfig;

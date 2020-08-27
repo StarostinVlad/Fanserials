@@ -8,10 +8,11 @@
         android:id="@+id/in_list_ad"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="30dp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-9409630953625719/6581085258">
+        ads:adUnitId="ca-app-pub-9409630953625719/1332118222">
     </com.google.android.gms.ads.AdView>
 
 </LinearLayout>

@@ -1,11 +1,7 @@
-*.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-*.zip
-/app/release
+package com.starostinvlad.fan.utils;
+
+import android.content.Context;
+import android.content.Intent;
+import android.view.LayoutInflater;
+import an
+/.idea/*

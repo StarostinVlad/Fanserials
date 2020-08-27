@@ -22,16 +22,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bluelinelabs.logansquare.LoganSquare;
-import com.starostinvlad.fan.R;
-import com.starostinvlad.fan.api.SeriaJsonClass;
-import com.starostinvlad.fan.utils.CurrentSeriaInfo;
-import com.starostinvlad.fan.utils.SharedPref;
-import com.starostinvlad.fan.utils.Utils;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
@@ -46,6 +42,14 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.starostinvlad.fan.BuildConfig;
+import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.SeriaAdapter;
+import com.starostinvlad.fan.api.SeriaJsonClass;
+import com.starostinvlad.fan.utils.CurrentSeriaInfo;
+import com.starostinvlad.fan.utils.Seria;
+import com.starostinvlad.fan.utils.SharedPref;
+import com.starostinvlad.fan.utils.Utils;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
@@ -68,6 +72,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import static com.starostinvlad.fan.utils.Utils.COOKIE;
 import static com.starostinvlad.fan.utils.Utils.DOMAIN;
+import static com.starostinvlad.fan.utils.Utils.INTERTESTIAL_AD;
 import static com.starostinvlad.fan.utils.Utils.IS_REVIEW;
 
 
@@ -96,45 +101,34 @@ public class ExoPlayerActivity extends AppCompatActivity {
     private int oldWidth;
     private int oldHeight;
     private FrameLayout layout;
-    private InterstitialAd mInterstitialAd;
+    private ListView series_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_bar_video);
-        mInterstitialAd = new InterstitialAd(this);
 
-        mInterstitialAd.setAdUnitId(getString(R.string.ad_screen));
-        mInterstitialAd.loadAd(new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("DFDC84BFD22F6F12CEFBDB0880FA290B")
-                .addTestDevice("0AE50CA39585DAB4D218A0C9516422A1")
-                .build());
-        mInterstitialAd.setAdListener(new AdListener() {
+        if(INTERTESTIAL_AD.isLoaded()){
+            INTERTESTIAL_AD.show();
+            INTERTESTIAL_AD.setAdListener(new AdListener(){
+                @Override
+                public void onAdClosed() {
+                    INTERTESTIAL_AD.loadAd(new AdRequest.Builder()
+                            .build());
+                    super.onAdClosed();
+                }
+            });
 
-            @Override
-            public void onAdLoaded() {
-                Log.d("ADS", "The interstitial loaded");
-                super.onAdLoaded();
-            }
-        });
-        if (mInterstitialAd.isLoaded()) {
-            Log.d("ADS", "AD should shown");
-            mInterstitialAd.show();
         }
-//        mInterstitialAd.setAdListener(new AdListener() {
-//            @Override
-//            public void onAdClosed() {
-//                // Load the next interstitial.
-//                mInterstitialAd.loadAd(new AdRequest.Builder()
-//                        .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-//                        .addTestDevice("DFDC84BFD22F6F12CEFBDB0880FA290B")
-//                        .addTestDevice("0AE50CA39585DAB4D218A0C9516422A1")
-//                        .build());
-//
-//
-//            }
-//        });
+        else {
+            INTERTESTIAL_AD.loadAd(new AdRequest.Builder()
+                    .build());
+        }
+
+
+        series_list = findViewById(R.id.series_in_sezon);
+
+
         layout = findViewById(R.id.frame_container);
         playerView = findViewById(R.id.exoplayer_view);
         playerView.setControllerVisibilityListener(new PlayerControlView.VisibilityListener() {
@@ -151,7 +145,11 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
 //        Log.d("currentSeria", "started!");
 
-        description = findViewById(R.id.seria_description);
+//        description = findViewById(R.id.seria_description);
+        View v = getLayoutInflater().inflate(R.layout.seria_header, null);
+
+        description = v.findViewById(R.id.description_seria);
+
         voicesList = findViewById(R.id.voicesList);
 
         subscribe = findViewById(R.id.subscribe_button_exo);
@@ -190,13 +188,12 @@ public class ExoPlayerActivity extends AppCompatActivity {
         Button forward = findViewById(R.id.forward);
 
         rewind.setOnTouchListener(new View.OnTouchListener() {
-            private GestureDetector gestureDetector = new GestureDetector(ExoPlayerActivity.this, new GestureDetector.SimpleOnGestureListener()
-            {
+            private GestureDetector gestureDetector = new GestureDetector(ExoPlayerActivity.this, new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
-                    if(player!=null) {
-                        long next_position = player.getCurrentPosition()-10000;
-                        if(next_position > 0)
+                    if (player != null) {
+                        long next_position = player.getCurrentPosition() - 10000;
+                        if (next_position > 0)
                             player.seekTo(next_position);
                         Animation animation = AnimationUtils.loadAnimation(ExoPlayerActivity.this, R.anim.alpha_anim);
                         rewind.startAnimation(animation);
@@ -223,6 +220,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                     return super.onDoubleTap(e);
                 }
             });
+
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 gestureDetector.onTouchEvent(event);
@@ -231,14 +229,13 @@ public class ExoPlayerActivity extends AppCompatActivity {
         });
 
         forward.setOnTouchListener(new View.OnTouchListener() {
-            private GestureDetector gestureDetector = new GestureDetector(ExoPlayerActivity.this, new GestureDetector.SimpleOnGestureListener()
-            {
+            private GestureDetector gestureDetector = new GestureDetector(ExoPlayerActivity.this, new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
-                    if(player!=null) {
-                        long next_position = player.getCurrentPosition()+10000;
-                        if(next_position < player.getDuration())
-                        player.seekTo(next_position);
+                    if (player != null) {
+                        long next_position = player.getCurrentPosition() + 10000;
+                        if (next_position < player.getDuration())
+                            player.seekTo(next_position);
                         Animation animation = AnimationUtils.loadAnimation(ExoPlayerActivity.this, R.anim.alpha_anim);
                         forward.startAnimation(animation);
                         animation.setAnimationListener(new Animation.AnimationListener() {
@@ -264,6 +261,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                     return super.onDoubleTap(e);
                 }
             });
+
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 gestureDetector.onTouchEvent(event);
@@ -370,7 +368,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     void fillSpinner(final ArrayList<CurrentSeriaInfo> currentSerias, String descript) {
 
-        description.setText(descript);
+//        description.setText(descript);
         ArrayList<String> titleList = new ArrayList<>();
         for (CurrentSeriaInfo item : currentSerias)
             titleList.add(item.Title);
@@ -486,7 +484,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
                 String targetUrl = url;
-                if(!url.contains("http://"))
+                if (!url.contains("http://"))
                     targetUrl = DOMAIN + url;
                 String textMessage = "Смотри сериал " + title + " " + subTitle + " по ссылке: " + targetUrl;
                 sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
@@ -539,7 +537,8 @@ public class ExoPlayerActivity extends AppCompatActivity {
     class SeriaData extends AsyncTask<String, Void, ArrayList<CurrentSeriaInfo>> {
 
         String toolbarTit = "";
-        String description = "";
+        String descriptionText = "";
+        ArrayList<Seria> seriaList = new ArrayList<>();
         private Map<String, String> cookie;
         private String previusSeria, nextSeria;
         private boolean limited = false;
@@ -552,7 +551,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 return null;
             ArrayList<CurrentSeriaInfo> currentSeriaInfo = new ArrayList<>();
             String currentPage = serias[0];
-            if(!IS_REVIEW.isEmpty()){
+            if (IS_REVIEW.equals(BuildConfig.VERSION_NAME)) {
                 limited = true;
                 return null;
             }
@@ -588,6 +587,32 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
                     title = doc.select("body > div.wrapper > main > div > div.row > div > div > section > ul > li:nth-child(2) > a > span").text();
 
+
+                    int numElem = doc.select("body > div.wrapper > main > div > div > div > div > section > ul > li").size() - 1;
+                    String sezonHref = doc.select("body > div.wrapper > main > div > div > div > div > section > ul > li:nth-child(" + numElem + ") > a").attr("href");
+
+//                    Log.d(TAG, "href: " + sezonHref);
+
+                    Document sezonHtml = Jsoup.connect(DOMAIN + sezonHref).get();
+
+
+//                    Log.d(TAG, "html: " + sezonHtml);
+
+                    Elements elementsList = sezonHtml.select("#episode_list > li > div > div");
+                    for (Element seria : elementsList) {
+                        String desc = seria.select(".serial-bottom div.field-description > a").text();
+                        String title = seria.select(".serial-bottom div.field-title > a").text();
+                        String href = seria.select(".serial-bottom div.field-title > a").attr("href");
+                        String image = seria.select("div.serial-top > div.field-img").attr("style");
+                        image = image.substring(image.indexOf("url('") + 5, image.length() - 3);
+
+                        if (!subTitle.equals(desc))
+                            seriaList.add(new Seria(title, href, image, desc));
+
+                        Log.d(TAG, "seria: " + desc);
+                    }
+
+
 //                    Document document = Jsoup.connect(DOMAIN + "/api/v1/serials")
 //                            .data("query", title).ignoreContentType(true).get();
 
@@ -603,7 +628,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                         id = 2410;
                     Log.d("ExoPlayerActivity", "id= " + st_id);
 
-                    description = doc.select(".well div").text();
+                    descriptionText = doc.select(".well div").text();
 
                     seria_id = (doc.select("#complain").attr("data-id"));
 
@@ -700,7 +725,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             if (limited) {
-                Utils.alarm(ExoPlayerActivity.this,"Внимание!", "Данный сериал недосутпен в вашей стране(попробуйте использовать VPN)");
+                Utils.alarm(ExoPlayerActivity.this, "Внимание!", "Данный сериал недосутпен в вашей стране(попробуйте использовать VPN)");
             }
 
             if (StringUtils.isNotEmpty(toolbarTit)) {
@@ -709,8 +734,13 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 Objects.requireNonNull(getSupportActionBar()).setSubtitle(toolbarSubTit);
                 Objects.requireNonNull(getSupportActionBar()).setTitle(title);
             }
+            if (!seriaList.isEmpty()) {
+                series_list.setAdapter(new SeriaAdapter(seriaList, getApplicationContext()));
+                description.setText(descriptionText);
+                series_list.addHeaderView(description);
+            }
             if (result != null) {
-                fillSpinner(result, description);
+                fillSpinner(result, descriptionText);
             }
 
             if (StringUtils.isNotEmpty(previusSeria)) {
@@ -729,41 +759,32 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 subscribe.setText("Подписаться");
             }
 
-            subscribe.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    v.setEnabled(false);
+            subscribe.setOnClickListener(v -> {
+                v.setEnabled(false);
 
-                    Log.d("topic", topic);
-                    if (Utils.isNetworkOnline(ExoPlayerActivity.this))
-                        try {
-                            topic = Utils.translit(title);
-                            if (!SharedPref.containsSubscribe(topic)) {
-                                subscribe();
-                            } else {
-                                unsubscribe();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                Log.d("topic", topic);
+                if (Utils.isNetworkOnline(ExoPlayerActivity.this))
+                    try {
+                        topic = Utils.translit(title);
+                        if (!SharedPref.containsSubscribe(topic)) {
+                            subscribe();
+                        } else {
+                            unsubscribe();
                         }
-                }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
             });
 
 
-            next.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (StringUtils.isNotEmpty(seriaData.nextSeria)) {
-                        openSeria(title, seriaData.nextSeria);
-                    }
+            next.setOnClickListener(v -> {
+                if (StringUtils.isNotEmpty(seriaData.nextSeria)) {
+                    openSeria(title, seriaData.nextSeria);
                 }
             });
-            prev.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (StringUtils.isNotEmpty(seriaData.previusSeria)) {
-                        openSeria(title, seriaData.previusSeria);
-                    }
+            prev.setOnClickListener(v -> {
+                if (StringUtils.isNotEmpty(seriaData.previusSeria)) {
+                    openSeria(title, seriaData.previusSeria);
                 }
             });
 
@@ -781,7 +802,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 ////            setSupportActionBar(toolbar);
 //            if (currentSeriaInfo != null)
 //                if (!currentSeriaInfo.isEmpty())
-//                    annoFrag.fill(true, currentSeriaInfo, description);
+//                    annoFrag.fill(true, currentSeriaInfo, descriptionText);
 //                else {
 //                    AlertDialog.Builder builder = new AlertDialog.Builder(Video.this);
 //                    builder.setTitle("Важное сообщение!")
