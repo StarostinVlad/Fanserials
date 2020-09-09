@@ -1722,7 +1722,9 @@
         </activity>
         <activity
             android:name="com.starostinvlad.fan.activities.ExoPlayerActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:supportsPictureInPicture="true"
+            android:configChanges=
+                "screenSize|smallestScreenSize|screenLayout|keyboardHidden|orientation"
             android:theme="@style/AppTheme.NoActionBar.Fullscreen" />
         <activity
             android:name="com.starostinvlad.fan.activities.SettingsActivity"

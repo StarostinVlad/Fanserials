@@ -40,78 +40,72 @@ public class AuthorizationFragment extends Fragment {
         vkAuthBtn = view.findViewById(R.id.vk_auth_btn);
         email = view.findViewById(R.id.email_field);
         pass = view.findViewById(R.id.pass_field);
-        vkAuthBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                VKAuthorizationFragment vkAuthFragment = new VKAuthorizationFragment();
-                getFragmentManager()
-                        .beginTransaction().addToBackStack(null)
-                        .replace(R.id.main_act_id, vkAuthFragment).commit();
-            }
+        vkAuthBtn.setOnClickListener(view12 -> {
+            VKAuthorizationFragment vkAuthFragment = new VKAuthorizationFragment();
+            getFragmentManager()
+                    .beginTransaction().addToBackStack(null)
+                    .replace(R.id.main_act_id, vkAuthFragment).commit();
         });
 
         Button login = view.findViewById(R.id.login_btn);
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (StringUtils.isEmpty(email.getText().toString())) {
-                    Toast.makeText(getContext(), "Поле email не полжно быть пустым", Toast.LENGTH_LONG).show();
-                } else if (StringUtils.isEmpty(pass.getText().toString())) {
-                    Toast.makeText(getContext(), "Поле пароль не должно быть пустым", Toast.LENGTH_LONG).show();
-                } else {
+        login.setOnClickListener(view1 -> {
+            if (StringUtils.isEmpty(email.getText().toString())) {
+                Toast.makeText(getContext(), "Поле email не полжно быть пустым", Toast.LENGTH_LONG).show();
+            } else if (StringUtils.isEmpty(pass.getText().toString())) {
+                Toast.makeText(getContext(), "Поле пароль не должно быть пустым", Toast.LENGTH_LONG).show();
+            } else {
 
-                    Utils.login(email.getText().toString(), pass.getText().toString());
+                Utils.login(email.getText().toString(), pass.getText().toString());
 
-                    NetworkService.getInstance()
-                            .getSerials()
-                            .getToken(email.getText().toString(), pass.getText().toString())
-                            .enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                                    Log.d("retrofit", "res: " + response);
-                                    String res = null;
-                                    try {
-                                        if (response.isSuccessful()) {
-                                            res = response.body().string(); // do something with that
-                                            String cookie = response.headers().get("Set-Cookie");
-                                            Log.d("retrofit", "res: " + cookie);
-                                            assert res != null;
-                                            GsonBuilder builder = new GsonBuilder();
-                                            Gson gson = builder.create();
-                                            Token token = gson.fromJson(res, Token.class);
-                                            Log.d("retrofit", "token: " + Utils.TOKEN);
-                                            SharedPref.write(SharedPref.TOKEN, token.getToken());
-                                            SharedPref.write(SharedPref.AUTH, true);
-                                            Bundle args = new Bundle();
-                                            args.putBoolean("PROFILE", true);
-                                            MainFragment bFragment = new MainFragment();
-                                            bFragment.setArguments(args);
-                                            getFragmentManager()
-                                                    .beginTransaction()
-                                                    .replace(R.id.main_act_id, bFragment)
-                                                    .commit();
-                                        } else {
-                                            res = response.errorBody().string(); // do something with that
-                                            if (res.contains("Bad password")) {
-                                                Toast.makeText(getContext(), "Неверный пароль!", Toast.LENGTH_LONG).show();
-                                            }else if(res.contains("User not found")){
-                                                Toast.makeText(getContext(), "Пользователь не найден!", Toast.LENGTH_LONG).show();
-                                            }
-                                            else if(res.contains("Bad email format")){
-                                                Toast.makeText(getContext(), "Неправильный формат email!", Toast.LENGTH_LONG).show();
-                                            }
+                NetworkService.getInstance()
+                        .getSerials()
+                        .getToken(email.getText().toString(), pass.getText().toString())
+                        .enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                                Log.d("retrofit", "res: " + response);
+                                String res = null;
+                                try {
+                                    if (response.isSuccessful()) {
+                                        res = response.body().string(); // do something with that
+                                        String cookie = response.headers().get("Set-Cookie");
+                                        Log.d("retrofit", "res: " + cookie);
+                                        assert res != null;
+                                        GsonBuilder builder = new GsonBuilder();
+                                        Gson gson = builder.create();
+                                        Token token = gson.fromJson(res, Token.class);
+                                        Log.d("retrofit", "token: " + Utils.TOKEN);
+                                        SharedPref.write(SharedPref.TOKEN, token.getToken());
+                                        SharedPref.write(SharedPref.AUTH, true);
+                                        Bundle args = new Bundle();
+                                        args.putBoolean("PROFILE", true);
+                                        MainFragment bFragment = new MainFragment();
+                                        bFragment.setArguments(args);
+                                        getFragmentManager()
+                                                .beginTransaction()
+                                                .replace(R.id.main_act_id, bFragment)
+                                                .commit();
+                                    } else {
+                                        res = response.errorBody().string(); // do something with that
+                                        if (res.contains("Bad password")) {
+                                            Toast.makeText(getContext(), "Неверный пароль!", Toast.LENGTH_LONG).show();
+                                        }else if(res.contains("User not found")){
+                                            Toast.makeText(getContext(), "Пользователь не найден!", Toast.LENGTH_LONG).show();
                                         }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                                        else if(res.contains("Bad email format")){
+                                            Toast.makeText(getContext(), "Неправильный формат email!", Toast.LENGTH_LONG).show();
+                                        }
                                     }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
+                            }
 
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    t.printStackTrace();
-                                }
-                            });
-                }
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                t.printStackTrace();
+                            }
+                        });
             }
         });
 

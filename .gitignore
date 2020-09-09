@@ -4,4 +4,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import an
-/.idea/*
+.idea/*
+app/release/
+
+# Android Studio
+*.iml
+.idea
+#.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
+.gradle
+build/
+.navigation
+captures/
+output.json
+
+#NDK
+obj/
+.externalNativeBuild

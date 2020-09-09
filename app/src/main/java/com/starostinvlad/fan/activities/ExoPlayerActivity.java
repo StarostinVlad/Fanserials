@@ -1,6 +1,7 @@
 package com.starostinvlad.fan.activities;
 
 import android.annotation.SuppressLint;
+import android.app.PictureInPictureParams;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -8,6 +9,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Rational;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,7 +40,6 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -75,7 +76,6 @@ import static com.starostinvlad.fan.utils.Utils.DOMAIN;
 import static com.starostinvlad.fan.utils.Utils.INTERTESTIAL_AD;
 import static com.starostinvlad.fan.utils.Utils.IS_REVIEW;
 
-
 public class ExoPlayerActivity extends AppCompatActivity {
 
     PlayerView playerView;
@@ -108,9 +108,9 @@ public class ExoPlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_bar_video);
 
-        if(INTERTESTIAL_AD.isLoaded()){
+        if (INTERTESTIAL_AD.isLoaded()) {
             INTERTESTIAL_AD.show();
-            INTERTESTIAL_AD.setAdListener(new AdListener(){
+            INTERTESTIAL_AD.setAdListener(new AdListener() {
                 @Override
                 public void onAdClosed() {
                     INTERTESTIAL_AD.loadAd(new AdRequest.Builder()
@@ -119,8 +119,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 }
             });
 
-        }
-        else {
+        } else {
             INTERTESTIAL_AD.loadAd(new AdRequest.Builder()
                     .build());
         }
@@ -131,14 +130,11 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
         layout = findViewById(R.id.frame_container);
         playerView = findViewById(R.id.exoplayer_view);
-        playerView.setControllerVisibilityListener(new PlayerControlView.VisibilityListener() {
-            @Override
-            public void onVisibilityChange(int visibility) {
-                if (visibility == View.VISIBLE) {
-                    Show();
-                } else {
-                    Hide();
-                }
+        playerView.setControllerVisibilityListener(visibility -> {
+            if (visibility == View.VISIBLE) {
+                Show();
+            } else {
+                Hide();
             }
         });
         playerView.setShowBuffering(true);
@@ -176,12 +172,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
         description_container = findViewById(R.id.description_container);
 
 
-        fullscreen_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fullscreen(fullscreen, false);
-            }
-        });
+        fullscreen_btn.setOnClickListener(v1 -> fullscreen(fullscreen, false));
 
 
         Button rewind = findViewById(R.id.rewind);
@@ -532,6 +523,29 @@ public class ExoPlayerActivity extends AppCompatActivity {
         playerView.setPlayer(null);
         player.release();
         player = null;
+    }
+
+    @Override
+    public void onUserLeaveHint() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Hide();
+            lastPosition = player.getCurrentPosition();
+            PictureInPictureParams pictureInPictureParams = new PictureInPictureParams.Builder()
+                    .setAspectRatio(new Rational(16, 9))
+                    .build();
+            enterPictureInPictureMode(pictureInPictureParams);
+        }
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
+        if(!isInPictureInPictureMode) {
+            player.seekTo(lastPosition);
+            Show();
+        }
+        else{
+            Hide();
+        }
     }
 
     class SeriaData extends AsyncTask<String, Void, ArrayList<CurrentSeriaInfo>> {

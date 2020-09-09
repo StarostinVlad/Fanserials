@@ -14,15 +14,15 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('..\\keystore_for_fan.jks')
+            storeFile file('..\\keystore_fserials.jks')
             storePassword 'Jisus131097'
-            keyAlias = 'KeyForFan'
+            keyAlias = 'fs_key'
             keyPassword 'Fuckit97'
         }
         debug {
-            storeFile file('..\\keystore_for_fan.jks')
+            storeFile file('..\\keystore_fserials.jks')
             storePassword 'Jisus131097'
-            keyAlias = 'KeyForFan'
+            keyAlias = 'fs_key'
             keyPassword 'Fuckit97'
         }
     }
@@ -32,7 +32,7 @@ android {
         applicationId "com.starostinvlad.fan"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 4
+        versionCode 5
         versionName "1.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -101,7 +101,6 @@ dependencies {
 
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
-
 
 
 }
