@@ -8,4 +8,16 @@
         <key>ALL_SERIAL_JSON</key>
         <value>https://fanser.000webhostapp.com/fanka</value>
     </entry>
+    <entry>
+        <key>REVIEW</key>
+        <value>1.0.0</value>
+    </entry>
+    <entry>
+        <key>PROXY_IP</key>
+        <value>127.0.0.1</value>
+    </entry>
+    <entry>
+        <key>PROXY_PORT</key>
+        <value>80</value>
+    </entry>
 </defaultsMap>

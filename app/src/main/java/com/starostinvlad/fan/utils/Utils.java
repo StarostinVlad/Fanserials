@@ -11,12 +11,14 @@ import android.view.View;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
-import com.starostinvlad.fan.R;
-import com.starostinvlad.fan.api.retro.SubscribeSerial;
-import com.starostinvlad.fan.api.retro.Subscribes;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jakewharton.picasso.OkHttp3Downloader;
+import com.squareup.picasso.Picasso;
+import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.api.retro.SubscribeSerial;
+import com.starostinvlad.fan.api.retro.Subscribes;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +31,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +41,9 @@ import java.util.stream.Collectors;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by Star on 03.02.2018.
@@ -48,11 +56,14 @@ public class Utils {
     public static Map<String, String> cookies;
     public static String DOMAIN;
     public static String TOKEN;
-    private static Context context;
     public static String ALL_SERIAL;
     public static boolean AUTH;
     public static String IS_REVIEW;
     public static InterstitialAd INTERTESTIAL_AD;
+    public static Map<String, String> COOKIE = null;
+    public static java.net.Proxy PROXY;
+    public static Picasso PICASSO;
+    private static Context context;
 
     static {
         letters.put('А', "A");
@@ -90,15 +101,53 @@ public class Utils {
         letters.put('Я', "YA");
     }
 
-    public static Map<String, String> COOKIE = null;
-
     private Utils() {
     }
 
+    public static String credential;
+
     public static void init(Context context) {
+
         DOMAIN = RemoteConfig.read(RemoteConfig.DOMAIN);
         IS_REVIEW = RemoteConfig.read(RemoteConfig.IS_REVIEW);
         ALL_SERIAL = RemoteConfig.read(RemoteConfig.ALL_SERIAL_JSON);
+
+        credential = Credentials.basic("GiMvRf5na6", "xp9O9ViUkt");
+
+        String ip = RemoteConfig.read(RemoteConfig.IP);
+        int port = Integer.parseInt(RemoteConfig.read(RemoteConfig.PORT));
+
+//        String ip = "45.138.159.126";
+//        int port = 53429;
+
+        if (!ip.equals("127.0.0.1")) {
+
+//            Authenticator.setDefault(
+//                    new Authenticator() {
+//                        public PasswordAuthentication getPasswordAuthentication() {
+//                            return new PasswordAuthentication(
+//                                    authUser, authPassword.toCharArray());
+//                        }
+//                    }
+//            );
+//
+//            System.setProperty("http.proxyHost", ip);
+//            System.setProperty("http.proxyPort", String.valueOf(port));
+//            System.setProperty("http.proxyUser", authUser);
+//            System.setProperty("http.proxyPassword", authPassword);
+
+            Authenticator proxyAuthenticator = (route, response) -> response.request().newBuilder()
+                    .header("Proxy-Authorization", credential)
+                    .build();
+            PROXY = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
+            OkHttpClient client = new OkHttpClient.Builder().proxy(PROXY).proxyAuthenticator(proxyAuthenticator).build();
+//            OkHttpClient client = new OkHttpClient.Builder().proxy(PROXY).build();
+            PICASSO = new Picasso.Builder(context).downloader(new OkHttp3Downloader(client)).build();
+        } else {
+            PROXY = null;
+            PICASSO = new Picasso.Builder(context).build();
+        }
+
         Utils.context = context;
         if (SharedPref.contains(SharedPref.COOKIE))
             COOKIE = getCookies();
@@ -114,6 +163,7 @@ public class Utils {
         INTERTESTIAL_AD.setAdUnitId(context.getString(R.string.ad_screen));
         INTERTESTIAL_AD.loadAd(new AdRequest.Builder()
                 .build());
+
 
     }
 
@@ -354,10 +404,12 @@ public class Utils {
                         Document doc = Jsoup.connect(DOMAIN + "/profile/subscriptions/")
                                 .cookies(COOKIE)
                                 .header("X-Requested-With", "XMLHttpRequest")
+                                .header("Accept", "application/json, text/plain, */*")
                                 .ignoreContentType(true)
                                 .get();
                         String res = doc.body().html();
-                        if(!res.isEmpty()) {
+                        Log.d("Utils", "body: " + doc.documentType().name());
+                        if (!res.isEmpty() && doc.documentType().name().equals("json")) {
                             GsonBuilder builder = new GsonBuilder();
                             Gson gson = builder.create();
                             Subscribes subscribes = gson.fromJson(res, Subscribes.class);

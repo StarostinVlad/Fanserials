@@ -20,6 +20,7 @@ import com.starostinvlad.fan.api.retro.Datum;
 import java.util.List;
 
 import static com.starostinvlad.fan.utils.Utils.INTERTESTIAL_AD;
+import static com.starostinvlad.fan.utils.Utils.PICASSO;
 
 public class SeriaListAdapter extends BaseAdapter {
 
@@ -59,7 +60,7 @@ public class SeriaListAdapter extends BaseAdapter {
         title.setText(data.getSerial().getName());
         sub_title.setText(data.getEpisode().getName());
 
-        Picasso.with(context).load(data.getEpisode().getImages().getSmall())
+        PICASSO.with(context).load(data.getEpisode().getImages().getSmall())
                 .error(R.drawable.no_image)
                 .placeholder(R.drawable.no_image)
                 .into(image);

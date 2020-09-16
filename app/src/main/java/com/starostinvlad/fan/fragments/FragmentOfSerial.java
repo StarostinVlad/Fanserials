@@ -33,6 +33,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import static com.starostinvlad.fan.utils.Utils.PICASSO;
+
 public class FragmentOfSerial extends Fragment {
     private ArrayList<Seria> Series;
     private Toolbar toolbar;
@@ -294,7 +296,7 @@ public class FragmentOfSerial extends Fragment {
             title.setText(data.getName());
             sub_title.setText(data.getDescription());
 
-            Picasso.with(context).load(data.getImage()).error(R.drawable.no_image).placeholder(R.drawable.no_image).into(image);
+            PICASSO.with(context).load(data.getImage()).error(R.drawable.no_image).placeholder(R.drawable.no_image).into(image);
             return view;
         }
     }

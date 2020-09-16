@@ -34,7 +34,6 @@ import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
@@ -43,10 +42,13 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.starostinvlad.fan.BuildConfig;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.SeriaAdapter;
 import com.starostinvlad.fan.api.SeriaJsonClass;
+import com.starostinvlad.fan.api.retro.Player;
 import com.starostinvlad.fan.utils.CurrentSeriaInfo;
 import com.starostinvlad.fan.utils.Seria;
 import com.starostinvlad.fan.utils.SharedPref;
@@ -62,6 +64,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
@@ -70,11 +73,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
+import static com.starostinvlad.fan.utils.Utils.AUTH;
 import static com.starostinvlad.fan.utils.Utils.COOKIE;
 import static com.starostinvlad.fan.utils.Utils.DOMAIN;
 import static com.starostinvlad.fan.utils.Utils.INTERTESTIAL_AD;
 import static com.starostinvlad.fan.utils.Utils.IS_REVIEW;
+import static com.starostinvlad.fan.utils.Utils.PROXY;
+import static com.starostinvlad.fan.utils.Utils.credential;
 
 public class ExoPlayerActivity extends AppCompatActivity {
 
@@ -151,6 +160,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
         subscribe = findViewById(R.id.subscribe_button_exo);
         next = findViewById(R.id.next_btn);
         prev = findViewById(R.id.prev_btn);
+
         fullscreen_btn = findViewById(R.id.fullscreen_toggle);
 
         decorView = getWindow().getDecorView();
@@ -166,8 +176,21 @@ public class ExoPlayerActivity extends AppCompatActivity {
         }
         setSupportActionBar(toolbar);
 
-        seriaData = new SeriaData();
-        seriaData.execute(url);
+//        seriaData = new SeriaData();
+//        seriaData.execute(url);
+
+        try {
+            Observable.fromCallable(() -> getSeriaData(url))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .map((val) -> fillFields(val))
+                    .observeOn(Schedulers.io())
+                    .flatMap(this::getHLS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::fillSp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         description_container = findViewById(R.id.description_container);
 
@@ -261,6 +284,257 @@ public class ExoPlayerActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private CurrentSeriaInfo fillFields(CurrentSeriaInfo currentSeriaInfo) {
+        if (currentSeriaInfo == null) {
+            Utils.alarm(this, "Внимание!", "Данный сериал недосутпен в вашей стране(попробуйте использовать VPN)");
+            return null;
+        }
+        Log.d("RXJAVA", "fillFields: start");
+        if (!currentSeriaInfo.series.isEmpty()) {
+            series_list.setAdapter(new SeriaAdapter(currentSeriaInfo.series, getApplicationContext()));
+            description.setText(currentSeriaInfo.description);
+            series_list.addHeaderView(description);
+        }
+
+        Log.d("RXJAVA", "fillFields: header fill");
+
+        if (StringUtils.isNotEmpty(currentSeriaInfo.previousSeria)) {
+            prev.setVisibility(View.VISIBLE);
+        }
+        if (StringUtils.isNotEmpty(currentSeriaInfo.nextSeria)) {
+            next.setVisibility(View.VISIBLE);
+        }
+        Log.d("RXJAVA", "fillFields: visible button");
+        if (AUTH) {
+            subscribe.setVisibility(View.VISIBLE);
+            topic = Utils.translit(title);
+//        Log.d("subscribe", "topic:" + topic);
+            if (SharedPref.containsSubscribe(topic)) {
+                subscribe.setBackgroundColor(getResources().getColor(R.color.Gray));
+                subscribe.setText("Отписаться");
+            } else {
+                subscribe.setBackgroundColor(getResources().getColor(R.color.colorOrange));
+                subscribe.setText("Подписаться");
+            }
+
+            subscribe.setOnClickListener(v -> {
+                v.setEnabled(false);
+
+                Log.d("topic", topic);
+                if (Utils.isNetworkOnline(ExoPlayerActivity.this))
+                    try {
+                        topic = Utils.translit(title);
+                        if (!SharedPref.containsSubscribe(topic)) {
+                            subscribe();
+                        } else {
+                            unsubscribe();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+            });
+
+        }
+
+        Log.d("ExoPlayerActivity", "fill descr: " + currentSeriaInfo.description);
+
+        next.setOnClickListener(v -> {
+            if (StringUtils.isNotEmpty(currentSeriaInfo.nextSeria)) {
+                openSeria(title, currentSeriaInfo.nextSeria);
+            }
+        });
+        prev.setOnClickListener(v -> {
+            if (StringUtils.isNotEmpty(currentSeriaInfo.previousSeria)) {
+                openSeria(title, currentSeriaInfo.previousSeria);
+            }
+        });
+        return currentSeriaInfo;
+    }
+
+    private void fillSp(ArrayList<Player> strings) {
+        if (strings != null) {
+            ArrayList<String> titleList = new ArrayList<>();
+            for (Player item : strings)
+                titleList.add(item.getName());
+            ArrayAdapter adapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, titleList);
+            voicesList.setAdapter(adapter);
+
+            if (!strings.isEmpty()) {
+                voicesList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    public void onItemSelected(AdapterView<?> parent,
+                                               View itemSelected, int selectedItemPosition, long selectedId) {
+                        startvideo(strings.get(selectedItemPosition).getPlayer());
+//                    Log.d("currentSeria", "url:" + uri);
+                    }
+
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        description.setText("nothing");
+                    }
+                });
+            }
+        }
+    }
+
+    private Observable<ArrayList<Player>> getHLS(CurrentSeriaInfo val) {
+        if (val == null)
+            return null;
+        Document doc;
+        Log.d("RXJAVA", "title: " + val.title);
+        ArrayList<Player> hlsPlayers = new ArrayList<>();
+        try {
+            for (Player player : val.players) {
+                String playerUrl = player.getPlayer();
+                if (playerUrl.contains("fanserials") || playerUrl.contains("umovies")
+                        || playerUrl.contains("seplay") || playerUrl.contains("player")
+                        || playerUrl.contains("toplay")) {
+
+                    Connection.Response sub_res = Jsoup.connect(playerUrl).cookies(val.cookies)
+                            .method(Connection.Method.GET).referrer(val.url).execute();
+                    if (sub_res.statusCode() == 200) {
+//                    Log.d("con", "serialHref= " + url);
+                        doc = sub_res.parse();
+//                    Log.d("tmp", sub_res.cookies().toString());
+                        String tmp = doc.getElementsByAttribute("data-config").attr("data-config");
+                        Log.d("tmp", "tmp: " + tmp);
+                        JSONObject jsonDATA = new JSONObject(tmp);
+//                    Log.d("tmp", "js= " + jsonDATA.get("hls"));
+                        String hls = jsonDATA.get("hls").toString();
+                        hlsPlayers.add(new Player(
+                                hls,
+                                player.getName()
+                        ));
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+//        return hls;
+        return Observable.just(hlsPlayers);
+    }
+
+    private CurrentSeriaInfo getSeriaData(String url) {
+        if (url == null)
+            return null;
+
+        CurrentSeriaInfo seriaInfo = null;
+
+        if (IS_REVIEW.equals(BuildConfig.VERSION_NAME)) {
+            return null;
+        }
+
+        Log.d(TAG, "url: " + url);
+        url = !url.contains("fanserial") ? DOMAIN + url : url;
+        Log.d(TAG, "url: " + url);
+        //Log.d("tmp", "current: " + s2);
+        try {
+            Connection.Response res = null;
+
+            if (PROXY != null)
+                res = Jsoup.connect(url)
+                        .proxy(PROXY)
+                        .header("Proxy-Authorization", credential)
+                        .cookies(COOKIE)
+                        .timeout(10000)
+                        .followRedirects(true)
+                        .method(Connection.Method.GET)
+                        .execute();
+            else
+                Jsoup.connect(url)
+                        .cookies(COOKIE)
+                        .timeout(10000)
+                        .followRedirects(true)
+                        .method(Connection.Method.GET)
+                        .execute();
+            if (res.statusCode() == 200) {
+//                    Connection.Response res = Jsoup.connect("https://fanser.000webhostapp.com/anti_block.php?url="+currentPage);
+                Document doc = res.parse();
+                Map<String, String> cookie = res.cookies();
+//                    Log.d("tmp", res.cookies().toString());
+                String pageTitle = doc.select("body > div.wrapper > main > div > div.row > div > div > section > ul > li:nth-child(2) > a > span").text();
+                int numElem = doc.select("body > div.wrapper > main > div > div > div > div > section > ul > li").size() - 1;
+                String sezonHref = doc.select("body > div.wrapper > main > div > div > div > div > section > ul > li:nth-child(" + numElem + ") > a").attr("href");
+//                    Log.d(TAG, "href: " + sezonHref);
+                Document sezonHtml = null;
+                if (PROXY != null)
+                    sezonHtml = Jsoup.connect(DOMAIN + sezonHref)
+                            .header("Proxy-Authorization", credential).proxy(PROXY).get();
+                else
+                    sezonHtml = Jsoup.connect(DOMAIN + sezonHref).get();
+//                    Log.d(TAG, "html: " + sezonHtml);
+                Elements elementsList = sezonHtml.select("#episode_list > li > div > div");
+
+                ArrayList<Seria> seriaList = new ArrayList<>();
+
+                for (Element seria : elementsList) {
+                    String desc = seria.select(".serial-bottom div.field-description > a").text();
+                    String title = seria.select(".serial-bottom div.field-title > a").text();
+                    String href = seria.select(".serial-bottom div.field-title > a").attr("href");
+                    String image = seria.select("div.serial-top > div.field-img").attr("style");
+                    image = image.substring(image.indexOf("url('") + 5, image.length() - 3);
+                    if (!subTitle.equals(desc))
+                        seriaList.add(new Seria(title, href, image, desc));
+                    Log.d(TAG, "seria: " + desc);
+                }
+                String st_id = doc.select("ul.subscribe-link li a").attr("data-id");
+                if (st_id != "")
+                    id = Integer.parseInt(st_id);
+                else
+                    id = 0;
+                Log.d("ExoPlayerActivity", "id= " + st_id);
+
+                String descriptionText = doc.select(".well div").text();
+
+                Log.d("ExoPlayerActivity", "description: " + descriptionText);
+
+                String seria_id = (doc.select("#complain").attr("data-id"));
+
+                String previusSeria = (doc.select("a.arrow.prev").attr("href"));
+                String nextSeria = (doc.select("a.arrow.next").attr("href"));
+                Log.d("tmp", "prev=" + previusSeria);
+                Log.d("tmp", "next=" + nextSeria);
+
+                String subTitle = doc.select("h1.page-title").text();
+
+                Elements iframe = doc.select("#players.player-component script");//doc.select("iframe");
+
+                ArrayList<Player> players = new ArrayList<>();
+
+                for (Element ss : iframe) {
+                    String str = ss.toString();
+//                        Log.d("tmp", "json= " + str);
+                    if (str.contains("\\/limited\\/")) {
+                        return null;
+                    }
+                    str = str.substring(0, str.indexOf("';</script>")).substring(str.indexOf(" = '") + 4).replace("\\/", "/");
+                    Gson gson = new Gson();
+                    Type userListType = new TypeToken<ArrayList<Player>>() {
+                    }.getType();
+                    players = gson.fromJson(str, userListType);
+                }
+
+                seriaInfo = new CurrentSeriaInfo(
+                        players,
+                        pageTitle,
+                        subTitle,
+                        url,
+                        seria_id,
+                        descriptionText,
+                        previusSeria,
+                        nextSeria,
+                        cookie,
+                        seriaList
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.d("RXJAVA", "getData: " + seriaInfo.title);
+        return seriaInfo;
     }
 
     void openSeria(String title, String url) {
@@ -362,7 +636,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
 //        description.setText(descript);
         ArrayList<String> titleList = new ArrayList<>();
         for (CurrentSeriaInfo item : currentSerias)
-            titleList.add(item.Title);
+            titleList.add(item.title);
         voicesList.setAdapter(new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, titleList));
 
         //pr.setVisibility(View.INVISIBLE);
@@ -371,7 +645,7 @@ public class ExoPlayerActivity extends AppCompatActivity {
             voicesList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView<?> parent,
                                            View itemSelected, int selectedItemPosition, long selectedId) {
-                    startvideo(currentSerias.get(selectedItemPosition).Url);
+                    startvideo(currentSerias.get(selectedItemPosition).url);
 //                    Log.d("currentSeria", "url:" + uri);
                 }
 
@@ -539,11 +813,10 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
     @Override
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
-        if(!isInPictureInPictureMode) {
+        if (!isInPictureInPictureMode) {
             player.seekTo(lastPosition);
             Show();
-        }
-        else{
+        } else {
             Hide();
         }
     }
@@ -577,15 +850,23 @@ public class ExoPlayerActivity extends AppCompatActivity {
 
             //Log.d("tmp", "current: " + s2);
             try {
-                Connection.Response res = Jsoup.connect(currentPage)
-//                            .userAgent(agent)
-                        .cookies(COOKIE)
-//                            .header("host", DOMAIN)
-//                            .header("Upgrade-Insecure-Requests"," 1")
-                        .timeout(10000)
-                        .followRedirects(true)
-                        .method(Connection.Method.GET)
-                        .execute();
+                Connection.Response res = null;
+                if (PROXY == null)
+                    res = Jsoup.connect(currentPage)
+                            .cookies(COOKIE)
+                            .timeout(20000)
+                            .followRedirects(true)
+                            .method(Connection.Method.GET)
+                            .execute();
+                else
+                    res = Jsoup.connect(currentPage)
+                            .proxy(PROXY)
+                            .header("Proxy-Authorization", credential)
+                            .cookies(COOKIE)
+                            .timeout(20000)
+                            .followRedirects(true)
+                            .method(Connection.Method.GET)
+                            .execute();
                 if (res.statusCode() == 200) {
 //                    doc = Jsoup.parse(Utils.GiveDocFromUrl(s2));//Jsoup.connect(s2).userAgent(agent).timeout(10000).followRedirects(true).get();
 //                    Connection.Response res = Jsoup.connect("https://fanser.000webhostapp.com/anti_block.php?url="
@@ -676,13 +957,13 @@ public class ExoPlayerActivity extends AppCompatActivity {
 //                            Log.d("tmp", "frame=" + player);
                             String title = seriaJsonClass.uris.get(i).title;
                             String hls;
-                            if ((hls = getSeria(seriaJsonClass.uris.get(i).player, currentPage)) != null)
-                                currentSeriaInfo.add(
-                                        new CurrentSeriaInfo(
-                                                title,
-                                                player,
-                                                hls
-                                        ));
+//                            if ((hls = getSeria(seriaJsonClass.uris.get(i).player, currentPage)) != null)
+//                                currentSeriaInfo.add(
+//                                        new CurrentSeriaInfo(
+//                                                title,
+//                                                player,
+//                                                hls
+//                                        ));
 
                         }
                     }

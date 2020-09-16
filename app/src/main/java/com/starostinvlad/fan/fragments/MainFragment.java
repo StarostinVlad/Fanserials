@@ -3,6 +3,7 @@ package com.starostinvlad.fan.fragments;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,7 @@ import android.widget.ProgressBar;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.api.retro.Datum;
 import com.starostinvlad.fan.api.retro.FANAPI;
@@ -20,11 +21,9 @@ import com.starostinvlad.fan.api.retro.NetworkService;
 import com.starostinvlad.fan.api.retro.Viewed;
 import com.starostinvlad.fan.utils.SeriaListAdapter;
 import com.starostinvlad.fan.utils.Utils;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,12 +58,6 @@ public class MainFragment extends Fragment implements Serializable {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
 
-//        mInterstitialAd = new InterstitialAd(Objects.requireNonNull(getContext()));
-//
-//        mInterstitialAd.setAdUnitId(getString(R.string.ad_screen));
-//
-//        mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
         Toolbar toolbar = Objects.requireNonNull(getActivity()).findViewById(R.id.toolbar);
         String title = "Новинки";
         toolbar.setTitle(title);
@@ -93,7 +86,7 @@ public class MainFragment extends Fragment implements Serializable {
             } else
                 fillNew(0);
         } else {
-            Utils.alarm(getContext(),"Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+            Utils.alarm(getContext(), "Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
         }
 
 //        Log.d("retrofit", getClass().getSimpleName() + " : " + list.size());
@@ -125,7 +118,7 @@ public class MainFragment extends Fragment implements Serializable {
                     } else
                         fillNew(0);
                 } else {
-                    Utils.alarm(getContext(),"Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+                    Utils.alarm(getContext(), "Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
                     swiperef.setRefreshing(false);
                 }
 
@@ -151,9 +144,9 @@ public class MainFragment extends Fragment implements Serializable {
                             if (getArguments().getBoolean("VIEWED"))
                                 viewpr.setVisibility(View.INVISIBLE);
                         } else
-                            fillNew(view.getCount()-1);
+                            fillNew(view.getCount() - 1);
                     } else {
-                        Utils.alarm(getContext(),"Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
+                        Utils.alarm(getContext(), "Отсутствует доступ к интернету!", "Для работы приложения необходим доступ к сети интернет.");
                     }
 //                    if (list.size() % seriasGetter.items != 0)
                     viewpr.setVisibility(View.INVISIBLE);
@@ -178,7 +171,6 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onResponse(@NonNull Call<List<Viewed>> call, @NonNull Response<List<Viewed>> response) {
                 List<Viewed> post = response.body();
-//                Log.d("retrofit", String.valueOf(response.code()));
 
                 assert post != null;
                 int code;
@@ -206,6 +198,7 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onFailure(Call<List<Viewed>> call, Throwable t) {
                 t.printStackTrace();
+                alert(404);
             }
         });
     }
@@ -218,7 +211,6 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onResponse(@NonNull Call<FANAPI> call, @NonNull Response<FANAPI> response) {
                 FANAPI post = response.body();
-//                Log.d("retrofit", String.valueOf(response.code()));
                 assert post != null;
                 int code;
                 if ((code = response.code()) == 200) {
@@ -231,6 +223,7 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onFailure(Call<FANAPI> call, Throwable t) {
                 t.printStackTrace();
+                alert(404);
             }
         });
     }
@@ -242,7 +235,7 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onResponse(@NonNull Call<FANAPI> call, @NonNull Response<FANAPI> response) {
                 FANAPI post = response.body();
-//                Log.d("retrofit", String.valueOf(response.code()));
+                Log.d("retrofit", response.message());
                 assert post != null;
                 int code;
                 if ((code = response.code()) == 200) {
@@ -255,32 +248,36 @@ public class MainFragment extends Fragment implements Serializable {
             @Override
             public void onFailure(Call<FANAPI> call, Throwable t) {
                 t.printStackTrace();
+                alert(404);
             }
+
         });
     }
 
     void fill(List<Datum> data) {
-        list.addAll(data);
 
-        if (seriaListAdapter == null) {
-            seriaListAdapter = new SeriaListAdapter(list, getContext());
-            lv.setAdapter(seriaListAdapter);
-            View view_with_ad = LayoutInflater.from(getContext()).inflate(R.layout.ad_in_listview, null);
-            AdView ad_view = view_with_ad.findViewById(R.id.in_list_ad);
-            lv.addHeaderView(ad_view);
-            AdRequest adRequest = new AdRequest.Builder()
-                    .build();
-            ad_view.loadAd(adRequest);
+        if (getContext() != null) {
+            list.addAll(data);
+            if (seriaListAdapter == null) {
+                seriaListAdapter = new SeriaListAdapter(list, getContext());
+                lv.setAdapter(seriaListAdapter);
+                View view_with_ad = LayoutInflater.from(getContext()).inflate(R.layout.ad_in_listview, null);
+                AdView ad_view = view_with_ad.findViewById(R.id.in_list_ad);
+                lv.addHeaderView(ad_view);
+                AdRequest adRequest = new AdRequest.Builder()
+                        .build();
+                ad_view.loadAd(adRequest);
 
-        } else
-            seriaListAdapter.notifyDataSetChanged();
+            } else
+                seriaListAdapter.notifyDataSetChanged();
 
-        if (lv.getAdapter() == null)
-            lv.setAdapter(seriaListAdapter);
+            if (lv.getAdapter() == null)
+                lv.setAdapter(seriaListAdapter);
 
 //        Log.d("retrofit", "size: " + list.size() + " : " + lv.getAdapter());
-        swiperef.setRefreshing(false);
-        pr.setVisibility(View.GONE);
+            swiperef.setRefreshing(false);
+            pr.setVisibility(View.GONE);
+        }
     }
 
     void alert(int code) {
@@ -293,6 +290,6 @@ public class MainFragment extends Fragment implements Serializable {
                 message = "Возможно изменился домен, попробуйте позже";
                 break;
         }
-        Utils.alarm(getContext(),"Что-то пошло не так!", message);
+        Utils.alarm(getContext(), "Что-то пошло не так!", message);
     }
 }

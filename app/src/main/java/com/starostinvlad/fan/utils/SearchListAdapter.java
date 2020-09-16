@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import static com.starostinvlad.fan.utils.Utils.PICASSO;
+
 public class SearchListAdapter extends BaseAdapter {
 
     List<SearchResult> searchResults = null;
@@ -54,7 +56,7 @@ public class SearchListAdapter extends BaseAdapter {
         title.setText(data.getName());
         sub_title.setText(data.getDescription());
 
-        Picasso.with(context).load(data.getPoster().getLarge()).error(R.drawable.no_image).placeholder(R.drawable.no_image).into(image);
+        PICASSO.with(context).load(data.getPoster().getLarge()).error(R.drawable.no_image).placeholder(R.drawable.no_image).into(image);
         return view;
     }
 }

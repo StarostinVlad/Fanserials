@@ -9,23 +9,22 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
 import com.starostinvlad.fan.activities.ExoPlayerActivity;
 import com.starostinvlad.fan.utils.Seria;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.starostinvlad.fan.utils.Utils.PICASSO;
+
 public class SeriaAdapter extends BaseAdapter {
     List<Seria> seriesList = new ArrayList<>();
+    Context context;
 
     public SeriaAdapter(List<Seria> seriesList, Context context) {
         this.seriesList = seriesList;
         this.context = context;
     }
-
-    Context context;
-
 
     @Override
     public int getCount() {
@@ -55,7 +54,7 @@ public class SeriaAdapter extends BaseAdapter {
         title.setText(seria.getName());
         sub_title.setText(seria.getDescription());
 
-        Picasso.with(context).load(seria.getImage())
+        PICASSO.with(context).load(seria.getImage())
                 .error(R.drawable.no_image)
                 .placeholder(R.drawable.no_image)
                 .into(image);

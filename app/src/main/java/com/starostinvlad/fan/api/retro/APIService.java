@@ -13,6 +13,9 @@ public interface APIService {
     @GET("episodes?limit=20")
     Call<FANAPI> getSerials(@Query("offset") int page);
 
+    @GET("episodes?limit=20&offset=0")
+    Call<String> getSerials();
+
     @GET("profile/tape")
     Call<FANAPI> getProfile(@Query("offset") int page, @Query("token") String token);
 

@@ -22,6 +22,8 @@ public class RemoteConfig {
     public static final String DOMAIN = "DOMAIN";
     public static final String IS_REVIEW = "REVIEW";
     public static final String ALL_SERIAL_JSON = "ALL_SERIAL_JSON";
+    public static final String IP = "PROXY_IP";
+    public static final String PORT = "PROXY_PORT";
 
     private static FirebaseRemoteConfig mFirebaseRemoteConfig;
 

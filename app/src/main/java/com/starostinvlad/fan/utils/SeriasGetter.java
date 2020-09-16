@@ -17,10 +17,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.starostinvlad.fan.utils.Utils.DOMAIN;
+import static com.starostinvlad.fan.utils.Utils.PROXY;
 
 public class SeriasGetter {
     public int items = 0;
-//    public String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
+    //    public String domain = RemoteConfig.read(RemoteConfig.DOMAIN);
     public Context context;
     int page = 1;
     private ArrayList<Seria> serias;
@@ -94,11 +95,20 @@ public class SeriasGetter {
             queryUrl += "/";
 //        Log.d(getClass().getSimpleName(), "query: " + queryUrl);
         Document doc = null;
-        Connection.Response request = Jsoup.connect(queryUrl)
-                .ignoreContentType(true)
-                .cookies(Utils.COOKIE)
-                .method(Connection.Method.GET)
-                .execute();
+        Connection.Response request = null;
+        if (PROXY != null)
+            request = Jsoup.connect(queryUrl)
+                    .ignoreContentType(true)
+                    .proxy(PROXY)
+                    .cookies(Utils.COOKIE)
+                    .method(Connection.Method.GET)
+                    .execute();
+        else
+            request = Jsoup.connect(queryUrl)
+                    .ignoreContentType(true)
+                    .cookies(Utils.COOKIE)
+                    .method(Connection.Method.GET)
+                    .execute();
 //        Log.d(getClass().getSimpleName(), "code: " + request.statusCode());
 //        if (!request.cookies().isEmpty()) {
 //            utils.setCookie(request.cookies().toString(), context);
@@ -126,11 +136,19 @@ public class SeriasGetter {
 //        Log.d("query", "url: " + queryUrl);
         items = 32;
         Document doc = null;
-        Connection.Response request = Jsoup.connect(queryUrl)
+        Connection.Response request = null;
+
+        if (PROXY != null) request = Jsoup.connect(queryUrl)
                 .ignoreContentType(true)
                 .cookies(Utils.COOKIE)
                 .method(Connection.Method.GET)
                 .execute();
+        else
+            request = Jsoup.connect(queryUrl)
+                    .ignoreContentType(true)
+                    .cookies(Utils.COOKIE)
+                    .method(Connection.Method.GET)
+                    .execute();
 
         if (request.statusCode() == 200)
             doc = request.parse();
