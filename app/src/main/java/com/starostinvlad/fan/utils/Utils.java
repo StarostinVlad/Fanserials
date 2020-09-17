@@ -32,11 +32,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import androidx.annotation.RequiresApi;
@@ -63,6 +63,7 @@ public class Utils {
     public static Map<String, String> COOKIE = null;
     public static java.net.Proxy PROXY;
     public static Picasso PICASSO;
+    public static String credential;
     private static Context context;
 
     static {
@@ -104,8 +105,6 @@ public class Utils {
     private Utils() {
     }
 
-    public static String credential;
-
     public static void init(Context context) {
 
         DOMAIN = RemoteConfig.read(RemoteConfig.DOMAIN);
@@ -122,25 +121,11 @@ public class Utils {
 
         if (!ip.equals("127.0.0.1")) {
 
-//            Authenticator.setDefault(
-//                    new Authenticator() {
-//                        public PasswordAuthentication getPasswordAuthentication() {
-//                            return new PasswordAuthentication(
-//                                    authUser, authPassword.toCharArray());
-//                        }
-//                    }
-//            );
-//
-//            System.setProperty("http.proxyHost", ip);
-//            System.setProperty("http.proxyPort", String.valueOf(port));
-//            System.setProperty("http.proxyUser", authUser);
-//            System.setProperty("http.proxyPassword", authPassword);
-
             Authenticator proxyAuthenticator = (route, response) -> response.request().newBuilder()
                     .header("Proxy-Authorization", credential)
                     .build();
             PROXY = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
-            OkHttpClient client = new OkHttpClient.Builder().proxy(PROXY).proxyAuthenticator(proxyAuthenticator).build();
+            OkHttpClient client = new OkHttpClient.Builder().proxy(PROXY).proxyAuthenticator(proxyAuthenticator).connectTimeout(10, TimeUnit.SECONDS).build();
 //            OkHttpClient client = new OkHttpClient.Builder().proxy(PROXY).build();
             PICASSO = new Picasso.Builder(context).downloader(new OkHttp3Downloader(client)).build();
         } else {

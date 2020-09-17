@@ -462,7 +462,8 @@ public class ExoPlayerActivity extends AppCompatActivity {
                 Document sezonHtml = null;
                 if (PROXY != null)
                     sezonHtml = Jsoup.connect(DOMAIN + sezonHref)
-                            .header("Proxy-Authorization", credential).proxy(PROXY).get();
+                            .header("Proxy-Authorization", credential)
+                            .proxy(PROXY).get();
                 else
                     sezonHtml = Jsoup.connect(DOMAIN + sezonHref).get();
 //                    Log.d(TAG, "html: " + sezonHtml);

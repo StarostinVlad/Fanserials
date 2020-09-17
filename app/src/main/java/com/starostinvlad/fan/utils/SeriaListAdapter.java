@@ -2,7 +2,6 @@ package com.starostinvlad.fan.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,16 +9,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.squareup.picasso.Picasso;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.activities.ExoPlayerActivity;
 import com.starostinvlad.fan.api.retro.Datum;
 
 import java.util.List;
 
-import static com.starostinvlad.fan.utils.Utils.INTERTESTIAL_AD;
 import static com.starostinvlad.fan.utils.Utils.PICASSO;
 
 public class SeriaListAdapter extends BaseAdapter {
@@ -65,9 +60,7 @@ public class SeriaListAdapter extends BaseAdapter {
                 .placeholder(R.drawable.no_image)
                 .into(image);
 
-        view.setOnClickListener(view1 -> {
-            openVideo(data);
-        });
+        view.setOnClickListener(view1 -> openVideo(data));
         return view;
     }
 

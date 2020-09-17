@@ -62,11 +62,13 @@ public class SeriaAdapter extends BaseAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(context, ExoPlayerActivity.class);
-                intent.putExtra("Title", seria.getName());
-                intent.putExtra("SubTitle", seria.getDescription());
-                intent.putExtra("URL", seria.getUri());
-                context.startActivity(intent);
+                if (context != null) {
+                    Intent intent = new Intent(context, ExoPlayerActivity.class);
+                    intent.putExtra("Title", seria.getName());
+                    intent.putExtra("SubTitle", seria.getDescription());
+                    intent.putExtra("URL", seria.getUri());
+                    context.startActivity(intent);
+                }
             }
         });
 

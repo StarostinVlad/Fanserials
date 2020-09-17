@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import static com.starostinvlad.fan.utils.Utils.DOMAIN;
 import static com.starostinvlad.fan.utils.Utils.PROXY;
+import static com.starostinvlad.fan.utils.Utils.credential;
 
 public class SeriasGetter {
     public int items = 0;
@@ -99,6 +100,7 @@ public class SeriasGetter {
         if (PROXY != null)
             request = Jsoup.connect(queryUrl)
                     .ignoreContentType(true)
+                    .header("Proxy-Authorization", credential)
                     .proxy(PROXY)
                     .cookies(Utils.COOKIE)
                     .method(Connection.Method.GET)
@@ -140,6 +142,8 @@ public class SeriasGetter {
 
         if (PROXY != null) request = Jsoup.connect(queryUrl)
                 .ignoreContentType(true)
+                .header("Proxy-Authorization", credential)
+                .proxy(PROXY)
                 .cookies(Utils.COOKIE)
                 .method(Connection.Method.GET)
                 .execute();
